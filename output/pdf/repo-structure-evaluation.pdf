@@ -1,0 +1,515 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>
+endobj
+4 0 obj
+<< /Length 9788 >>
+stream
+0.965 0.953 0.922 rg
+0.00 0.00 792.00 612.00 re f
+0.982 0.978 0.963 rg
+20.00 20.00 752.00 572.00 re f
+1.10 w
+0.835 0.800 0.730 RG
+20.00 20.00 752.00 572.00 re S
+0.063 0.196 0.275 rg
+34.00 524.00 724.00 44.00 re f
+0.840 0.914 0.870 rg
+34.00 480.00 724.00 28.00 re f
+BT
+/F2 22.00 Tf
+0.970 0.960 0.930 rg
+1 0 0 1 44.00 544.00 Tm
+(MIDI-8bit Repository Evaluation) Tj
+ET
+BT
+/F2 10.20 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 46.00 499.00 Tm
+(Final verdict: Keep as monorepo, but reorganise.) Tj
+ET
+BT
+/F1 8.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 330.00 499.00 Tm
+(Basis: repo manifests, build files, tests, and CI under the current checkout.) Tj
+ET
+0.835 0.800 0.730 RG
+1 w
+396.00 34 m 396.00 462.00 l S
+1.000 1.000 1.000 rg
+34.00 398.40 346.00 97.60 re f
+0.80 w
+0.855 0.835 0.790 RG
+34.00 398.40 346.00 97.60 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 42.00 476.00 Tm
+(1. Repository classification) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 465.00 Tm
+(Current state: incomplete / poorly structured hybrid.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 454.90 Tm
+(- Not a clean monorepo: the root has no shared build entrypoint, no root) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 444.80 Tm
+(  workspace, and only one platform CI workflow.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 434.70 Tm
+(- Not a loose folder dump either: html-app and macos-app both depend on) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 424.60 Tm
+(  shared/midi_to_wave.py, and windows-app uses the same Python code as its) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 414.50 Tm
+(  parity oracle.) Tj
+ET
+1.000 1.000 1.000 rg
+34.00 242.20 346.00 158.20 re f
+0.80 w
+0.855 0.835 0.790 RG
+34.00 242.20 346.00 158.20 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 42.00 380.40 Tm
+(2. Evidence from structure) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 369.40 Tm
+(- html-app: Python Flask web app, not Node. Evidence: html-app/app.py,) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 359.30 Tm
+(  templates/, static/, no package.json or pyproject.toml.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 349.20 Tm
+(- macos-app: Xcode project, not a Swift Package. Evidence:) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 339.10 Tm
+(  MIDI8BitSynthesiser.xcodeproj/project.pbxproj and a build phase named) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 329.00 Tm
+(  Bundle Python Helper.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 318.90 Tm
+(- windows-app: .NET 8 WinUI 3 solution with xUnit tests and Inno Setup.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 308.80 Tm
+(  Evidence: Midi8BitSynthesiser.sln, *.csproj, Directory.Packages.props,) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 298.70 Tm
+(  installer/Midi8BitSynthesiser.iss.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 288.60 Tm
+(- shared: plain Python module plus requirements file, not an installable) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 278.50 Tm
+(  package. Evidence: shared/midi_to_wave.py and shared/requirements.txt.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 268.40 Tm
+(- desktop-app: no files or manifest in this checkout; responsibility is) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 258.30 Tm
+(  unclear and it is absent from the root README variant matrix.) Tj
+ET
+1.000 1.000 1.000 rg
+34.00 75.90 346.00 168.30 re f
+0.80 w
+0.855 0.835 0.790 RG
+34.00 75.90 346.00 168.30 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 42.00 224.20 Tm
+(3. Problems found) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 213.20 Tm
+(- Shared code is only partly shared: html-app imports shared directly,) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 203.10 Tm
+(  macos-app freezes the same script with PyInstaller, but) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 193.00 Tm
+(  windows-app/src/Midi8BitSynthesiser.Core/SynthesisRenderEngine.cs is a) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 182.90 Tm
+(  separate C# implementation.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 172.80 Tm
+(- Dependency boundaries are blurred: shared/requirements.txt mixes core) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 162.70 Tm
+(  DSP dependencies with Flask and PyInstaller.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 152.60 Tm
+(- Assets are duplicated/inconsistently sourced: Windows keeps preview WAVs) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 142.50 Tm
+(  in windows-app/src/.../Assets/Previews, while macOS copies them from) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 132.40 Tm
+(  html-app/static/previews. The files are byte-identical.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 122.30 Tm
+(- CI/CD is platform-skewed: only .github/workflows/windows-release.yml) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 112.20 Tm
+(  exists.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 102.10 Tm
+(- Repo hygiene is weak: tracked Xcode derived data exists under) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 42.00 92.00 Tm
+(  macos-app/.xcodebuild/.) Tj
+ET
+1.000 1.000 1.000 rg
+396.00 368.10 346.00 127.90 re f
+0.80 w
+0.855 0.835 0.790 RG
+396.00 368.10 346.00 127.90 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 404.00 476.00 Tm
+(4. Options considered) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 465.00 Tm
+(- Keep as-is: lowest short-term cost, but the current ambiguity keeps) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 454.90 Tm
+(  increasing drift across the Python reference, the C# rewrite, and) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 444.80 Tm
+(  duplicated assets.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 434.70 Tm
+(- Split now: cleaner ownership and smaller repos, but you would first need) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 424.60 Tm
+(  a versioned shared core, a central asset package, and a new parity-testing) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 414.50 Tm
+(  story because windows tests currently locate ../../../shared.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 404.40 Tm
+(- Keep one repo, but reorganise: preserves atomic contract changes while) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 394.30 Tm
+(  removing accidental coupling. This is the best fit for the repo as it) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 384.20 Tm
+(  exists today.) Tj
+ET
+1.000 1.000 1.000 rg
+396.00 193.90 346.00 176.20 re f
+0.80 w
+0.855 0.835 0.790 RG
+396.00 193.90 346.00 176.20 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 404.00 350.10 Tm
+(5. Recommended structure) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 339.10 Tm
+(Target layout:) Tj
+ET
+BT
+/F3 7.50 Tf
+0.140 0.220 0.280 rg
+1 0 0 1 410.00 329.00 Tm
+(apps/web-flask/   apps/macos/   apps/windows/) Tj
+ET
+BT
+/F3 7.50 Tf
+0.140 0.220 0.280 rg
+1 0 0 1 410.00 320.00 Tm
+(core/python-renderer/   assets/previews/   docs/   .github/workflows/) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 311.00 Tm
+(- Move platform apps under apps/ and move the Python renderer to) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 300.90 Tm
+(  core/python-renderer/.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 290.80 Tm
+(- Turn the Python renderer into a real package with scoped dependencies.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 280.70 Tm
+(  Keep core deps there; put Flask in the web app and PyInstaller in the) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 270.60 Tm
+(  macOS build layer.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 260.50 Tm
+(- Move preview WAVs to assets/previews/ so web, macOS, and Windows all) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 250.40 Tm
+(  consume one source of truth.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 240.30 Tm
+(- Keep the Windows C# engine in the repo, but treat it explicitly as a) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 230.20 Tm
+(  second renderer implementation validated against the Python reference.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 220.10 Tm
+(- Add per-app CI: HTML smoke/import test, macOS build validation, and) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 210.00 Tm
+(  Windows build/test/release.) Tj
+ET
+1.000 1.000 1.000 rg
+396.00 118.50 346.00 77.40 re f
+0.80 w
+0.855 0.835 0.790 RG
+396.00 118.50 346.00 77.40 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 404.00 175.90 Tm
+(6. Final verdict) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 164.90 Tm
+(Keep as monorepo, but reorganise.) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 154.80 Tm
+(- The repo still contains real cross-platform coupling around the render) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 144.70 Tm
+(  contract, so splitting now would create package/version overhead before it) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 134.60 Tm
+(  reduces complexity.) Tj
+ET
+1.000 1.000 1.000 rg
+396.00 53.20 346.00 67.30 re f
+0.80 w
+0.855 0.835 0.790 RG
+396.00 53.20 346.00 67.30 re S
+BT
+/F2 11.00 Tf
+0.063 0.196 0.275 rg
+1 0 0 1 404.00 100.50 Tm
+(7. Summary) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 89.50 Tm
+(- This repository is one product with three delivery paths, not three) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 79.40 Tm
+(  unrelated products. The structural problem is not monorepo itself; it is) Tj
+ET
+BT
+/F1 8.20 Tf
+0.070 0.130 0.170 rg
+1 0 0 1 404.00 69.30 Tm
+(  that the current monorepo does not express the architecture cleanly.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 792 612] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Type /Pages /Count 1 /Kids [5 0 R] >>
+endobj
+7 0 obj
+<< /Type /Catalog /Pages 6 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000000238 00000 n 
+0000010078 00000 n 
+0000010224 00000 n 
+0000010281 00000 n 
+trailer
+<< /Size 8 /Root 7 0 R >>
+startxref
+10330
+%%EOF

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MIDI-8bit Repository Evaluation</title>
+  <style>
+    @page { size: letter landscape; margin: 0.42in; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #14222c;
+      background: #f6f4ef;
+      font-size: 9.2pt;
+      line-height: 1.25;
+    }
+    .page {
+      width: 100%;
+      min-height: 100%;
+      padding: 0.16in 0.18in;
+      background:
+        radial-gradient(circle at top right, #d8eadf 0, #d8eadf 18%, transparent 18.5%),
+        linear-gradient(135deg, #f6f4ef, #f0ece2);
+      border: 1px solid #d8d0bf;
+    }
+    h1 {
+      margin: 0 0 0.1in 0;
+      font-size: 20pt;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #103246;
+    }
+    .subhead {
+      margin: 0 0 0.14in 0;
+      color: #425563;
+      font-size: 9pt;
+    }
+    .verdict {
+      margin: 0 0 0.14in 0;
+      padding: 0.08in 0.1in;
+      background: #103246;
+      color: #f6f4ef;
+      border-radius: 8px;
+      font-size: 10pt;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 0.18in;
+    }
+    .section {
+      margin: 0 0 0.12in 0;
+      padding: 0.09in 0.1in;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid #d9d5c8;
+      border-radius: 8px;
+      break-inside: avoid;
+    }
+    h2 {
+      margin: 0 0 0.06in 0;
+      font-size: 10.6pt;
+      color: #103246;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+    p {
+      margin: 0.03in 0 0.05in 0;
+    }
+    ul {
+      margin: 0.03in 0 0.03in 0.16in;
+      padding: 0;
+    }
+    li {
+      margin: 0 0 0.03in 0;
+    }
+    .mono { font-family: Menlo, Monaco, Consolas, monospace; font-size: 8.35pt; }
+    .small { font-size: 8.4pt; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>MIDI-8bit Repository Evaluation</h1>
+    <p class="subhead">Scope: classify the current repository and decide whether it should stay together or be split, using only repo evidence.</p>
+    <div class="verdict">Final verdict: Keep as monorepo, but reorganise.</div>
+
+    <div class="grid">
+      <div>
+        <section class="section">
+          <h2>1. Repository classification</h2>
+          <p><strong>Current state:</strong> incomplete / poorly structured hybrid.</p>
+          <p>It is not a clean monorepo because the root has no shared build entrypoint, no root workspace, and only one platform CI workflow. It is not just a loose folder dump either, because <span class="mono">html-app</span> and <span class="mono">macos-app</span> directly depend on <span class="mono">shared/midi_to_wave.py</span>, and <span class="mono">windows-app</span> uses the same Python code as its parity oracle.</p>
+        </section>
+
+        <section class="section">
+          <h2>2. Evidence from structure</h2>
+          <ul>
+            <li><span class="mono">html-app/</span>: Python Flask web app, not Node. Evidence: <span class="mono">html-app/app.py</span>, <span class="mono">templates/</span>, <span class="mono">static/</span>, no <span class="mono">package.json</span> or <span class="mono">pyproject.toml</span>.</li>
+            <li><span class="mono">macos-app/</span>: Xcode project, not a Swift Package. Evidence: <span class="mono">MIDI8BitSynthesiser.xcodeproj/project.pbxproj</span>, SwiftUI sources, custom build phase named <span class="mono">Bundle Python Helper</span>.</li>
+            <li><span class="mono">windows-app/</span>: .NET 8 WinUI 3 solution with xUnit tests and Inno Setup installer. Evidence: <span class="mono">Midi8BitSynthesiser.sln</span>, <span class="mono">*.csproj</span>, <span class="mono">installer/Midi8BitSynthesiser.iss</span>, <span class="mono">Directory.Packages.props</span>.</li>
+            <li><span class="mono">shared/</span>: plain Python module plus dependency file, not an installable package. Evidence: <span class="mono">shared/midi_to_wave.py</span>, <span class="mono">shared/requirements.txt</span>, no packaging metadata.</li>
+            <li><span class="mono">desktop-app/</span>: no files or manifest in this checkout; responsibility is unclear and it is absent from the root variant matrix.</li>
+            <li>Root: <span class="mono">global.json</span> only pins .NET; there is no root <span class="mono">Package.swift</span>, workspace, Makefile, or monorepo task runner.</li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>3. Problems found</h2>
+          <ul>
+            <li><strong>Shared code is only partly shared:</strong> <span class="mono">html-app/app.py</span> imports <span class="mono">shared</span> directly, <span class="mono">macos-app/macos/build_desktop_resources.sh</span> freezes the same script with PyInstaller, but <span class="mono">windows-app/src/Midi8BitSynthesiser.Core/SynthesisRenderEngine.cs</span> is a separate C# implementation.</li>
+            <li><strong>Dependency boundaries are blurred:</strong> <span class="mono">shared/requirements.txt</span> includes core DSP dependencies plus Flask and PyInstaller, so the "shared" layer also owns web and build-packaging dependencies.</li>
+            <li><strong>Assets are duplicated/inconsistently sourced:</strong> Windows stores preview WAVs in <span class="mono">windows-app/src/.../Assets/Previews</span>, while macOS copies them from <span class="mono">html-app/static/previews</span>. The files are byte-identical, so there is duplicate source of truth.</li>
+            <li><strong>CI/CD is platform-skewed:</strong> only <span class="mono">.github/workflows/windows-release.yml</span> exists. There is no comparable macOS or HTML verification pipeline.</li>
+            <li><strong>Repo hygiene is weak:</strong> tracked Xcode derived data exists under <span class="mono">macos-app/.xcodebuild/</span>.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div>
+        <section class="section">
+          <h2>4. Options considered</h2>
+          <p><strong>Keep as-is:</strong> lowest short-term cost, but the current ambiguity will keep increasing drift. The Windows rewrite, Python reference, and duplicated assets will remain awkwardly coupled.</p>
+          <p><strong>Split now:</strong> clean ownership boundaries, smaller repos, independent release cadence. Cost: you would have to version and publish the Python reference core first, replace direct path dependencies, duplicate or publish shared assets, and redesign the Windows parity tests that currently locate <span class="mono">../../../shared</span>.</p>
+          <p><strong>Keep one repo, but reorganise:</strong> preserves atomic cross-platform changes to the render contract while fixing the structural debt. This is the best fit for the repo as it exists today.</p>
+        </section>
+
+        <section class="section">
+          <h2>5. Recommended structure</h2>
+          <p><strong>Target layout:</strong></p>
+          <p class="mono small">apps/web-flask/  apps/macos/  apps/windows/</p>
+          <p class="mono small">core/python-renderer/  assets/previews/  docs/  .github/workflows/</p>
+          <ul>
+            <li>Move platform apps under <span class="mono">apps/</span> and move the Python renderer to <span class="mono">core/python-renderer/</span>.</li>
+            <li>Turn the Python renderer into a real package with scoped dependencies. Keep core deps there; put Flask in the web app and PyInstaller in the macOS build layer.</li>
+            <li>Move preview WAVs to <span class="mono">assets/previews/</span> so web, macOS, and Windows all consume one source of truth.</li>
+            <li>Keep the Windows C# engine in the repo, but treat it explicitly as a second renderer implementation validated against the Python reference.</li>
+            <li>Add per-app CI: at minimum HTML smoke/import test, macOS build validation, and Windows build/test/release.</li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>6. Trade-offs</h2>
+          <ul>
+            <li><strong>Why not split now:</strong> the real coupling is still high. Path-based imports, build-time bundling, shared parity tests, and shared assets mean a split would add release and package-management overhead before it reduces complexity.</li>
+            <li><strong>Why reorganise instead:</strong> one repo still makes cross-platform contract changes tractable, but the repo should reflect architecture instead of historical accretion.</li>
+            <li><strong>When a split would become reasonable:</strong> once the Python renderer is a versioned package, the asset pipeline is centralised, and each platform has independent CI/release ownership.</li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>7. Summary</h2>
+          <p>This repository is one product with three delivery paths, not three unrelated products. The problem is not that it is a monorepo; the problem is that it is an under-structured monorepo. Keep it together, remove the accidental coupling, and make the shared/core versus platform/app boundary explicit.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
