@@ -1,0 +1,84 @@
+MIDI-8BIT SYNTHESISER USER GUIDE
+
+This guide covers the legacy Flask/browser version of the MIDI-8bit Synthesiser.
+
+Project layout:
+- `apps/web-flask/` contains the browser interface.
+- `apps/macos/` contains the native macOS application.
+- `core/python-renderer/` contains the shared Python synthesis engine.
+- `assets/previews/` contains the shared waveform preview WAV files.
+
+==================================================
+1. SYSTEM REQUIREMENTS FOR THE WEB APP
+==================================================
+To run the browser version, you need:
+- Python 3.x installed on your computer.
+- A repo-local virtual environment in the project root.
+
+Create or refresh the local environment with:
+python3 -m venv .venv
+./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
+
+Important:
+- Use `./.venv/bin/python3 -m pip`, not the bare `pip` launcher, because moved virtual environments can leave stale entry-point paths behind.
+
+==================================================
+2. HOW TO START THE WEB APP
+==================================================
+1. Double-click `apps/web-flask/Launch_Synthesiser.command`, or run:
+   `./.venv/bin/python3 apps/web-flask/app.py`
+2. Wait for the browser to open `http://127.0.0.1:5002`.
+3. Keep the terminal window open while the Flask app is running.
+
+==================================================
+3. HOW TO USE THE WEB APP
+==================================================
+- Add MIDI files by clicking the queue import area or dragging `.mid` / `.midi` files into it.
+- Reorder queued files with the Move Up / Move Down buttons.
+- Remove selected items or clear the whole queue.
+- Mix up to 3 waveform layers.
+- Preview each waveform layer directly inside the app.
+- Choose the sample rate before exporting.
+- When you click export, the app asks for one output folder and then processes the queue sequentially.
+
+Output naming:
+- Single-layer export: `<original>_<wave>.wav`
+- Multi-layer export: `<original>_mix.wav`
+
+==================================================
+4. WAVEFORM GUIDE
+==================================================
+SQUARE / PULSE:
+The classic chiptune sound.
+- 0.50 pulse width gives the most familiar square-wave tone.
+- Lower pulse widths create thinner, sharper sounds.
+
+SINE:
+A pure, smooth tone for softer melodies.
+
+SAWTOOTH:
+A bright, buzzy tone that works well for leads and bass.
+
+TRIANGLE:
+A softer, hollow tone often used for basslines.
+
+==================================================
+5. OTHER VARIANTS
+==================================================
+- The native macOS version lives in `apps/macos/`.
+- The Windows desktop version lives in `apps/windows/`.
+- The shared synthesis engine lives in `core/python-renderer/`.
+- See the repository root `README.md` for the platform overview.
+
+==================================================
+6. TROUBLESHOOTING
+==================================================
+- The browser app fails to start because dependencies are missing:
+  Run `./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt`
+- Preview audio does not play:
+  Confirm the preview WAV files are present in `assets/previews/`.
+- No sound in the exported WAV:
+  Drum tracks are ignored. Use a MIDI file with pitched instrument notes.
+
+==================================================
+Created - 2026

@@ -1,32 +1,47 @@
 # MIDI-8bit Synthesiser
 
-This repository is organised by deliverable so each published version can be built, documented, and released independently while reusing the same synthesis engine.
+This repository is a reorganised monorepo for the MIDI-8bit Synthesiser product family. Platform-specific apps live under `apps/`, the Python reference renderer lives under `core/`, and shared preview assets live under `assets/`.
 
-## Variant Matrix
+## Layout
 
-| Folder | Target system | Owns |
-| --- | --- | --- |
-| `html-app/` | Browser / Flask | Web entrypoint, templates, static assets, legacy launcher, web build artifacts |
-| `macos-app/` | Native macOS | Xcode project, SwiftUI app, macOS build script, app bundle resources |
-| `windows-app/` | Native Windows | WinUI 3 solution, C# synthesis engine, Windows build/publish pipeline |
-| `shared/` | Cross-platform runtime | MIDI-to-WAV synthesis logic and shared Python dependencies |
+| Folder | Responsibility |
+| --- | --- |
+| `apps/web-flask/` | Legacy Flask/browser UI |
+| `apps/macos/` | Native macOS SwiftUI app and Xcode project |
+| `apps/windows/` | Native Windows WinUI 3 solution, C# renderer, installer |
+| `apps/desktop/` | Reserved placeholder for future desktop packaging work |
+| `core/python-renderer/` | Canonical Python MIDI-to-WAV renderer and parity reference |
+| `assets/previews/` | Canonical waveform preview WAV files used by all apps |
+| `docs/` | Reviews and repository structure notes |
 
-## Shared Core Contract
+## Shared Contract
 
-- Canonical synthesis module: `shared/midi_to_wave.py`
+- Canonical renderer entrypoint: `core/python-renderer/midi_to_wave.py`
 - Stable inputs: MIDI path, output WAV path, sample rate, waveform layers
 - Stable output: rendered WAV file or explicit error
-- Platform folders may own UI, packaging, and release workflows, but should not reimplement synthesis unless the platform requires a deliberate fork
+- Windows intentionally keeps a native C# implementation and validates it against the Python renderer in parity tests
 
 ## Build Notes
 
-- Create the repo-local environment at the repository root:
-  - `python3 -m venv .venv`
-  - `./.venv/bin/python3 -m pip install -r shared/requirements.txt`
-- Browser variant instructions live in `html-app/`
-- macOS variant instructions live in `macos-app/macos/README.md`
-- Windows variant instructions live in `windows-app/README.md`
+Create the repo-local environment at the repository root:
 
-## Future Variants
+```bash
+python3 -m venv .venv
+```
 
-Additional platform ports should follow the same pattern: add a new top-level app folder for platform-specific code and continue importing or bundling `shared/` unless a hard platform constraint requires a separate runtime implementation.
+Install only the dependencies needed for the app you are working on:
+
+- Web UI:
+  `./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt`
+- macOS helper build:
+  `./.venv/bin/python3 -m pip install -r apps/macos/requirements-build.txt`
+- Windows parity tests:
+  `./.venv/bin/python3 -m pip install -r core/python-renderer/requirements.txt`
+
+App-specific instructions live in:
+
+- `apps/web-flask/README.md`
+- `apps/macos/macos/README.md`
+- `apps/windows/README.md`
+
+Repository layout notes live in `docs/repository-layout.md`.

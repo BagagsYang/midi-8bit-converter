@@ -27,7 +27,7 @@ jobs:
       - name: Read app compatibility metadata
         shell: pwsh
         run: |
-          [xml]$project = Get-Content "windows-app/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj"
+          [xml]$project = Get-Content "apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj"
           $props = $project.Project.PropertyGroup | Where-Object { $_.TargetFramework } | Select-Object -First 1
           $version = if ($env:GITHUB_REF_TYPE -eq "tag") { $env:GITHUB_REF_NAME.TrimStart("v") } else { $props.Version }
           $minimumWindowsVersion = $props.TargetPlatformMinVersion
@@ -42,34 +42,34 @@ jobs:
           "APP_SUPPORTED_ARCHITECTURE=$supportedArchitecture" >> $env:GITHUB_ENV
 
       - name: Install Python dependencies
-        run: python -m pip install -r shared/requirements.txt
+        run: python -m pip install -r core/python-renderer/requirements.txt
 
       - name: Restore solution
-        run: dotnet restore windows-app/Midi8BitSynthesiser.sln
+        run: dotnet restore apps/windows/Midi8BitSynthesiser.sln
 
       - name: Build solution
-        run: dotnet build windows-app/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-restore
+        run: dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-restore
 
       - name: Run tests
-        run: dotnet test windows-app/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
+        run: dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
 
       - name: Publish WinUI app
         run: >
           dotnet publish
-          windows-app/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj
+          apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj
           -c Release
           -r win-x64
           --self-contained true
           -p:Platform=x64
           --no-build
-          -o windows-app/artifacts/publish/win-x64
+          -o apps/windows/artifacts/publish/win-x64
 
       - name: Zip publish output
         shell: pwsh
         run: |
-          $artifactDir = "windows-app/artifacts"
+          $artifactDir = "apps/windows/artifacts"
           New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-          Compress-Archive -Path "windows-app/artifacts/publish/win-x64/*" -DestinationPath "$artifactDir/Midi8BitSynthesiser-win-x64.zip" -Force
+          Compress-Archive -Path "apps/windows/artifacts/publish/win-x64/*" -DestinationPath "$artifactDir/Midi8BitSynthesiser-win-x64.zip" -Force
 
       - name: Install Inno Setup
         shell: pwsh
@@ -78,7 +78,7 @@ jobs:
       - name: Build installer
         shell: pwsh
         run: |
-          $publishDir = (Resolve-Path "windows-app/artifacts/publish/win-x64").Path
+          $publishDir = (Resolve-Path "apps/windows/artifacts/publish/win-x64").Path
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           & $iscc `
             "/DAppVersion=$env:APP_VERSION" `
@@ -86,13 +86,13 @@ jobs:
             "/DMinimumWindowsVersion=$env:APP_MINIMUM_WINDOWS_VERSION" `
             "/DMinimumWindowsBuild=$env:APP_MINIMUM_WINDOWS_BUILD" `
             "/DSupportedArchitecture=$env:APP_SUPPORTED_ARCHITECTURE" `
-            "windows-app/installer/Midi8BitSynthesiser.iss"
+            "apps/windows/installer/Midi8BitSynthesiser.iss"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Midi8BitSynthesiser-win-x64
           path: |
-            windows-app/artifacts/Midi8BitSynthesiser-win-x64.zip
-            windows-app/artifacts/installer/*.exe
+            apps/windows/artifacts/Midi8BitSynthesiser-win-x64.zip
+            apps/windows/artifacts/installer/*.exe
           if-no-files-found: error

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <Platforms>x64</Platforms>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../../..'))</RepoRoot>
+    <PythonRendererRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../../../core/python-renderer'))</PythonRendererRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Melanchall.DryWetMidi" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NAudio" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="RepoRoot" Value="$(RepoRoot)" />
+    <AssemblyMetadata Include="PythonRendererRoot" Value="$(PythonRendererRoot)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Midi8BitSynthesiser.App\Midi8BitSynthesiser.App.csproj" />
+    <ProjectReference Include="..\..\src\Midi8BitSynthesiser.Core\Midi8BitSynthesiser.Core.csproj" />
+  </ItemGroup>
+</Project>

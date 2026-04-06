@@ -1,0 +1,5 @@
+-r ../../core/python-renderer/requirements.txt
+altgraph==0.17.5
+macholib==1.16.4
+pyinstaller==6.19.0
+pyinstaller-hooks-contrib==2026.3
