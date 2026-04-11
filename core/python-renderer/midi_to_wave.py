@@ -1,21 +1,195 @@
 import argparse
 import json
+import math
 
 import numpy as np
 import pretty_midi
 from scipy.io import wavfile
 
 VALID_WAVE_TYPES = {"pulse", "sine", "sawtooth", "triangle"}
+MIN_CURVE_FREQUENCY_HZ = float(pretty_midi.note_number_to_hz(0))
+MAX_CURVE_FREQUENCY_HZ = float(pretty_midi.note_number_to_hz(127))
+MIN_CURVE_GAIN_DB = -36.0
+MAX_CURVE_GAIN_DB = 12.0
+MAX_CURVE_POINTS = 8
+CURVE_FREQUENCY_TOLERANCE_HZ = 1e-6
+
+
+def _parse_finite_number(raw_value, field_label):
+    try:
+        value = float(raw_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_label} must be a number.") from exc
+
+    if not math.isfinite(value):
+        raise ValueError(f"{field_label} must be finite.")
+
+    return value
 
 
 def _parse_layer_number(layer, layer_index, field_name, default_value):
-    raw_value = layer.get(field_name, default_value)
-    try:
-        return float(raw_value)
-    except (TypeError, ValueError) as exc:
+    return _parse_finite_number(
+        layer.get(field_name, default_value),
+        f"Layer {layer_index} {field_name}",
+    )
+
+
+def _default_layer():
+    return {
+        "type": "pulse",
+        "duty": 0.5,
+        "volume": 1.0,
+        "frequency_curve": [],
+    }
+
+
+def _sanitise_frequency_curve(curve, layer_index):
+    if curve is None:
+        return []
+
+    if not isinstance(curve, list):
+        raise ValueError(f"Layer {layer_index} frequency_curve must be an array.")
+
+    if not curve:
+        return []
+
+    if len(curve) > MAX_CURVE_POINTS:
         raise ValueError(
-            f"Layer {layer_index} {field_name} must be a number."
-        ) from exc
+            f"Layer {layer_index} frequency_curve supports at most "
+            f"{MAX_CURVE_POINTS} points."
+        )
+
+    points = []
+    for point_index, point in enumerate(curve, start=1):
+        if not isinstance(point, dict):
+            raise ValueError(
+                f"Layer {layer_index} frequency_curve point {point_index} must be an object."
+            )
+
+        frequency_hz = _parse_finite_number(
+            point.get("frequency_hz"),
+            f"Layer {layer_index} frequency_curve point {point_index} frequency_hz",
+        )
+        if (
+            frequency_hz < MIN_CURVE_FREQUENCY_HZ
+            and math.isclose(
+                frequency_hz,
+                MIN_CURVE_FREQUENCY_HZ,
+                rel_tol=0.0,
+                abs_tol=CURVE_FREQUENCY_TOLERANCE_HZ,
+            )
+        ):
+            frequency_hz = MIN_CURVE_FREQUENCY_HZ
+        elif (
+            frequency_hz > MAX_CURVE_FREQUENCY_HZ
+            and math.isclose(
+                frequency_hz,
+                MAX_CURVE_FREQUENCY_HZ,
+                rel_tol=0.0,
+                abs_tol=CURVE_FREQUENCY_TOLERANCE_HZ,
+            )
+        ):
+            frequency_hz = MAX_CURVE_FREQUENCY_HZ
+
+        if not MIN_CURVE_FREQUENCY_HZ <= frequency_hz <= MAX_CURVE_FREQUENCY_HZ:
+            raise ValueError(
+                f"Layer {layer_index} frequency_curve point {point_index} frequency_hz "
+                f"must be between {MIN_CURVE_FREQUENCY_HZ:.6f} and "
+                f"{MAX_CURVE_FREQUENCY_HZ:.6f}."
+            )
+
+        gain_db = _parse_finite_number(
+            point.get("gain_db"),
+            f"Layer {layer_index} frequency_curve point {point_index} gain_db",
+        )
+        if not MIN_CURVE_GAIN_DB <= gain_db <= MAX_CURVE_GAIN_DB:
+            raise ValueError(
+                f"Layer {layer_index} frequency_curve point {point_index} gain_db "
+                f"must be between {MIN_CURVE_GAIN_DB:.1f} and {MAX_CURVE_GAIN_DB:.1f}."
+            )
+
+        points.append({
+            "frequency_hz": frequency_hz,
+            "gain_db": gain_db,
+        })
+
+    points.sort(key=lambda point: point["frequency_hz"])
+    for point_index in range(1, len(points)):
+        previous_frequency = points[point_index - 1]["frequency_hz"]
+        current_frequency = points[point_index]["frequency_hz"]
+        if current_frequency <= previous_frequency:
+            raise ValueError(
+                f"Layer {layer_index} frequency_curve frequencies must be strictly increasing."
+            )
+
+    return points
+
+
+def sanitise_layer(layer, layer_index):
+    if not isinstance(layer, dict):
+        raise ValueError(f"Layer {layer_index} must be an object.")
+
+    wave_type = layer.get("type", "pulse")
+    if not isinstance(wave_type, str):
+        raise ValueError(f"Layer {layer_index} waveform type must be a string.")
+    if wave_type not in VALID_WAVE_TYPES:
+        raise ValueError(
+            f"Layer {layer_index} has unsupported waveform '{wave_type}'. "
+            f"Expected one of: {', '.join(sorted(VALID_WAVE_TYPES))}."
+        )
+
+    duty = _parse_layer_number(layer, layer_index, "duty", 0.5)
+    if not 0.01 <= duty <= 0.99:
+        raise ValueError(f"Layer {layer_index} duty must be between 0.01 and 0.99.")
+
+    volume = _parse_layer_number(layer, layer_index, "volume", 1.0)
+    if volume < 0:
+        raise ValueError(f"Layer {layer_index} volume must be 0 or greater.")
+
+    frequency_curve = _sanitise_frequency_curve(
+        layer.get("frequency_curve"),
+        layer_index,
+    )
+
+    return {
+        "type": wave_type,
+        "duty": duty,
+        "volume": volume,
+        "frequency_curve": frequency_curve,
+    }
+
+
+def db_to_linear_gain(gain_db):
+    return 10.0 ** (gain_db / 20.0)
+
+
+def evaluate_frequency_curve_gain_db(curve_points, frequency_hz):
+    if not curve_points:
+        return 0.0
+
+    if frequency_hz <= curve_points[0]["frequency_hz"]:
+        return curve_points[0]["gain_db"]
+    if frequency_hz >= curve_points[-1]["frequency_hz"]:
+        return curve_points[-1]["gain_db"]
+    if len(curve_points) == 1:
+        return curve_points[0]["gain_db"]
+
+    log_frequency = math.log(frequency_hz)
+    for left_point, right_point in zip(curve_points, curve_points[1:]):
+        left_frequency = left_point["frequency_hz"]
+        right_frequency = right_point["frequency_hz"]
+        if left_frequency <= frequency_hz <= right_frequency:
+            left_log_frequency = math.log(left_frequency)
+            right_log_frequency = math.log(right_frequency)
+            interpolation = (
+                (log_frequency - left_log_frequency)
+                / (right_log_frequency - left_log_frequency)
+            )
+            return left_point["gain_db"] + (
+                interpolation * (right_point["gain_db"] - left_point["gain_db"])
+            )
+
+    return curve_points[-1]["gain_db"]
 
 def generate_waveform(freq, duration, sample_rate, wave_type='pulse', duty_cycle=0.5):
     """Generates various audio waveforms."""
@@ -70,26 +244,28 @@ def midi_to_audio(midi_path, output_path, sample_rate=48000, layers=None):
             freq = pretty_midi.note_number_to_hz(note.pitch)
             note_volume = note.velocity / 127.0
             
-            t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
-            mixed_note_waveform = np.zeros_like(t)
+            mixed_note_waveform = np.zeros(
+                int(sample_rate * duration),
+                dtype=np.float64,
+            )
             
             for layer in layers:
-                w_type = layer.get('type', 'pulse')
-                duty = layer.get('duty', 0.5)
-                vol = layer.get('volume', 1.0)
-                
-                if w_type == 'sine':
-                    layer_wave = np.sin(2 * np.pi * freq * t)
-                elif w_type == 'sawtooth':
-                    layer_wave = 2.0 * (t * freq % 1.0) - 1.0
-                elif w_type == 'triangle':
-                    layer_wave = 2.0 * np.abs(2.0 * (t * freq % 1.0) - 1.0) - 1.0
-                elif w_type == 'pulse':
-                    layer_wave = np.where((t * freq) % 1.0 < duty, 1.0, -1.0)
-                else:
-                    layer_wave = np.zeros_like(t)
-                    
-                mixed_note_waveform += layer_wave * vol
+                curve_gain_db = evaluate_frequency_curve_gain_db(
+                    layer["frequency_curve"],
+                    freq,
+                )
+                effective_volume = layer["volume"] * db_to_linear_gain(curve_gain_db)
+                if effective_volume <= 0:
+                    continue
+
+                layer_wave = generate_waveform(
+                    freq,
+                    duration,
+                    sample_rate,
+                    layer["type"],
+                    layer["duty"],
+                )
+                mixed_note_waveform += layer_wave * effective_volume
                 
             mixed_note_waveform = apply_envelope(mixed_note_waveform, sample_rate)
             
@@ -109,23 +285,17 @@ def midi_to_audio(midi_path, output_path, sample_rate=48000, layers=None):
 
 def normalise_runtime_layers(layers):
     if not layers:
-        return [{'type': 'pulse', 'duty': 0.5, 'volume': 1.0}]
+        return [_default_layer()]
 
     audible_layers = []
-    for layer in layers:
-        volume = float(layer.get('volume', 1.0))
-        if volume <= 0:
+    for layer_index, layer in enumerate(layers, start=1):
+        sanitised_layer = sanitise_layer(layer, layer_index)
+        if sanitised_layer["volume"] <= 0:
             continue
 
-        wave_type = layer.get('type', 'pulse')
-        duty = float(layer.get('duty', 0.5))
-        audible_layers.append({
-            'type': wave_type,
-            'duty': duty,
-            'volume': volume,
-        })
+        audible_layers.append(sanitised_layer)
 
-    return audible_layers or [{'type': 'pulse', 'duty': 0.5, 'volume': 1.0}]
+    return audible_layers or [_default_layer()]
 
 def parse_layers_json(layers_json):
     try:
@@ -136,45 +306,21 @@ def parse_layers_json(layers_json):
     if not isinstance(parsed, list):
         raise ValueError("Layer JSON must be an array of layer objects.")
 
-    layers = []
-    for index, layer in enumerate(parsed, start=1):
-        if not isinstance(layer, dict):
-            raise ValueError(f"Layer {index} must be an object.")
-
-        wave_type = layer.get('type', 'pulse')
-        if not isinstance(wave_type, str):
-            raise ValueError(f"Layer {index} waveform type must be a string.")
-        if wave_type not in VALID_WAVE_TYPES:
-            raise ValueError(
-                f"Layer {index} has unsupported waveform '{wave_type}'. "
-                f"Expected one of: {', '.join(sorted(VALID_WAVE_TYPES))}."
-            )
-
-        duty = _parse_layer_number(layer, index, 'duty', 0.5)
-        if not 0.01 <= duty <= 0.99:
-            raise ValueError(f"Layer {index} duty must be between 0.01 and 0.99.")
-
-        volume = _parse_layer_number(layer, index, 'volume', 1.0)
-        if volume < 0:
-            raise ValueError(f"Layer {index} volume must be 0 or greater.")
-
-        layers.append({
-            'type': wave_type,
-            'duty': duty,
-            'volume': volume,
-        })
-
-    return layers
+    return [
+        sanitise_layer(layer, index)
+        for index, layer in enumerate(parsed, start=1)
+    ]
 
 def build_layers_from_args(args):
     if args.layers_json:
         return parse_layers_json(args.layers_json)
 
-    return [{
-        'type': args.type,
-        'duty': args.duty,
-        'volume': 1.0,
-    }]
+    return [sanitise_layer({
+        "type": args.type,
+        "duty": args.duty,
+        "volume": 1.0,
+        "frequency_curve": [],
+    }, 1)]
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
@@ -185,7 +331,10 @@ def main(argv=None):
     parser.add_argument("--rate", type=int, default=48000)
     parser.add_argument(
         "--layers-json",
-        help="JSON array of waveform layers, each containing type, duty, and volume."
+        help=(
+            "JSON array of waveform layers, each containing type, duty, volume, "
+            "and optional frequency_curve points."
+        )
     )
     args = parser.parse_args(argv)
 

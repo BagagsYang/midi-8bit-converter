@@ -15,6 +15,8 @@
             --item-bg: #2c2c2e;
             --muted-text: #aaa;
             --drop-zone-border: #444;
+            --curve-grid: rgba(255, 255, 255, 0.12);
+            --curve-fill: rgba(13, 110, 253, 0.14);
         }
 
         [data-bs-theme="light"] {
@@ -26,32 +28,38 @@
             --item-bg: #e9ecef;
             --muted-text: #6c757d;
             --drop-zone-border: #ced4da;
+            --curve-grid: rgba(33, 37, 41, 0.14);
+            --curve-fill: rgba(13, 110, 253, 0.10);
         }
 
         html, body {
-            height: 100%;
+            min-height: 100%;
         }
-        body { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        body {
+            margin: 0;
+            min-height: 100vh;
             background-color: var(--bg-color);
             transition: background-color 0.3s ease, color 0.3s ease;
-            padding-top: 0;
+            padding: 24px 12px;
             color: var(--text-color);
+            overflow-y: auto;
         }
-        .container-main { 
-            max-width: 900px; 
-            padding: 30px; 
-            border-radius: 12px; 
+
+        .container-main {
+            max-width: 980px;
+            padding: 30px;
+            border-radius: 12px;
             width: 100%;
-            background-color: var(--container-bg); 
-            color: var(--text-color); 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            position: relative; 
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            margin: 0 auto;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .theme-toggle {
             position: absolute;
             top: 15px;
@@ -72,18 +80,30 @@
             padding: 0;
             line-height: 1;
         }
+
         .theme-toggle:hover {
             transform: scale(1.1);
             background-color: var(--item-bg);
         }
 
-        .header { margin-bottom: 30px; text-align: center; }
-        .header h2 { transition: color 0.3s ease; }
-        h6 { transition: color 0.3s ease; }
-        .badge { transition: background-color 0.3s ease, color 0.3s ease; }
-        .btn-primary { background-color: #0d6efd; width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; }
-        #audioPlayer { width: 100%; margin-top: 20px; display: none; border-radius: 10px; }
-        .loading { display: none; margin-top: 15px; }
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            width: 100%;
+            padding: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+        }
+
         .drop-zone {
             border: 2px dashed var(--drop-zone-border);
             border-radius: 8px;
@@ -93,10 +113,12 @@
             cursor: pointer;
             position: relative;
         }
+
         .drop-zone.dragover {
             border-color: #007bff;
             background-color: rgba(0, 123, 255, 0.1);
         }
+
         .drop-zone input[type="file"] {
             position: absolute;
             width: 100%;
@@ -106,80 +128,187 @@
             opacity: 0;
             cursor: pointer;
         }
-        .drop-zone-prompt { 
-            font-size: 0.9rem; 
-            color: var(--muted-text); 
+
+        .drop-zone-prompt {
+            font-size: 0.9rem;
+            color: var(--muted-text);
             transition: color 0.3s ease;
         }
-        .queue-list { list-style-type: none; padding-left: 0; max-height: 250px; overflow-y: auto; }
-        .queue-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 8px 12px; 
-            border-radius: 6px; 
-            margin-bottom: 5px; 
-            cursor: grab; 
-            background-color: var(--item-bg); 
-            color: var(--text-color); 
+
+        .queue-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: grab;
+            background-color: var(--item-bg);
+            color: var(--text-color);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .queue-item.dragging { opacity: 0.5; }
-        .queue-item.drag-over { border-top: 2px solid #007bff; }
-        .remove-btn { cursor: pointer; color: #dc3545; font-weight: bold; }
-        
-        .wave-type-group { display: flex; align-items: center; gap: 10px; }
+
+        .queue-item.dragging {
+            opacity: 0.5;
+        }
+
+        .queue-item.drag-over {
+            border-top: 2px solid #007bff;
+        }
+
+        .remove-btn {
+            cursor: pointer;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .wave-type-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .preview-btn {
-            width: 38px; height: 38px; border-radius: 50%;
-            background-color: #0d6efd; color: white;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease;
-            user-select: none; flex-shrink: 0;
-            border: none; padding: 0; font-size: 1.1rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            user-select: none;
+            flex-shrink: 0;
+            border: none;
+            padding: 0;
+            font-size: 1.1rem;
             line-height: 1;
         }
-        .preview-btn:hover { background-color: #0b5ed7; transform: scale(1.05); }
-        .preview-btn:active { transform: scale(0.95); }
-        
-        .form-label { 
-            color: var(--text-color); 
-            transition: color 0.3s ease;
+
+        .preview-btn:hover {
+            background-color: #0b5ed7;
+            transform: scale(1.05);
         }
-        .layer-card { 
-            background-color: var(--card-bg); 
+
+        .preview-btn:active {
+            transform: scale(0.95);
+        }
+
+        .layer-card {
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color) !important;
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        .processing-status { 
-            font-style: italic; 
-            color: var(--muted-text); 
-            transition: color 0.3s ease;
+
+        .curve-panel {
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(13, 110, 253, 0.06);
+            border: 1px solid rgba(13, 110, 253, 0.18);
+        }
+
+        .curve-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .curve-summary {
+            font-size: 0.82rem;
+            color: var(--muted-text);
+            margin-bottom: 8px;
+        }
+
+        .curve-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            touch-action: none;
+        }
+
+        .curve-grid-line,
+        .curve-axis-line {
+            stroke: var(--curve-grid);
+            stroke-width: 1;
+        }
+
+        .curve-zero-line {
+            stroke: rgba(220, 53, 69, 0.45);
+            stroke-width: 1.2;
+            stroke-dasharray: 4 4;
+        }
+
+        .curve-path {
+            fill: none;
+            stroke: #0d6efd;
+            stroke-width: 2.5;
+        }
+
+        .curve-fill {
+            fill: var(--curve-fill);
+            stroke: none;
+        }
+
+        .curve-point {
+            fill: #ffffff;
+            stroke: #0d6efd;
+            stroke-width: 2;
+            cursor: pointer;
+        }
+
+        .curve-point.selected {
+            fill: #0d6efd;
+        }
+
+        .curve-axis-label {
+            font-size: 10px;
+            fill: var(--muted-text);
+            user-select: none;
         }
 
         .text-muted {
             transition: color 0.3s ease;
         }
 
-        /* Slider Contrast */
-        .form-range::-webkit-slider-runnable-track { 
-            background-color: var(--drop-zone-border); 
+        .form-range::-webkit-slider-runnable-track {
+            background-color: var(--drop-zone-border);
             transition: background-color 0.3s ease;
         }
-        .form-range::-moz-range-track { 
-            background-color: var(--drop-zone-border); 
+
+        .form-range::-moz-range-track {
+            background-color: var(--drop-zone-border);
             transition: background-color 0.3s ease;
         }
-        
-         .form-select {
+
+        .form-select {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* Light Theme Select Overrides */
-        [data-bs-theme="light"] .form-select, 
+        [data-bs-theme="light"] .form-select,
         [data-bs-theme="light"] .form-control {
             background-color: #fff;
             color: #212529;
             border-color: #ced4da;
+        }
+
+        @media (max-width: 767px) {
+            .container-main {
+                padding: 22px 18px;
+            }
         }
     </style>
 </head>
@@ -192,116 +321,41 @@
     </div>
 
     <form id="synthForm">
-        <div class="row">
-            <!-- Left Column: Queue -->
+        <div class="row g-4">
             <div class="col-md-5">
                 <div class="mb-4">
                     <label class="form-label fw-bold">1. MIDI Queue</label>
                     <div class="drop-zone" id="dropZone">
-                        <span class="drop-zone-prompt" id="dropPrompt">Click or Drag & Drop MIDI Files</span>
+                        <span class="drop-zone-prompt">Click or Drag & Drop MIDI Files</span>
                         <input class="form-control" type="file" id="midi_file" accept=".mid,.midi" multiple>
                     </div>
                 </div>
-                <ul class="queue-list mb-3" id="queueList">
-                    <!-- Queue items will be injected here -->
-                </ul>
+                <ul class="queue-list mb-3" id="queueList"></ul>
                 <button type="button" class="btn btn-sm btn-outline-danger w-100" id="clearQueueBtn" style="display: none;">Clear Queue</button>
             </div>
 
-            <!-- Right Column: Controls -->
             <div class="col-md-7">
                 <div class="mb-4">
                     <label class="form-label fw-bold">2. Waveform Layers (Max 3)</label>
-                    <p class="text-muted small mb-2">Mix up to 3 different waveforms. Adjust volume for a perfect blend.</p>
-                    
-                    <div id="layersContainer">
-                        <!-- Layer 1 -->
-                        <div class="layer-card mb-3 p-3 border rounded" id="layer_1">
-                            <div class="mb-3">
-                                <label class="form-label small">Waveform Type</label>
-                                <div class="wave-type-group">
-                                    <select class="form-select form-select-sm" id="wave_type1" name="wave_type1" onchange="toggleDuty(1)">
-                                        <option value="pulse" selected>Square/Pulse</option>
-                                        <option value="sine">Sine</option>
-                                        <option value="sawtooth">Sawtooth</option>
-                                        <option value="triangle">Triangle</option>
-                                    </select>
-                                    <button type="button" class="preview-btn" onclick="playPreview(1)" title="Play Preview">▶</button>
-                                </div>
-                            </div>
-                            <div class="mb-3" id="dutyContainer1">
-                                <label class="form-label small">Pulse Width: <span id="dutyVal1">0.5</span></label>
-                                <input type="range" class="form-range" id="duty1" name="duty1" min="0.01" max="0.99" step="0.01" value="0.5" oninput="updateDutyVal(1)">
-                            </div>
-                            <div>
-                                <label class="form-label small">Volume: <span id="volVal1">1.0</span></label>
-                                <input type="range" class="form-range" id="vol1" name="vol1" min="0.0" max="2.0" step="0.1" value="1.0" oninput="updateVolVal(1)">
-                            </div>
-                        </div>
-
-                        <!-- Layer 2 & 3 are similar, hidden by default -->
-                        <div class="layer-card mb-3 p-3 border rounded" id="layer_2" style="display: none;">
-                             <div class="mb-3">
-                                <label class="form-label small">Waveform Type</label>
-                                <div class="wave-type-group">
-                                    <select class="form-select form-select-sm" id="wave_type2" name="wave_type2" onchange="toggleDuty(2)" disabled>
-                                        <option value="sine" selected>Sine</option>
-                                        <option value="pulse">Square/Pulse</option>
-                                        <option value="sawtooth">Sawtooth</option>
-                                        <option value="triangle">Triangle</option>
-                                    </select>
-                                    <button type="button" class="preview-btn" onclick="playPreview(2)" title="Play Preview">▶</button>
-                                </div>
-                            </div>
-                            <div class="mb-3" id="dutyContainer2" style="display: none;">
-                                <label class="form-label small">Pulse Width: <span id="dutyVal2">0.5</span></label>
-                                <input type="range" class="form-range" id="duty2" name="duty2" min="0.01" max="0.99" step="0.01" value="0.5" oninput="updateDutyVal(2)" disabled>
-                            </div>
-                            <div>
-                                <label class="form-label small">Volume: <span id="volVal2">0.5</span></label>
-                                <input type="range" class="form-range" id="vol2" name="vol2" min="0.0" max="2.0" step="0.1" value="0.5" oninput="updateVolVal(2)" disabled>
-                            </div>
-                        </div>
-
-                         <div class="layer-card mb-3 p-3 border rounded" id="layer_3" style="display: none;">
-                            <div class="mb-3">
-                                <label class="form-label small">Waveform Type</label>
-                                <div class="wave-type-group">
-                                    <select class="form-select form-select-sm" id="wave_type3" name="wave_type3" onchange="toggleDuty(3)" disabled>
-                                        <option value="triangle" selected>Triangle</option>
-                                        <option value="pulse">Square/Pulse</option>
-                                        <option value="sine">Sine</option>
-                                        <option value="sawtooth">Sawtooth</option>
-                                    </select>
-                                    <button type="button" class="preview-btn" onclick="playPreview(3)" title="Play Preview">▶</button>
-                                </div>
-                            </div>
-                            <div class="mb-3" id="dutyContainer3" style="display: none;">
-                                <label class="form-label small">Pulse Width: <span id="dutyVal3">0.5</span></label>
-                                <input type="range" class="form-range" id="duty3" name="duty3" min="0.01" max="0.99" step="0.01" value="0.5" oninput="updateDutyVal(3)" disabled>
-                            </div>
-                            <div>
-                                <label class="form-label small">Volume: <span id="volVal3">0.5</span></label>
-                                <input type="range" class="form-range" id="vol3" name="vol3" min="0.0" max="2.0" step="0.1" value="0.5" oninput="updateVolVal(3)" disabled>
-                            </div>
-                        </div>
-                    </div>
-                    
+                    <p class="text-muted small mb-2">
+                        Mix up to 3 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch.
+                    </p>
+                    <div id="layersContainer"></div>
                     <div class="d-flex gap-2 mb-4">
                         <button type="button" class="btn btn-sm btn-outline-secondary w-100 fw-bold" id="addLayerBtn">+ Add Layer</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger w-100 fw-bold" id="removeLayerBtn" style="display: none;">- Remove Layer</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100 fw-bold" id="removeLayerBtn">- Remove Layer</button>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">3. Sample Rate</label>
-                    <select class="form-select" name="rate">
+                    <label class="form-label fw-bold" for="rate">3. Sample Rate</label>
+                    <select class="form-select" id="rate" name="rate">
                         <option value="44100">44100 Hz</option>
                         <option value="48000" selected>48000 Hz</option>
                         <option value="96000">96000 Hz</option>
                     </select>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary" id="submitBtn">Synthesise Queue (<span id="queueCount">0</span>)</button>
             </div>
         </div>
@@ -311,20 +365,54 @@
         <div class="spinner-border text-primary" role="status"></div>
         <p class="mt-2" id="processingStatus">Generating audio...</p>
     </div>
-
-    <audio id="audioPlayer" controls></audio>
 </div>
 
 <script>
-    // Global State
-    let fileQueue = [];
-    let layerCount = 1;
+    const MIN_CURVE_FREQUENCY_HZ = 8.175798915643707;
+    const MAX_CURVE_FREQUENCY_HZ = 12543.853951415975;
+    const MIN_CURVE_GAIN_DB = -36.0;
+    const MAX_CURVE_GAIN_DB = 12.0;
+    const MAX_CURVE_POINTS = 8;
+    const CURVE_WIDTH = 320;
+    const CURVE_HEIGHT = 150;
+    const CURVE_MARGIN = { top: 14, right: 14, bottom: 24, left: 38 };
+    const curveLogSpan = Math.log(MAX_CURVE_FREQUENCY_HZ) - Math.log(MIN_CURVE_FREQUENCY_HZ);
     const maxLayers = 3;
 
-    // DOM Elements
+    function createDefaultCurve() {
+        return [
+            { frequency_hz: MIN_CURVE_FREQUENCY_HZ, gain_db: 0.0 },
+            { frequency_hz: MAX_CURVE_FREQUENCY_HZ, gain_db: 0.0 },
+        ];
+    }
+
+    function createDefaultLayer(index) {
+        const presets = [
+            { type: 'pulse', duty: 0.5, volume: 1.0 },
+            { type: 'sine', duty: 0.5, volume: 0.5 },
+            { type: 'triangle', duty: 0.5, volume: 0.5 },
+        ];
+        const preset = presets[index];
+        return {
+            active: index === 0,
+            type: preset.type,
+            duty: preset.duty,
+            volume: preset.volume,
+            curveEnabled: false,
+            frequencyCurve: createDefaultCurve(),
+            selectedPointIndex: 0,
+        };
+    }
+
+    let fileQueue = [];
+    let layerCount = 1;
+    let dragStartIndex;
+    let previewAudio = new Audio();
+    let dragState = null;
+    const layers = [0, 1, 2].map(index => createDefaultLayer(index));
+
     const synthForm = document.getElementById('synthForm');
     const loading = document.querySelector('.loading');
-    const audioPlayer = document.getElementById('audioPlayer');
     const submitBtn = document.getElementById('submitBtn');
     const htmlElement = document.documentElement;
     const dropZone = document.getElementById('dropZone');
@@ -334,8 +422,11 @@
     const queueCountSpan = document.getElementById('queueCount');
     const processingStatus = document.getElementById('processingStatus');
     const themeToggle = document.getElementById('themeToggle');
+    const layersContainer = document.getElementById('layersContainer');
+    const addLayerBtn = document.getElementById('addLayerBtn');
+    const removeLayerBtn = document.getElementById('removeLayerBtn');
+    const rateSelect = document.getElementById('rate');
 
-    // --- Theme Management ---
     const savedTheme = localStorage.getItem('theme') || 'dark';
     htmlElement.setAttribute('data-bs-theme', savedTheme);
     updateThemeIcon(savedTheme);
@@ -349,11 +440,17 @@
     });
 
     function updateThemeIcon(theme) {
-        // Show the icon of the mode it WILL change to
         themeToggle.textContent = theme === 'dark' ? '🌞' : '🌛';
     }
 
-    // --- Queue Management & Drag-to-Reorder ---
+    function isMidiFile(file) {
+        return (
+            file.type === 'audio/midi'
+            || file.type === 'audio/x-midi'
+            || /\.midi?$/i.test(file.name)
+        );
+    }
+
     function renderQueue() {
         queueList.innerHTML = '';
         fileQueue.forEach((file, index) => {
@@ -372,127 +469,572 @@
         submitBtn.disabled = fileQueue.length === 0;
     }
 
-    let dragStartIndex;
-    queueList.addEventListener('dragstart', (e) => {
-        dragStartIndex = parseInt(e.target.dataset.index);
-        e.target.classList.add('dragging');
+    queueList.addEventListener('dragstart', (event) => {
+        const item = event.target.closest('.queue-item');
+        if (!item) return;
+        dragStartIndex = parseInt(item.dataset.index, 10);
+        item.classList.add('dragging');
     });
-    queueList.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
-    queueList.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const target = e.target.closest('.queue-item');
+
+    queueList.addEventListener('dragend', (event) => {
+        const item = event.target.closest('.queue-item');
+        if (item) item.classList.remove('dragging');
+    });
+
+    queueList.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        const target = event.target.closest('.queue-item');
         if (!target) return;
         document.querySelectorAll('.queue-item').forEach(item => item.classList.remove('drag-over'));
         target.classList.add('drag-over');
     });
-    queueList.addEventListener('dragleave', (e) => {
-        if (e.target.classList.contains('queue-item')) e.target.classList.remove('drag-over');
+
+    queueList.addEventListener('dragleave', (event) => {
+        const target = event.target.closest('.queue-item');
+        if (target) target.classList.remove('drag-over');
     });
-    queueList.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const target = e.target.closest('.queue-item');
+
+    queueList.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const target = event.target.closest('.queue-item');
         if (!target) return;
         target.classList.remove('drag-over');
-        const dragEndIndex = parseInt(target.dataset.index);
+        const dragEndIndex = parseInt(target.dataset.index, 10);
         const [draggedItem] = fileQueue.splice(dragStartIndex, 1);
         fileQueue.splice(dragEndIndex, 0, draggedItem);
         renderQueue();
     });
 
     function addToQueue(files) {
-        for (const file of files) if (file.type === "audio/midi") fileQueue.push(file);
+        for (const file of files) {
+            if (isMidiFile(file)) fileQueue.push(file);
+        }
         renderQueue();
     }
-    window.removeFromQueue = (index) => { fileQueue.splice(index, 1); renderQueue(); };
-    clearQueueBtn.addEventListener('click', () => { fileQueue = []; renderQueue(); });
 
-    // --- Drag & Drop ---
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    ['dragleave', 'dragend'].forEach(type => dropZone.addEventListener(type, () => dropZone.classList.remove('dragover')));
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) addToQueue(e.dataTransfer.files);
+    window.removeFromQueue = (index) => {
+        fileQueue.splice(index, 1);
+        renderQueue();
+    };
+
+    clearQueueBtn.addEventListener('click', () => {
+        fileQueue = [];
+        renderQueue();
     });
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    ['dragleave', 'dragend'].forEach((type) => {
+        dropZone.addEventListener(type, () => dropZone.classList.remove('dragover'));
+    });
+
+    dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (event.dataTransfer.files.length) addToQueue(event.dataTransfer.files);
+    });
+
     fileInput.addEventListener('change', () => addToQueue(fileInput.files));
 
-    // --- Layer Management ---
-    function toggleDuty(layerId) {
-        document.getElementById(`dutyContainer${layerId}`).style.display = (document.getElementById(`wave_type${layerId}`).value === 'pulse') ? 'block' : 'none';
-    }
-    function updateDutyVal(layerId) {
-        document.getElementById(`dutyVal${layerId}`).textContent = document.getElementById(`duty${layerId}`).value;
-    }
-    function updateVolVal(layerId) {
-        document.getElementById(`volVal${layerId}`).textContent = document.getElementById(`vol${layerId}`).value;
-    }
-    document.getElementById('addLayerBtn').addEventListener('click', () => {
-        if (layerCount < maxLayers) {
-            layerCount++;
-            document.getElementById(`layer_${layerCount}`).style.display = 'block';
-            ['wave_type', 'duty', 'vol'].forEach(p => document.getElementById(`${p}${layerCount}`).disabled = false);
-            updateButtons();
-        }
-    });
-    document.getElementById('removeLayerBtn').addEventListener('click', () => {
-        if (layerCount > 1) {
-            ['wave_type', 'duty', 'vol'].forEach(p => document.getElementById(`${p}${layerCount}`).disabled = true);
-            document.getElementById(`layer_${layerCount}`).style.display = 'none';
-            layerCount--;
-            updateButtons();
-        }
-    });
-    function updateButtons() {
-        const addBtn = document.getElementById('addLayerBtn');
-        const removeBtn = document.getElementById('removeLayerBtn');
-        addBtn.style.display = layerCount === maxLayers ? 'none' : 'block';
-        removeBtn.style.display = layerCount === 1 ? 'none' : 'block';
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
     }
 
-    // --- Preview Logic ---
-    let previewAudio = new Audio();
-    function playPreview(layerId) {
-        const type = document.getElementById(`wave_type${layerId}`).value;
-        const duty = parseFloat(document.getElementById(`duty${layerId}`).value);
-        let src = (type === 'pulse') ? `pulse_${(duty < 0.18) ? '10' : (duty < 0.38) ? '25' : '50'}.wav` : `${type}.wav`;
+    function formatFrequency(value) {
+        return value >= 1000 ? `${(value / 1000).toFixed(2)} kHz` : `${value.toFixed(1)} Hz`;
+    }
+
+    function formatGainDb(value) {
+        return `${value >= 0 ? '+' : ''}${value.toFixed(1)} dB`;
+    }
+
+    function plotWidth() {
+        return CURVE_WIDTH - CURVE_MARGIN.left - CURVE_MARGIN.right;
+    }
+
+    function plotHeight() {
+        return CURVE_HEIGHT - CURVE_MARGIN.top - CURVE_MARGIN.bottom;
+    }
+
+    function frequencyToX(frequencyHz) {
+        const ratio = (Math.log(frequencyHz) - Math.log(MIN_CURVE_FREQUENCY_HZ)) / curveLogSpan;
+        return CURVE_MARGIN.left + (ratio * plotWidth());
+    }
+
+    function xToFrequency(x) {
+        const ratio = clamp((x - CURVE_MARGIN.left) / plotWidth(), 0, 1);
+        return MIN_CURVE_FREQUENCY_HZ * ((MAX_CURVE_FREQUENCY_HZ / MIN_CURVE_FREQUENCY_HZ) ** ratio);
+    }
+
+    function gainToY(gainDb) {
+        const ratio = (MAX_CURVE_GAIN_DB - gainDb) / (MAX_CURVE_GAIN_DB - MIN_CURVE_GAIN_DB);
+        return CURVE_MARGIN.top + (ratio * plotHeight());
+    }
+
+    function yToGain(y) {
+        const ratio = clamp((y - CURVE_MARGIN.top) / plotHeight(), 0, 1);
+        return MAX_CURVE_GAIN_DB - (ratio * (MAX_CURVE_GAIN_DB - MIN_CURVE_GAIN_DB));
+    }
+
+    function evaluateCurveGainDb(points, frequencyHz) {
+        if (!points.length) return 0.0;
+        if (frequencyHz <= points[0].frequency_hz) return points[0].gain_db;
+        if (frequencyHz >= points[points.length - 1].frequency_hz) return points[points.length - 1].gain_db;
+        for (let index = 0; index < points.length - 1; index += 1) {
+            const leftPoint = points[index];
+            const rightPoint = points[index + 1];
+            if (frequencyHz >= leftPoint.frequency_hz && frequencyHz <= rightPoint.frequency_hz) {
+                const leftLog = Math.log(leftPoint.frequency_hz);
+                const rightLog = Math.log(rightPoint.frequency_hz);
+                const frequencyLog = Math.log(frequencyHz);
+                const ratio = (frequencyLog - leftLog) / (rightLog - leftLog);
+                return leftPoint.gain_db + (ratio * (rightPoint.gain_db - leftPoint.gain_db));
+            }
+        }
+        return points[points.length - 1].gain_db;
+    }
+
+    function createWaveOptions(currentType) {
+        const options = [
+            ['pulse', 'Square/Pulse'],
+            ['sine', 'Sine'],
+            ['sawtooth', 'Sawtooth'],
+            ['triangle', 'Triangle'],
+        ];
+        return options.map(([value, label]) => `
+            <option value="${value}" ${currentType === value ? 'selected' : ''}>${label}</option>
+        `).join('');
+    }
+
+    function buildCurvePath(points) {
+        return points.map((point, index) => {
+            const command = index === 0 ? 'M' : 'L';
+            return `${command} ${frequencyToX(point.frequency_hz).toFixed(2)} ${gainToY(point.gain_db).toFixed(2)}`;
+        }).join(' ');
+    }
+
+    function buildCurveArea(points) {
+        const startX = frequencyToX(points[0].frequency_hz).toFixed(2);
+        const endX = frequencyToX(points[points.length - 1].frequency_hz).toFixed(2);
+        const bottomY = (CURVE_MARGIN.top + plotHeight()).toFixed(2);
+        return `M ${startX} ${bottomY} ${buildCurvePath(points).slice(2)} L ${endX} ${bottomY} Z`;
+    }
+
+    function buildCurveSvg(layer, layerIndex) {
+        const zeroY = gainToY(0);
+        const selectedPoint = layer.frequencyCurve[layer.selectedPointIndex] || layer.frequencyCurve[0];
+        const gainTicks = [MAX_CURVE_GAIN_DB, 0, MIN_CURVE_GAIN_DB];
+        const freqTicks = [MIN_CURVE_FREQUENCY_HZ, 27.5, 110.0, 440.0, 1760.0, MAX_CURVE_FREQUENCY_HZ];
+
+        return `
+            <div class="curve-summary">
+                Selected point: ${formatFrequency(selectedPoint.frequency_hz)} / ${formatGainDb(selectedPoint.gain_db)}
+            </div>
+            <svg
+                class="curve-svg"
+                id="curveSvg${layerIndex}"
+                viewBox="0 0 ${CURVE_WIDTH} ${CURVE_HEIGHT}"
+                aria-label="Frequency gain editor for layer ${layerIndex + 1}"
+            >
+                <rect
+                    x="${CURVE_MARGIN.left}"
+                    y="${CURVE_MARGIN.top}"
+                    width="${plotWidth()}"
+                    height="${plotHeight()}"
+                    fill="transparent"
+                ></rect>
+                ${gainTicks.map((gainDb) => `
+                    <g>
+                        <line
+                            class="${gainDb === 0 ? 'curve-zero-line' : 'curve-grid-line'}"
+                            x1="${CURVE_MARGIN.left}"
+                            y1="${gainToY(gainDb)}"
+                            x2="${CURVE_MARGIN.left + plotWidth()}"
+                            y2="${gainToY(gainDb)}"
+                        ></line>
+                        <text class="curve-axis-label" x="4" y="${gainToY(gainDb) + 4}">${formatGainDb(gainDb)}</text>
+                    </g>
+                `).join('')}
+                ${freqTicks.map((frequencyHz) => `
+                    <g>
+                        <line
+                            class="curve-grid-line"
+                            x1="${frequencyToX(frequencyHz)}"
+                            y1="${CURVE_MARGIN.top}"
+                            x2="${frequencyToX(frequencyHz)}"
+                            y2="${CURVE_MARGIN.top + plotHeight()}"
+                        ></line>
+                        <text
+                            class="curve-axis-label"
+                            x="${frequencyToX(frequencyHz)}"
+                            y="${CURVE_HEIGHT - 6}"
+                            text-anchor="middle"
+                        >${frequencyHz >= 1000 ? `${(frequencyHz / 1000).toFixed(1)}k` : Math.round(frequencyHz)}</text>
+                    </g>
+                `).join('')}
+                <path class="curve-fill" d="${buildCurveArea(layer.frequencyCurve)}"></path>
+                <path class="curve-path" d="${buildCurvePath(layer.frequencyCurve)}"></path>
+                ${layer.frequencyCurve.map((point, pointIndex) => `
+                    <circle
+                        class="curve-point ${layer.selectedPointIndex === pointIndex ? 'selected' : ''}"
+                        cx="${frequencyToX(point.frequency_hz)}"
+                        cy="${gainToY(point.gain_db)}"
+                        r="${pointIndex === 0 || pointIndex === layer.frequencyCurve.length - 1 ? 5.5 : 5}"
+                        onpointerdown="startCurvePointDrag(${layerIndex}, ${pointIndex}, event)"
+                        onclick="selectCurvePoint(${layerIndex}, ${pointIndex})"
+                    ></circle>
+                `).join('')}
+            </svg>
+        `;
+    }
+
+    function renderLayers() {
+        layersContainer.innerHTML = '';
+
+        for (let layerIndex = 0; layerIndex < layerCount; layerIndex += 1) {
+            const layer = layers[layerIndex];
+            const selectedPoint = layer.frequencyCurve[layer.selectedPointIndex] || layer.frequencyCurve[0];
+            const canRemoveSelected = layer.frequencyCurve.length > 2
+                && layer.selectedPointIndex > 0
+                && layer.selectedPointIndex < layer.frequencyCurve.length - 1;
+
+            const card = document.createElement('div');
+            card.className = 'layer-card mb-3 p-3 rounded';
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="fw-bold">Layer ${layerIndex + 1}</div>
+                        <div class="text-muted small">${layer.curveEnabled ? 'Curve active' : 'Flat gain across all note frequencies'}</div>
+                    </div>
+                    <button type="button" class="preview-btn" onclick="playPreview(${layerIndex})" title="Play Preview">▶</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Waveform Type</label>
+                    <div class="wave-type-group">
+                        <select class="form-select form-select-sm" onchange="updateLayerType(${layerIndex}, this.value)">
+                            ${createWaveOptions(layer.type)}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3" style="display: ${layer.type === 'pulse' ? 'block' : 'none'};">
+                    <label class="form-label small">Pulse Width: <span id="dutyValue${layerIndex}">${layer.duty.toFixed(2)}</span></label>
+                    <input
+                        type="range"
+                        class="form-range"
+                        min="0.01"
+                        max="0.99"
+                        step="0.01"
+                        value="${layer.duty}"
+                        oninput="updateLayerDuty(${layerIndex}, this.value)"
+                    >
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Base Volume: <span id="volumeValue${layerIndex}">${layer.volume.toFixed(1)}</span></label>
+                    <input
+                        type="range"
+                        class="form-range"
+                        min="0.0"
+                        max="2.0"
+                        step="0.1"
+                        value="${layer.volume}"
+                        oninput="updateLayerVolume(${layerIndex}, this.value)"
+                    >
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="curveToggle${layerIndex}"
+                        ${layer.curveEnabled ? 'checked' : ''}
+                        onchange="toggleCurveEnabled(${layerIndex}, this.checked)"
+                    >
+                    <label class="form-check-label small" for="curveToggle${layerIndex}">
+                        Enable frequency-gain curve
+                    </label>
+                </div>
+                ${layer.curveEnabled ? `
+                    <div class="curve-panel">
+                        <div class="curve-toolbar">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                onclick="addCurvePoint(${layerIndex})"
+                                ${layer.frequencyCurve.length >= MAX_CURVE_POINTS ? 'disabled' : ''}
+                            >
+                                Add Point
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                onclick="removeSelectedPoint(${layerIndex})"
+                                ${canRemoveSelected ? '' : 'disabled'}
+                            >
+                                Remove Selected
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                onclick="resetCurve(${layerIndex})"
+                            >
+                                Reset Curve
+                            </button>
+                        </div>
+                        <div class="curve-summary">
+                            Drag points to change gain by pitch. Endpoints stay at the minimum and maximum supported note frequencies.
+                        </div>
+                        ${buildCurveSvg(layer, layerIndex)}
+                        <div class="curve-summary mt-2">
+                            Curve points: ${layer.frequencyCurve.length}. Selected: ${formatFrequency(selectedPoint.frequency_hz)} / ${formatGainDb(selectedPoint.gain_db)}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            layersContainer.appendChild(card);
+        }
+
+        updateLayerButtons();
+    }
+
+    function updateLayerButtons() {
+        addLayerBtn.style.display = layerCount === maxLayers ? 'none' : 'block';
+        removeLayerBtn.style.display = layerCount === 1 ? 'none' : 'block';
+    }
+
+    function activeLayersPayload() {
+        return layers.slice(0, layerCount).map((layer) => ({
+            type: layer.type,
+            duty: Number(layer.duty.toFixed(4)),
+            volume: Number(layer.volume.toFixed(4)),
+            frequency_curve: layer.curveEnabled
+                ? layer.frequencyCurve.map((point) => ({
+                    frequency_hz: point.frequency_hz,
+                    gain_db: Number(point.gain_db.toFixed(4)),
+                }))
+                : [],
+        }));
+    }
+
+    function updateLayerType(layerIndex, value) {
+        layers[layerIndex].type = value;
+        renderLayers();
+    }
+
+    function updateLayerDuty(layerIndex, value) {
+        const duty = parseFloat(value);
+        layers[layerIndex].duty = duty;
+        const dutyValue = document.getElementById(`dutyValue${layerIndex}`);
+        if (dutyValue) {
+            dutyValue.textContent = duty.toFixed(2);
+        }
+    }
+
+    function updateLayerVolume(layerIndex, value) {
+        const volume = parseFloat(value);
+        layers[layerIndex].volume = volume;
+        const volumeValue = document.getElementById(`volumeValue${layerIndex}`);
+        if (volumeValue) {
+            volumeValue.textContent = volume.toFixed(1);
+        }
+    }
+
+    function toggleCurveEnabled(layerIndex, enabled) {
+        const layer = layers[layerIndex];
+        layer.curveEnabled = enabled;
+        if (!layer.frequencyCurve.length) {
+            layer.frequencyCurve = createDefaultCurve();
+            layer.selectedPointIndex = 0;
+        }
+        renderLayers();
+    }
+
+    function selectCurvePoint(layerIndex, pointIndex) {
+        layers[layerIndex].selectedPointIndex = pointIndex;
+        renderLayers();
+    }
+
+    function addCurvePoint(layerIndex) {
+        const layer = layers[layerIndex];
+        if (layer.frequencyCurve.length >= MAX_CURVE_POINTS) return;
+
+        let widestGapIndex = 0;
+        let widestGap = -1;
+        for (let index = 0; index < layer.frequencyCurve.length - 1; index += 1) {
+            const gap = Math.log(layer.frequencyCurve[index + 1].frequency_hz) - Math.log(layer.frequencyCurve[index].frequency_hz);
+            if (gap > widestGap) {
+                widestGap = gap;
+                widestGapIndex = index;
+            }
+        }
+
+        const leftPoint = layer.frequencyCurve[widestGapIndex];
+        const rightPoint = layer.frequencyCurve[widestGapIndex + 1];
+        const newFrequency = Math.sqrt(leftPoint.frequency_hz * rightPoint.frequency_hz);
+        const newGain = evaluateCurveGainDb(layer.frequencyCurve, newFrequency);
+
+        layer.frequencyCurve.splice(widestGapIndex + 1, 0, {
+            frequency_hz: newFrequency,
+            gain_db: newGain,
+        });
+        layer.selectedPointIndex = widestGapIndex + 1;
+        renderLayers();
+    }
+
+    function removeSelectedPoint(layerIndex) {
+        const layer = layers[layerIndex];
+        if (layer.selectedPointIndex <= 0 || layer.selectedPointIndex >= layer.frequencyCurve.length - 1) {
+            return;
+        }
+
+        layer.frequencyCurve.splice(layer.selectedPointIndex, 1);
+        layer.selectedPointIndex = Math.max(0, layer.selectedPointIndex - 1);
+        renderLayers();
+    }
+
+    function resetCurve(layerIndex) {
+        layers[layerIndex].frequencyCurve = createDefaultCurve();
+        layers[layerIndex].selectedPointIndex = 0;
+        renderLayers();
+    }
+
+    window.updateLayerType = updateLayerType;
+    window.updateLayerDuty = updateLayerDuty;
+    window.updateLayerVolume = updateLayerVolume;
+    window.toggleCurveEnabled = toggleCurveEnabled;
+    window.addCurvePoint = addCurvePoint;
+    window.removeSelectedPoint = removeSelectedPoint;
+    window.resetCurve = resetCurve;
+    window.selectCurvePoint = selectCurvePoint;
+
+    window.startCurvePointDrag = (layerIndex, pointIndex, event) => {
+        event.preventDefault();
+        layers[layerIndex].selectedPointIndex = pointIndex;
+        dragState = { layerIndex, pointIndex };
+        renderLayers();
+    };
+
+    window.addLayer = () => {
+        if (layerCount >= maxLayers) return;
+        layerCount += 1;
+        layers[layerCount - 1].active = true;
+        renderLayers();
+    };
+
+    window.removeLayer = () => {
+        if (layerCount <= 1) return;
+        layers[layerCount - 1] = createDefaultLayer(layerCount - 1);
+        layerCount -= 1;
+        renderLayers();
+    };
+
+    window.playPreview = (layerIndex) => {
+        const layer = layers[layerIndex];
+        let src = `${layer.type}.wav`;
+        if (layer.type === 'pulse') {
+            src = `pulse_${layer.duty < 0.18 ? '10' : layer.duty < 0.38 ? '25' : '50'}.wav`;
+        }
         previewAudio.src = `/static/previews/${src}`;
-        previewAudio.play().catch(e => console.error("Preview failed:", e));
-        const btn = document.querySelectorAll('.preview-btn')[layerId - 1];
-        btn.style.transform = "scale(0.9)";
-        setTimeout(() => btn.style.transform = "", 150);
+        previewAudio.play().catch((error) => console.error('Preview failed:', error));
+    };
+
+    addLayerBtn.addEventListener('click', window.addLayer);
+    removeLayerBtn.addEventListener('click', window.removeLayer);
+
+    window.addEventListener('pointermove', (event) => {
+        if (!dragState) return;
+
+        const { layerIndex, pointIndex } = dragState;
+        const svg = document.getElementById(`curveSvg${layerIndex}`);
+        if (!svg) return;
+
+        const rect = svg.getBoundingClientRect();
+        const localX = ((event.clientX - rect.left) / rect.width) * CURVE_WIDTH;
+        const localY = ((event.clientY - rect.top) / rect.height) * CURVE_HEIGHT;
+        const layer = layers[layerIndex];
+        const points = layer.frequencyCurve;
+        const point = points[pointIndex];
+
+        point.gain_db = Number(clamp(yToGain(localY), MIN_CURVE_GAIN_DB, MAX_CURVE_GAIN_DB).toFixed(4));
+        if (pointIndex === 0) {
+            point.frequency_hz = MIN_CURVE_FREQUENCY_HZ;
+        } else if (pointIndex === points.length - 1) {
+            point.frequency_hz = MAX_CURVE_FREQUENCY_HZ;
+        } else {
+            const minFrequency = points[pointIndex - 1].frequency_hz * 1.0001;
+            const maxFrequency = points[pointIndex + 1].frequency_hz / 1.0001;
+            point.frequency_hz = clamp(xToFrequency(localX), minFrequency, maxFrequency);
+        }
+
+        renderLayers();
+    });
+
+    window.addEventListener('pointerup', () => {
+        dragState = null;
+    });
+
+    function extractDownloadName(response, fallbackName) {
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const utfMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+        if (utfMatch) return decodeURIComponent(utfMatch[1]);
+        const plainMatch = disposition.match(/filename="?([^"]+)"?/i);
+        return plainMatch ? plainMatch[1] : fallbackName;
     }
 
-    // --- Form Submission ---
-    synthForm.onsubmit = async (e) => {
-        e.preventDefault();
+    synthForm.onsubmit = async (event) => {
+        event.preventDefault();
         loading.style.display = 'block';
         submitBtn.disabled = true;
-        const originalForm = new FormData(synthForm);
+
         const filesToProcess = [...fileQueue];
-        for (let i = 0; i < filesToProcess.length; i++) {
-            const file = filesToProcess[i];
-            processingStatus.textContent = `Processing ${i + 1} of ${filesToProcess.length}: ${file.name}`;
+        const failedFiles = [];
+        const layersJson = JSON.stringify(activeLayersPayload());
+        for (let index = 0; index < filesToProcess.length; index += 1) {
+            const file = filesToProcess[index];
+            processingStatus.textContent = `Processing ${index + 1} of ${filesToProcess.length}: ${file.name}`;
+
             const formData = new FormData();
-            for (let [key, value] of originalForm.entries()) if(key !== 'midi_file') formData.append(key, value);
+            formData.append('rate', rateSelect.value);
+            formData.append('layers_json', layersJson);
             formData.append('midi_file', file);
+
             try {
-                const response = await fetch('/synthesise', { method: 'POST', body: formData });
-                if (!response.ok) { alert(`Error processing ${file.name}: ${(await response.json()).error}`); continue; }
+                const response = await fetch('/synthesise', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) {
+                    const errorPayload = await response.json();
+                    failedFiles.push(file);
+                    alert(`Error processing ${file.name}: ${errorPayload.error}`);
+                    continue;
+                }
+
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const originalName = file.name.split('.').slice(0, -1).join('.');
-                const suffix = layerCount > 1 ? "mix" : document.getElementById('wave_type1').value;
-                a.download = `${originalName}_${suffix}.wav`;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                const downloadName = extractDownloadName(response, `${file.name.replace(/\.[^.]+$/, '') || 'output'}.wav`);
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = downloadName;
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
                 window.URL.revokeObjectURL(url);
-            } catch (error) { alert(`An error occurred while processing ${file.name}.`); }
+            } catch (error) {
+                failedFiles.push(file);
+                alert(`An error occurred while processing ${file.name}.`);
+            }
         }
-        loading.style.display = 'none'; submitBtn.disabled = false; fileQueue = []; renderQueue();
+
+        loading.style.display = 'none';
+        submitBtn.disabled = false;
+        fileQueue = failedFiles;
+        renderQueue();
     };
-    
-    renderQueue(); updateButtons();
+
+    renderQueue();
+    renderLayers();
 </script>
 
 </body>

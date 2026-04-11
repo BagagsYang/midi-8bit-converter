@@ -8,6 +8,7 @@ This folder contains the legacy browser-distributed version of the MIDI-8bit Syn
 - HTML templates and web-specific static assets
 - Legacy launcher script
 - Browser UI only; synthesis is delegated to the Python renderer in `../../core/python-renderer/`
+- Phase 1 proving UI for per-layer frequency-gain curves
 
 ## Run
 
@@ -31,3 +32,28 @@ apps/web-flask/Launch_Synthesiser.command
 - Canonical preview assets: `../../assets/previews/`
 
 This app serves preview WAVs from the shared asset folder and should not duplicate renderer logic.
+
+## Current Upload Contract
+
+`POST /synthesise` uses `multipart/form-data` with:
+
+- `midi_file`: uploaded `.mid` or `.midi`
+- `rate`: sample rate integer
+- `layers_json`: JSON array of layer objects
+
+Each layer object contains:
+
+- `type`
+- `duty`
+- `volume`
+- `frequency_curve`: optional array of `{frequency_hz, gain_db}` points
+
+The browser UI stores layer state in JavaScript and serialises it into `layers_json`.
+
+## Output Naming
+
+- Single audible layer without a curve: `<original>_<wave>.wav`
+- Multiple audible layers without a curve: `<original>_mix.wav`
+- Any audible layer with a non-empty frequency curve: `<original>_<base>_<hash>.wav`
+
+The hash is derived from the sanitised layer payload so different curve settings do not reuse the same export name.
