@@ -510,6 +510,7 @@
             if (isMidiFile(file)) fileQueue.push(file);
         }
         renderQueue();
+        fileInput.value = '';
     }
 
     window.removeFromQueue = (index) => {
@@ -520,6 +521,7 @@
     clearQueueBtn.addEventListener('click', () => {
         fileQueue = [];
         renderQueue();
+        fileInput.value = '';
     });
 
     dropZone.addEventListener('dragover', (event) => {
@@ -1031,6 +1033,7 @@
         submitBtn.disabled = false;
         fileQueue = failedFiles;
         renderQueue();
+        fileInput.value = '';
     };
 
     renderQueue();
