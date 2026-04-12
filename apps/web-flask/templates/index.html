@@ -91,6 +91,74 @@
             text-align: center;
         }
 
+        .section-label-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid var(--drop-zone-border);
+            background-color: transparent;
+            color: var(--muted-text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            font-size: 0.62rem;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0;
+            position: relative;
+            flex-shrink: 0;
+            transform: translateY(1px);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .info-icon:hover,
+        .info-icon:focus-visible {
+            background-color: var(--item-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+            outline: none;
+        }
+
+        .info-icon::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            width: min(320px, calc(100vw - 72px));
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+            font-size: 0.8rem;
+            font-weight: 400;
+            line-height: 1.4;
+            text-align: left;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            z-index: 20;
+        }
+
+        .info-icon:hover::after,
+        .info-icon:focus-visible::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
         .btn-primary {
             background-color: #0d6efd;
             width: 100%;
@@ -368,10 +436,17 @@
 
             <div class="col-md-7">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">2. Waveform Layers</label>
-                    <p class="text-muted small mb-2">
-                        Mix up to 4 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch.
-                    </p>
+                    <div class="section-label-row">
+                        <label class="form-label fw-bold mb-0">2. Waveform Layers</label>
+                        <button
+                            type="button"
+                            class="info-icon"
+                            aria-label="Mix up to 4 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch."
+                            data-tooltip="Mix up to 4 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch."
+                        >
+                            i
+                        </button>
+                    </div>
                     <div id="layersContainer"></div>
                     <div class="d-flex gap-2 mb-4">
                         <button type="button" class="btn btn-sm btn-outline-secondary w-100 fw-bold" id="addLayerBtn">+ Add Layer</button>
