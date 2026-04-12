@@ -303,6 +303,18 @@
             cursor: pointer;
         }
 
+        #addLayerBtn {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+        }
+
+        #addLayerBtn:disabled {
+            background-color: var(--item-bg);
+            border-color: var(--border-color);
+            color: var(--muted-text);
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
         .form-select {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
@@ -345,9 +357,9 @@
 
             <div class="col-md-7">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">2. Waveform Layers (Max 3)</label>
+                    <label class="form-label fw-bold">2. Waveform Layers</label>
                     <p class="text-muted small mb-2">
-                        Mix up to 3 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch.
+                        Mix up to 4 waveforms. Each layer can optionally use a draggable frequency curve that changes its gain by note pitch.
                     </p>
                     <div id="layersContainer"></div>
                     <div class="d-flex gap-2 mb-4">
@@ -386,7 +398,13 @@
     const CURVE_HEIGHT = 150;
     const CURVE_MARGIN = { top: 14, right: 14, bottom: 24, left: 38 };
     const curveLogSpan = Math.log(MAX_CURVE_FREQUENCY_HZ) - Math.log(MIN_CURVE_FREQUENCY_HZ);
-    const maxLayers = 3;
+    const layerPresets = [
+        { type: 'pulse', duty: 0.5, volume: 1.0 },
+        { type: 'sine', duty: 0.5, volume: 0.5 },
+        { type: 'triangle', duty: 0.5, volume: 0.5 },
+        { type: 'sawtooth', duty: 0.5, volume: 0.5 },
+    ];
+    const maxLayers = layerPresets.length;
 
     function createDefaultCurve() {
         return [
@@ -396,12 +414,7 @@
     }
 
     function createDefaultLayer(index) {
-        const presets = [
-            { type: 'pulse', duty: 0.5, volume: 1.0 },
-            { type: 'sine', duty: 0.5, volume: 0.5 },
-            { type: 'triangle', duty: 0.5, volume: 0.5 },
-        ];
-        const preset = presets[index];
+        const preset = layerPresets[index] || layerPresets[0];
         return {
             active: index === 0,
             type: preset.type,
@@ -418,7 +431,7 @@
     let dragStartIndex;
     let previewAudio = new Audio();
     let dragState = null;
-    const layers = [0, 1, 2].map(index => createDefaultLayer(index));
+    const layers = Array.from({ length: maxLayers }, (_, index) => createDefaultLayer(index));
 
     const synthForm = document.getElementById('synthForm');
     const loading = document.querySelector('.loading');
@@ -810,7 +823,7 @@
     }
 
     function updateLayerButtons() {
-        addLayerBtn.style.display = layerCount === maxLayers ? 'none' : 'block';
+        addLayerBtn.disabled = layerCount === maxLayers;
         removeLayerBtn.style.display = layerCount === 1 ? 'none' : 'block';
     }
 

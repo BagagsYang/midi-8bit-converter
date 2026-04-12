@@ -37,7 +37,7 @@ Important:
 - Add MIDI files by clicking the queue import area or dragging `.mid` / `.midi` files into it.
 - Reorder queued files with the Move Up / Move Down buttons.
 - Remove selected items or clear the whole queue.
-- Mix up to 3 waveform layers.
+- Mix up to 4 waveform layers.
 - Preview each waveform layer directly inside the app.
 - Choose the sample rate before exporting.
 - When you click export, the app asks for one output folder and then processes the queue sequentially.

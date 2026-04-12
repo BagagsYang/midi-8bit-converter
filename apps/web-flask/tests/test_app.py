@@ -91,6 +91,47 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn(expected_name, response.headers["Content-Disposition"])
 
+    def test_synthesise_accepts_four_layer_mix(self):
+        response = self.client.post(
+            "/synthesise",
+            data={
+                "rate": "16000",
+                "layers_json": json.dumps([
+                    {
+                        "type": "pulse",
+                        "duty": 0.5,
+                        "volume": 1.0,
+                        "frequency_curve": [],
+                    },
+                    {
+                        "type": "sine",
+                        "duty": 0.5,
+                        "volume": 0.5,
+                        "frequency_curve": [],
+                    },
+                    {
+                        "type": "triangle",
+                        "duty": 0.5,
+                        "volume": 0.5,
+                        "frequency_curve": [],
+                    },
+                    {
+                        "type": "sawtooth",
+                        "duty": 0.5,
+                        "volume": 0.5,
+                        "frequency_curve": [],
+                    },
+                ]),
+                "midi_file": (io.BytesIO(self._build_midi_bytes()), "lead.mid"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.addCleanup(response.close)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(b"RIFF", response.data[:4])
+        self.assertIn("lead_mix.wav", response.headers["Content-Disposition"])
+
     def test_synthesise_accepts_rounded_web_curve_endpoints(self):
         response = self.client.post(
             "/synthesise",
