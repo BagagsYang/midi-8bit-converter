@@ -2,10 +2,23 @@
 
 Date checked: 2026-04-12
 
-This report covers repository manifests and tracked bundled assets for the AGPLv3
-adoption step. It does not apply UI notices or other runtime interface changes.
+This report supports the current repository-level AGPL adoption step. The
+repository now carries AGPL licensing materials for the repository-owned code
+updated in this phase. The remaining questions documented here are mainly about
+third-party dependencies and future app-distribution analysis, not about
+whether the repository has adopted AGPL at the repository level.
 
-## Items checked
+This report distinguishes between:
+
+- facts established from tracked repository files, and
+- assessments that depend on installed-package metadata, package registry pages,
+  or later bundle/publish review.
+
+It is a documentation audit, not a legal opinion.
+
+## Repository evidence reviewed
+
+Tracked files reviewed for this update:
 
 - `core/python-renderer/requirements.txt`
 - `apps/web-flask/requirements.txt`
@@ -15,108 +28,157 @@ adoption step. It does not apply UI notices or other runtime interface changes.
 - `apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj`
 - `apps/windows/tests/Midi8BitSynthesiser.Tests/Midi8BitSynthesiser.Tests.csproj`
 - `global.json`
+- `assets/README.md`
 - `assets/previews/*.wav`
-- `apps/windows/src/Midi8BitSynthesiser.App/Assets/Previews/*.wav`
 
-## Dependencies
+## Facts established from repository contents
+
+- `assets/README.md` describes `assets/previews/` as the canonical source of the
+  shared waveform preview WAV files.
+- The Windows app project file does not rely solely on a local `Assets/Previews`
+  source folder for publish input. Instead,
+  `apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj`
+  explicitly includes `..\..\..\..\assets\previews\*.wav`, links those files as
+  `Assets\Previews\%(Filename)%(Extension)`, and marks them for both output and
+  publish copy.
+- The same Windows project file is configured for self-contained publishing via
+  `RuntimeIdentifier=win-x64`, `SelfContained=true`,
+  `PublishSelfContained=true`, and `WindowsAppSDKSelfContained=true`.
+- The repository manifests identify the dependency sets that matter for later
+  distribution review:
+  - Python runtime dependencies in `core/python-renderer/requirements.txt`
+  - Flask/web dependencies in `apps/web-flask/requirements.txt`
+  - macOS helper-build dependencies in `apps/macos/requirements-build.txt`
+  - Windows app and test dependencies in the `.csproj` files plus
+    `apps/windows/Directory.Packages.props`
+- The preview WAV files under `assets/previews/` are shared repository assets
+  used across app outputs according to `assets/README.md` and the Windows
+  project file.
+- `assets/README.md` now records a maintainer-provided provenance description
+  for the preview WAV files: they are project-specific preview/test assets; the
+  underlying MIDI material was generated with LLM assistance from the
+  maintainer's prompts; and the WAV files themselves were rendered by this
+  repository's own program.
+- The same provenance description states that, to the maintainer's knowledge,
+  the preview WAV files are not derived from third-party sample packs or
+  externally licensed audio recordings, and that they are intended to be
+  redistributed with repository and app outputs as project preview assets.
+
+## Dependency assessments that rely on external metadata
+
+The licence descriptions in this section are not established from tracked
+repository files alone. They are based on installed package metadata and, for
+some .NET packages, package-registry pages previously consulted during this
+audit work. They are useful for triage, but they should not be treated as if the
+repository itself proves them.
 
 ### Core Python renderer runtime
 
-- `importlib_resources` 6.5.2: Apache-2.0 from installed package metadata. No
-  obvious AGPL compatibility issue.
-- `mido` 1.3.3: MIT from installed package metadata. No obvious AGPL
-  compatibility issue.
-- `numpy` 2.4.3: `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0` from
-  installed package metadata. No obvious AGPL compatibility issue.
-- `packaging` 26.0: `Apache-2.0 OR BSD-2-Clause` from installed package
-  metadata. No obvious AGPL compatibility issue.
-- `pretty_midi` 0.2.11: MIT from installed package metadata. No obvious AGPL
-  compatibility issue.
-- `scipy` 1.17.1: BSD-style core license from installed package metadata. The
-  installed wheel metadata also references bundled third-party libraries such as
-  OpenBLAS (BSD-3-Clause), LAPACK (BSD-style), `libgfortran` (`GPL-3.0-or-later
-  WITH GCC-exception-3.1`), and `libquadmath` (`LGPL-2.1-or-later`).
-  Compatibility looks workable, but binary redistribution should preserve the
-  upstream notices and warrants a dedicated packaging review.
-- `setuptools` 82.0.1: MIT from installed package metadata. No obvious AGPL
-  compatibility issue.
-- `six` 1.17.0: MIT from installed package metadata. No obvious AGPL
-  compatibility issue.
+- `importlib_resources` 6.5.2: apparent Apache-2.0 from installed package
+  metadata. No immediate concern identified for this repository-level step.
+- `mido` 1.3.3: apparent MIT from installed package metadata. No immediate
+  concern identified for this repository-level step.
+- `numpy` 2.4.3: installed package metadata reports
+  `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0`. No immediate concern
+  identified for this repository-level step.
+- `packaging` 26.0: installed package metadata reports
+  `Apache-2.0 OR BSD-2-Clause`. No immediate concern identified for this
+  repository-level step.
+- `pretty_midi` 0.2.11: apparent MIT from installed package metadata. No
+  immediate concern identified for this repository-level step.
+- `scipy` 1.17.1: installed package metadata indicates a BSD-style core licence
+  and references additional bundled native-library notices in the installed
+  wheel. This does not by itself block the repository-level AGPL step, but it
+  does mean later binary-distribution review should confirm what notices and
+  obligations apply to any shipped bundles.
+- `setuptools` 82.0.1: apparent MIT from installed package metadata. No
+  immediate concern identified for this repository-level step.
+- `six` 1.17.0: apparent MIT from installed package metadata. No immediate
+  concern identified for this repository-level step.
 
 ### Web Flask dependencies
 
-- `Flask` 3.1.3, `Werkzeug` 3.1.7, `click` 8.3.1, `MarkupSafe` 3.0.3:
-  BSD-3-Clause from installed package metadata. No obvious AGPL compatibility
-  issue.
-- `itsdangerous` 2.2.0 and `Jinja2` 3.1.6: BSD-style from installed package
-  metadata. No obvious AGPL compatibility issue.
-- `blinker` 1.9.0: MIT from installed package metadata. No obvious AGPL
-  compatibility issue.
+- `Flask` 3.1.3, `Werkzeug` 3.1.7, `click` 8.3.1, and `MarkupSafe` 3.0.3:
+  apparent BSD-3-Clause from installed package metadata. No immediate concern
+  identified for this repository-level step.
+- `itsdangerous` 2.2.0 and `Jinja2` 3.1.6: apparent BSD-style licensing from
+  installed package metadata. No immediate concern identified for this
+  repository-level step.
+- `blinker` 1.9.0: apparent MIT from installed package metadata. No immediate
+  concern identified for this repository-level step.
 
-### macOS helper build dependencies
+### macOS helper-build dependencies
 
-- `altgraph` 0.17.5 and `macholib` 1.16.4: MIT from installed package metadata.
-  No obvious AGPL compatibility issue.
-- `pyinstaller` 6.19.0: GPL-2.0-or-later with the PyInstaller special
-  exception, from installed package metadata. This usually needs case-specific
-  review for bundled application distribution, but it is not an immediate blocker
-  for the repository-level relicensing step.
-- `pyinstaller-hooks-contrib` 2026.3: mixed licensing from the installed
-  package's bundled `LICENSE` file. Standard hooks are GPL-2.0-or-later; runtime
-  hooks are Apache-2.0. Manual follow-up is required to confirm which hooks, if
-  any, are shipped in distributed macOS helper artifacts.
+- `altgraph` 0.17.5 and `macholib` 1.16.4: apparent MIT from installed package
+  metadata. No immediate concern identified for this repository-level step.
+- `pyinstaller` 6.19.0: installed package metadata describes GPL-2.0-or-later
+  with the PyInstaller special exception. This should be treated as a later
+  packaging/distribution review item for macOS helper artifacts, not as an
+  established blocker to the repository-level AGPL step.
+- `pyinstaller-hooks-contrib` 2026.3: the installed package's bundled `LICENSE`
+  file describes mixed licensing, with standard hooks under GPL-2.0-or-later
+  and runtime hooks under Apache-2.0. This is relevant mainly to future helper
+  bundle analysis and should be revisited when reviewing what macOS build output
+  actually ships.
 
 ### Windows/.NET dependencies
 
-- `Melanchall.DryWetMidi` 8.0.3: MIT per the NuGet Gallery package page. No
-  obvious AGPL compatibility issue.
-- `NAudio` 2.3.0: MIT per the NuGet Gallery package page. No obvious AGPL
-  compatibility issue.
-- `Microsoft.NET.Test.Sdk` 18.3.0: MIT per the NuGet Gallery package page. Test
-  dependency only.
-- `xunit` 2.9.3: Apache-2.0 per the NuGet Gallery package page. Test dependency
-  only.
-- `xunit.runner.visualstudio` 3.1.5: the xUnit package pages describe xUnit.net
-  as Apache-2.0 licensed, and this package is additionally marked
-  `PrivateAssets=all` in the test project. Treat as test-only, but confirm the
-  exact package license before any formal distribution audit.
-- `Microsoft.WindowsAppSDK` 1.8.260317003: Microsoft Software License Terms from
-  the NuGet Gallery license page, not an open-source permissive license. The
-  redistributable code restrictions prohibit distributing source so that the
-  Microsoft code becomes subject to a source-disclosure licence. This is a likely
-  AGPL-compatibility concern for the Windows self-contained desktop app and needs
-  manual legal review before that app is relicensed or redistributed under AGPL
-  terms.
+- `Melanchall.DryWetMidi` 8.0.3: previously noted from the NuGet package page as
+  MIT. That assessment is external to the repository.
+- `NAudio` 2.3.0: previously noted from the NuGet package page as MIT. That
+  assessment is external to the repository.
+- `Microsoft.NET.Test.Sdk` 18.3.0: previously noted from the NuGet package page
+  as MIT. Test dependency only.
+- `xunit` 2.9.3: previously noted from the NuGet package page as Apache-2.0.
+  Test dependency only.
+- `xunit.runner.visualstudio` 3.1.5: treated here as lower-risk because the test
+  project marks it `PrivateAssets=all`, but the exact licence should still be
+  confirmed during any formal distribution-grade inventory. The current licence
+  description is not proven by tracked repository files alone.
+- `Microsoft.WindowsAppSDK` 1.8.260317003: the repository clearly shows that the
+  Windows app depends on this package and is configured for self-contained
+  publishing, but the licence characterisation itself comes from external
+  package-page material rather than tracked repository files. This makes the
+  Windows publish path a significant redistribution/licensing hotspot. It should
+  receive separate legal or packaging review before drawing conclusions about
+  AGPL-based redistribution of the Windows self-contained app. This report does
+  not treat incompatibility as definitively proven from repository evidence
+  alone.
 
-### Tooling manifest
+## Bundled asset observations
 
-- `global.json` pins the .NET SDK version (`8.0.100`) but does not itself add a
-  redistributed third-party source or asset.
-
-## Bundled assets
-
-- The only tracked non-code media found in source-controlled, non-build
-  directories for this step are the six waveform preview WAV files under
+- `assets/previews/` is the clearest repository-evidenced shared asset set in
+  scope for this audit.
+- The strongest repository evidence for Windows app packaging is the `.csproj`
+  link to `assets/previews/*.wav`, not any inference about a separate Windows
+  asset source tree.
+- The repository does contain files under
+  `apps/windows/src/Midi8BitSynthesiser.App/Assets/Previews/`, but this report
+  does not rely on that path to explain Windows build/publish behaviour because
+  the project file already points directly to the canonical files under
   `assets/previews/`.
-- The copies under
-  `apps/windows/src/Midi8BitSynthesiser.App/Assets/Previews/` are byte-for-byte
-  identical to the canonical files in `assets/previews/`.
-- Git history shows these preview files were introduced in the initial project
-  import and later moved during the repository reorganisation, but no authoring,
-  provenance, or licence note for the audio files was found in the repository.
-- No tracked fonts, icon packs, or other third-party media were found in the
-  repository outside build output directories.
+- `assets/README.md` now records the maintainer's provenance explanation for
+  these files. On that basis, they are better described as documented
+  project-generated preview/test assets than as unexplained third-party audio
+  material.
+- This documentation update does not attempt to make a broader legal ownership
+  determination; it records the stated provenance and intended redistribution
+  context so future audits do not treat the files as being of unknown origin.
 
 ## Manual follow-up required
 
-- Confirm the provenance and intended licence of the preview WAV assets before
-  asserting that they are covered by the repository AGPL terms.
-- Review how `scipy` and any bundled native libraries are redistributed in app
-  bundles, and preserve any required third-party notices.
-- Review the exact macOS helper packaging output for `pyinstaller` and
-  `pyinstaller-hooks-contrib`, especially if GPL-covered hooks are shipped.
-- Review `Microsoft.WindowsAppSDK` licensing before applying AGPL-driven
-  redistribution terms to the Windows app or its self-contained published output.
-- Confirm the exact published license for `xunit.runner.visualstudio` when doing a
-  distribution-grade dependency inventory, even though it currently appears to be
-  test-only.
+- Perform a dedicated Windows redistribution review for the self-contained
+  publish path, grounded in the existing project settings and the
+  `Microsoft.WindowsAppSDK` dependency. This is a future distribution question,
+  not a conclusion already proven solely from tracked repository files.
+- Review `scipy` and any bundled native-library notices in the context of actual
+  shipped app bundles or helper artifacts.
+- Review macOS helper packaging output for `pyinstaller` and
+  `pyinstaller-hooks-contrib` so that any notices or licence conditions are
+  handled at distribution time.
+- Keep `assets/README.md` and this audit aligned with the documented preview
+  asset provenance, and document any future generated or replacement preview
+  assets with the same level of specificity.
+- Confirm the exact licence of `xunit.runner.visualstudio` when preparing any
+  formal distribution-grade dependency inventory, while continuing to treat it
+  as lower-risk because it appears test-only in this repository.
