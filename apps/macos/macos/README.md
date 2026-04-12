@@ -11,6 +11,11 @@ This folder contains the native macOS app packaging and build notes.
 3. Install the macOS build dependencies: `./.venv/bin/python3 -m pip install -r apps/macos/requirements-build.txt`
 4. Open `apps/macos/MIDI8BitSynthesiser.xcodeproj` and run the `MIDI8BitSynthesiser` scheme.
 
+## Launching
+
+- Launch the built `.app` bundle through Xcode, Finder, or `open -na <path-to-app>`.
+- Do not execute `MIDI8BitSynthesiser.app/Contents/MacOS/MIDI8BitSynthesiser` directly during manual testing. On recent macOS releases that path can abort inside AppKit/HIServices before the app UI is initialized, which produces a misleading crash report even though the normal app-bundle launch path works.
+
 ## How the app works
 
 - SwiftUI provides the native macOS interface.
