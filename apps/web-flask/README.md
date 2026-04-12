@@ -25,6 +25,12 @@ Or launch the helper script:
 apps/web-flask/Launch_Synthesiser.command
 ```
 
+On Windows, use:
+
+```bat
+apps\web-flask\Launch_Synthesiser.bat
+```
+
 ## Shared Dependencies
 
 - Renderer: `../../core/python-renderer/midi_to_wave.py`

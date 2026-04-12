@@ -27,6 +27,7 @@ Important:
 ==================================================
 1. Double-click `apps/web-flask/Launch_Synthesiser.command`, or run:
    `./.venv/bin/python3 apps/web-flask/app.py`
+   On Windows, double-click `apps\web-flask\Launch_Synthesiser.bat`.
 2. Wait for the browser to open `http://127.0.0.1:5002`.
 3. Keep the terminal window open while the Flask app is running.
 
