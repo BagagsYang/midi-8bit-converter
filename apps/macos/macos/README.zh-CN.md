@@ -1,6 +1,6 @@
 # macOS 应用
 
-语言：简体中文 | [English](./README.md)
+Language/语言: [English](./README.md) | 简体中文
 
 此目录包含原生 macOS 应用的打包说明和构建说明。
 

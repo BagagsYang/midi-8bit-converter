@@ -1,6 +1,6 @@
 # Web Flask 应用
 
-语言：简体中文 | [English](./README.md)
+Language/语言: [English](./README.md) | 简体中文
 
 此目录包含通过浏览器分发的 MIDI-8bit Synthesiser 旧版实现。
 
