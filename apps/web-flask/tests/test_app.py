@@ -122,7 +122,7 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         runtime_layers = web_app.midi_to_wave.normalise_runtime_layers(
             web_app.midi_to_wave.parse_layers_json(json.dumps(layers))
         )
-        expected_name = web_app._build_download_name("lead", runtime_layers)
+        expected_name = web_app.midi_to_wave.build_output_filename("lead", runtime_layers)
 
         response = self.client.post(
             "/synthesise",

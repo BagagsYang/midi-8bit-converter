@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import hashlib
 import json
 import math
 
@@ -177,6 +178,24 @@ def sanitise_layer(layer, layer_index):
 
 def db_to_linear_gain(gain_db):
     return 10.0 ** (gain_db / 20.0)
+
+
+def build_curve_payload_hash(layers):
+    canonical_payload = json.dumps(layers, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha1(canonical_payload.encode("utf-8")).hexdigest()[:8]
+
+
+def build_output_suffix(layers):
+    runtime_layers = normalise_runtime_layers(layers)
+    suffix = "mix" if len(runtime_layers) > 1 else runtime_layers[0]["type"]
+    if any(layer["frequency_curve"] for layer in runtime_layers):
+        suffix = f"{suffix}_{build_curve_payload_hash(runtime_layers)}"
+
+    return suffix
+
+
+def build_output_filename(original_filename, layers):
+    return f"{original_filename}_{build_output_suffix(layers)}.wav"
 
 
 def evaluate_frequency_curve_gain_db(curve_points, frequency_hz):

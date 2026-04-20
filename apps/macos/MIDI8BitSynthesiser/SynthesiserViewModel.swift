@@ -145,7 +145,7 @@ final class SynthesiserViewModel: ObservableObject {
             return
         }
 
-        let preparedLayers = sanitizedLayers(from: layers)
+        let preparedLayers = WaveLayerExportSanitizer.sanitizedLayers(from: layers)
         let preparedRate = sampleRate
 
         for index in queue.indices {
@@ -209,7 +209,7 @@ final class SynthesiserViewModel: ObservableObject {
             guard let index = queue.firstIndex(where: { $0.id == jobID }) else { continue }
 
             let inputURL = queue[index].inputURL
-            let outputURL = Self.outputURL(
+            let outputURL = OutputFileNameBuilder.outputURL(
                 for: inputURL,
                 in: outputDirectory,
                 layers: layers
@@ -239,25 +239,11 @@ final class SynthesiserViewModel: ObservableObject {
         lastRunSummary = "\(completedCount) completed, \(failedCount) failed."
     }
 
-    private func sanitizedLayers(from layers: [WaveLayer]) -> [WaveLayer] {
-        let audibleLayers = layers.filter { $0.volume > 0 }
-        if audibleLayers.isEmpty {
-            return [WaveLayer(type: .pulse, duty: 0.5, volume: 1.0)]
-        }
-        return audibleLayers
-    }
-
     var audibleLayerCount: Int {
         layers.filter { $0.volume > 0 }.count
     }
 
     private var midiContentTypes: [UTType] {
         [UTType(filenameExtension: "mid"), UTType(filenameExtension: "midi")].compactMap { $0 }
-    }
-
-    private static func outputURL(for inputURL: URL, in directory: URL, layers: [WaveLayer]) -> URL {
-        let suffix = layers.count > 1 ? "mix" : layers[0].type.rawValue
-        let filename = inputURL.deletingPathExtension().lastPathComponent
-        return directory.appendingPathComponent("\(filename)_\(suffix).wav")
     }
 }

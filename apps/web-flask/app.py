@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import sys
@@ -108,19 +107,6 @@ def _get_locale_context():
     return locale, _load_translations(locale), is_explicit_override
 
 
-def _build_curve_payload_hash(layers):
-    canonical_payload = json.dumps(layers, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha1(canonical_payload.encode("utf-8")).hexdigest()[:8]
-
-
-def _build_download_name(original_filename, runtime_layers):
-    suffix = "mix" if len(runtime_layers) > 1 else runtime_layers[0]["type"]
-    if any(layer["frequency_curve"] for layer in runtime_layers):
-        suffix = f"{suffix}_{_build_curve_payload_hash(runtime_layers)}"
-
-    return f"{original_filename}_{suffix}.wav"
-
-
 def _parse_layers_from_request(form):
     layers_json = (form.get("layers_json") or "").strip()
     if not layers_json:
@@ -205,7 +191,7 @@ def synthesise():
         return send_file(
             temp_wav.name,
             as_attachment=True,
-            download_name=_build_download_name(original_filename, runtime_layers),
+            download_name=midi_to_wave.build_output_filename(original_filename, runtime_layers),
         )
     except ValueError as exc:
         for temp_path in temp_paths:

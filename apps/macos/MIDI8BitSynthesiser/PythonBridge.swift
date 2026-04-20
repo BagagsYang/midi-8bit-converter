@@ -4,7 +4,6 @@ enum PythonBridgeError: LocalizedError {
     case helperMissing
     case launchFailed(String)
     case processFailed(code: Int32, message: String)
-    case invalidLayerPayload(String)
 
     var errorDescription: String? {
         switch self {
@@ -17,8 +16,6 @@ enum PythonBridgeError: LocalizedError {
             return trimmedMessage.isEmpty
                 ? "The converter helper exited with code \(code)."
                 : trimmedMessage
-        case .invalidLayerPayload(let message):
-            return "Could not encode waveform layers: \(message)"
         }
     }
 }
@@ -31,20 +28,7 @@ struct PythonBridge {
         layers: [WaveLayer]
     ) async throws {
         let helperURL = try helperExecutableURL()
-        let encoder = JSONEncoder()
-
-        let payload: Data
-        do {
-            payload = try encoder.encode(
-                layers.map {
-                    EncodedWaveLayer(type: $0.type.rawValue, duty: $0.duty, volume: $0.volume)
-                }
-            )
-        } catch {
-            throw PythonBridgeError.invalidLayerPayload(error.localizedDescription)
-        }
-
-        let jsonString = String(decoding: payload, as: UTF8.self)
+        let jsonString = LayerPayloadEncoder.jsonString(for: layers)
         _ = try await ProcessRunner.run(
             executableURL: helperURL,
             arguments: [
@@ -69,12 +53,6 @@ struct PythonBridge {
 
         return bundledURL
     }
-}
-
-private struct EncodedWaveLayer: Encodable {
-    let type: String
-    let duty: Double
-    let volume: Double
 }
 
 private struct ProcessResult {

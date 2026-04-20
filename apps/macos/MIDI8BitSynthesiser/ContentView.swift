@@ -147,7 +147,7 @@ struct ContentView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Layers")
                                     .font(.title3.weight(.semibold))
-                                Text("Blend waveforms with concise controls and inline previews.")
+                                Text("Blend waveforms with concise controls and optional pitch-dependent layer curves.")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -183,7 +183,7 @@ struct ContentView: View {
                             Text("Output")
                                 .font(.title3.weight(.semibold))
 
-                            Text("Choose the export sample rate. Output naming stays unchanged.")
+                            Text("Choose the export sample rate. Export naming matches the current web curve semantics.")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
 
@@ -441,6 +441,7 @@ private struct LayerEditorCard: View {
     let isProcessing: Bool
     let onPreview: () -> Void
     let onRemove: () -> Void
+    @State private var selectedCurvePointID: UUID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -493,13 +494,27 @@ private struct LayerEditorCard: View {
                 }
 
                 SliderRow(
-                    title: "Volume",
+                    title: "Base Volume",
                     valueText: String(format: "%.1f×", layer.volume),
                     value: $layer.volume,
                     range: 0.0...2.0,
                     step: 0.1,
                     isDisabled: isProcessing
                 )
+            }
+
+            Toggle("Enable frequency-gain curve", isOn: $layer.isFrequencyCurveEnabled)
+                .disabled(isProcessing)
+                .onChange(of: layer.isFrequencyCurveEnabled) { _, isEnabled in
+                    if isEnabled {
+                        layer.ensureDefaultFrequencyCurve()
+                    } else {
+                        selectedCurvePointID = nil
+                    }
+                }
+
+            if layer.isFrequencyCurveEnabled {
+                curveEditorSection
             }
         }
         .padding(18)
@@ -511,6 +526,125 @@ private struct LayerEditorCard: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(Color.secondary.opacity(0.12))
         }
+    }
+
+    private var curveEditorSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Frequency-Gain Curve")
+                    .font(.subheadline.weight(.semibold))
+                Text("Layer gain is evaluated per note using a log-frequency axis and dB gain.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            FrequencyCurveEditor(
+                points: $layer.frequencyCurve,
+                selectedPointID: $selectedCurvePointID,
+                isDisabled: isProcessing
+            )
+            .frame(height: 180)
+
+            HStack {
+                Text("8 Hz")
+                Spacer()
+                Text("440 Hz")
+                Spacer()
+                Text("12.5 kHz")
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                Button("Add Point", action: addCurvePoint)
+                    .disabled(isProcessing || layer.frequencyCurve.count >= FrequencyCurveConstants.maxPoints)
+
+                Button("Remove Selected", action: removeSelectedCurvePoint)
+                    .disabled(isProcessing || !canRemoveSelectedCurvePoint)
+
+                Button("Reset Curve", action: resetCurve)
+                    .disabled(isProcessing)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Text("Preview is raw waveform only for now and does not reflect this curve.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var sortedCurve: [FrequencyCurvePoint] {
+        let curve = layer.frequencyCurve.isEmpty ? FrequencyCurvePoint.defaultAnchors() : layer.frequencyCurve
+        return curve.sorted { $0.frequencyHz < $1.frequencyHz }
+    }
+
+    private var canRemoveSelectedCurvePoint: Bool {
+        guard let selectedCurvePointID,
+              let selectedIndex = sortedCurve.firstIndex(where: { $0.id == selectedCurvePointID }) else {
+            return false
+        }
+
+        return selectedIndex > 0 && selectedIndex < sortedCurve.count - 1
+    }
+
+    private func addCurvePoint() {
+        layer.ensureDefaultFrequencyCurve()
+        guard layer.frequencyCurve.count < FrequencyCurveConstants.maxPoints else {
+            return
+        }
+
+        let sortedPoints = sortedCurve
+        guard sortedPoints.count >= 2 else {
+            layer.frequencyCurve = FrequencyCurvePoint.defaultAnchors()
+            return
+        }
+
+        let insertionIndex = widestCurveSegmentIndex(in: sortedPoints)
+        let leftPoint = sortedPoints[insertionIndex]
+        let rightPoint = sortedPoints[insertionIndex + 1]
+        let newPoint = FrequencyCurvePoint(
+            frequencyHz: sqrt(leftPoint.frequencyHz * rightPoint.frequencyHz),
+            gainDB: (leftPoint.gainDB + rightPoint.gainDB) / 2.0
+        )
+
+        layer.frequencyCurve.append(newPoint)
+        layer.frequencyCurve.sort { $0.frequencyHz < $1.frequencyHz }
+        selectedCurvePointID = newPoint.id
+    }
+
+    private func removeSelectedCurvePoint() {
+        guard canRemoveSelectedCurvePoint,
+              let selectedCurvePointID else {
+            return
+        }
+
+        layer.frequencyCurve.removeAll { $0.id == selectedCurvePointID }
+        self.selectedCurvePointID = nil
+    }
+
+    private func resetCurve() {
+        layer.frequencyCurve = FrequencyCurvePoint.defaultAnchors()
+        selectedCurvePointID = nil
+    }
+
+    private func widestCurveSegmentIndex(in points: [FrequencyCurvePoint]) -> Int {
+        guard points.count >= 2 else {
+            return 0
+        }
+
+        var widestIndex = 0
+        var widestSpan = 0.0
+
+        for index in 0..<(points.count - 1) {
+            let span = log(points[index + 1].frequencyHz) - log(points[index].frequencyHz)
+            if span > widestSpan {
+                widestSpan = span
+                widestIndex = index
+            }
+        }
+
+        return widestIndex
     }
 }
 
@@ -536,5 +670,176 @@ private struct SliderRow: View {
             Slider(value: $value, in: range, step: step)
                 .disabled(isDisabled)
         }
+    }
+}
+
+private struct FrequencyCurveEditor: View {
+    @Binding var points: [FrequencyCurvePoint]
+    @Binding var selectedPointID: UUID?
+    let isDisabled: Bool
+
+    var body: some View {
+        GeometryReader { geometry in
+            let plotRect = plotArea(in: geometry.size)
+            let sortedPoints = displayedPoints
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.secondary.opacity(0.05))
+
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Color.secondary.opacity(0.18))
+
+                Path { path in
+                    let zeroY = yPosition(forGain: 0.0, in: plotRect)
+                    path.move(to: CGPoint(x: plotRect.minX, y: zeroY))
+                    path.addLine(to: CGPoint(x: plotRect.maxX, y: zeroY))
+                }
+                .stroke(Color.secondary.opacity(0.18), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                Path { path in
+                    path.move(to: CGPoint(x: plotRect.minX, y: plotRect.midY))
+                    path.addLine(to: CGPoint(x: plotRect.maxX, y: plotRect.midY))
+                }
+                .stroke(Color.secondary.opacity(0.12), lineWidth: 1)
+
+                Path { path in
+                    guard let firstPoint = sortedPoints.first else { return }
+                    path.move(to: position(for: firstPoint, in: plotRect))
+                    for point in sortedPoints.dropFirst() {
+                        path.addLine(to: position(for: point, in: plotRect))
+                    }
+                }
+                .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
+
+                ForEach(Array(sortedPoints.enumerated()), id: \.element.id) { index, point in
+                    let pointPosition = position(for: point, in: plotRect)
+                    Circle()
+                        .fill(selectedPointID == point.id ? Color.accentColor : Color(nsColor: .windowBackgroundColor))
+                        .overlay {
+                            Circle()
+                                .stroke(
+                                    selectedPointID == point.id ? Color.accentColor : Color.secondary.opacity(0.65),
+                                    lineWidth: selectedPointID == point.id ? 3 : 2
+                                )
+                        }
+                        .frame(width: 14, height: 14)
+                        .contentShape(Rectangle())
+                        .position(pointPosition)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { gesture in
+                                    guard !isDisabled else { return }
+                                    selectedPointID = point.id
+                                    updatePoint(
+                                        point,
+                                        sortedIndex: index,
+                                        location: gesture.location,
+                                        plotRect: plotRect,
+                                        sortedPoints: sortedPoints
+                                    )
+                                }
+                        )
+                }
+            }
+            .overlay(alignment: .topLeading) {
+                Text("+12 dB")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 6)
+                    .padding(.leading, 8)
+                    .allowsHitTesting(false)
+            }
+            .overlay(alignment: .bottomLeading) {
+                Text("-36 dB")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 6)
+                    .padding(.leading, 8)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+
+    private var displayedPoints: [FrequencyCurvePoint] {
+        let currentPoints = points.isEmpty ? FrequencyCurvePoint.defaultAnchors() : points
+        return currentPoints.sorted { $0.frequencyHz < $1.frequencyHz }
+    }
+
+    private func plotArea(in size: CGSize) -> CGRect {
+        CGRect(
+            x: 26,
+            y: 14,
+            width: max(1, size.width - 40),
+            height: max(1, size.height - 28)
+        )
+    }
+
+    private func position(for point: FrequencyCurvePoint, in plotRect: CGRect) -> CGPoint {
+        CGPoint(
+            x: xPosition(forFrequency: point.frequencyHz, in: plotRect),
+            y: yPosition(forGain: point.gainDB, in: plotRect)
+        )
+    }
+
+    private func xPosition(forFrequency frequencyHz: Double, in plotRect: CGRect) -> CGFloat {
+        let minLog = log(FrequencyCurveConstants.minFrequencyHz)
+        let maxLog = log(FrequencyCurveConstants.maxFrequencyHz)
+        let ratio = (log(frequencyHz) - minLog) / (maxLog - minLog)
+        return plotRect.minX + (plotRect.width * ratio)
+    }
+
+    private func yPosition(forGain gainDB: Double, in plotRect: CGRect) -> CGFloat {
+        let ratio = (FrequencyCurveConstants.maxGainDB - gainDB)
+            / (FrequencyCurveConstants.maxGainDB - FrequencyCurveConstants.minGainDB)
+        return plotRect.minY + (plotRect.height * ratio)
+    }
+
+    private func frequency(at x: CGFloat, in plotRect: CGRect) -> Double {
+        let clampedRatio = max(0.0, min(1.0, (x - plotRect.minX) / plotRect.width))
+        let scale = FrequencyCurveConstants.maxFrequencyHz / FrequencyCurveConstants.minFrequencyHz
+        return FrequencyCurveConstants.minFrequencyHz * pow(scale, clampedRatio)
+    }
+
+    private func gain(at y: CGFloat, in plotRect: CGRect) -> Double {
+        let clampedRatio = max(0.0, min(1.0, (y - plotRect.minY) / plotRect.height))
+        return FrequencyCurveConstants.maxGainDB
+            - (clampedRatio * (FrequencyCurveConstants.maxGainDB - FrequencyCurveConstants.minGainDB))
+    }
+
+    private func updatePoint(
+        _ point: FrequencyCurvePoint,
+        sortedIndex: Int,
+        location: CGPoint,
+        plotRect: CGRect,
+        sortedPoints: [FrequencyCurvePoint]
+    ) {
+        guard let pointIndex = points.firstIndex(where: { $0.id == point.id }) else {
+            return
+        }
+
+        let clampedY = max(plotRect.minY, min(plotRect.maxY, location.y))
+        var updatedPoint = points[pointIndex]
+        updatedPoint.gainDB = gain(at: clampedY, in: plotRect)
+
+        if sortedIndex == 0 {
+            updatedPoint.frequencyHz = FrequencyCurveConstants.minFrequencyHz
+        } else if sortedIndex == sortedPoints.count - 1 {
+            updatedPoint.frequencyHz = FrequencyCurveConstants.maxFrequencyHz
+        } else {
+            let minimumX = xPosition(
+                forFrequency: sortedPoints[sortedIndex - 1].frequencyHz,
+                in: plotRect
+            ) + 12
+            let maximumX = xPosition(
+                forFrequency: sortedPoints[sortedIndex + 1].frequencyHz,
+                in: plotRect
+            ) - 12
+            let clampedX = max(minimumX, min(maximumX, location.x))
+            updatedPoint.frequencyHz = frequency(at: clampedX, in: plotRect)
+        }
+
+        points[pointIndex] = updatedPoint
+        points.sort { $0.frequencyHz < $1.frequencyHz }
     }
 }

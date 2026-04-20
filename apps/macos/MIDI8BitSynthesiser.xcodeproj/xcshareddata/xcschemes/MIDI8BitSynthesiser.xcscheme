@@ -28,6 +28,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AA000000000000000000001D"
+               BuildableName = "MIDI8BitSynthesiserTests.xctest"
+               BlueprintName = "MIDI8BitSynthesiserTests"
+               ReferencedContainer = "container:MIDI8BitSynthesiser.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

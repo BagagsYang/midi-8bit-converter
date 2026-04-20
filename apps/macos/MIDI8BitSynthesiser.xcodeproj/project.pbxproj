@@ -13,7 +13,18 @@
 		AA0000000000000000000053 /* AudioPreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000033 /* AudioPreviewPlayer.swift */; };
 		AA0000000000000000000054 /* PythonBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000034 /* PythonBridge.swift */; };
 		AA0000000000000000000055 /* SynthesiserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000035 /* SynthesiserViewModel.swift */; };
+		AA0000000000000000000060 /* MIDI8BitSynthesiserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000040 /* MIDI8BitSynthesiserTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA0000000000000000000024 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000010;
+			remoteInfo = MIDI8BitSynthesiser;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		AA0000000000000000000011 /* MIDI8BitSynthesiser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MIDI8BitSynthesiser.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -27,10 +38,19 @@
 		AA0000000000000000000037 /* requirements-build.txt */ = {isa = PBXFileReference; lastKnownFileType = text.plain; name = "requirements-build.txt"; path = "requirements-build.txt"; sourceTree = "<group>"; };
 		AA0000000000000000000038 /* User_Guide.txt */ = {isa = PBXFileReference; lastKnownFileType = text.plain; name = User_Guide.txt; path = ../web-flask/User_Guide.txt; sourceTree = "<group>"; };
 		AA0000000000000000000039 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		AA0000000000000000000040 /* MIDI8BitSynthesiserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDI8BitSynthesiserTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000041 /* MIDI8BitSynthesiserTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MIDI8BitSynthesiserTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000000000000000000013 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA000000000000000000001A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000003 /* MIDI8BitSynthesiser */,
+				AA0000000000000000000006 /* MIDI8BitSynthesiserTests */,
 				AA0000000000000000000037 /* requirements-build.txt */,
 				AA0000000000000000000038 /* User_Guide.txt */,
 				AA0000000000000000000004 /* macos */,
@@ -73,10 +94,19 @@
 			path = macos;
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000006 /* MIDI8BitSynthesiserTests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000040 /* MIDI8BitSynthesiserTests.swift */,
+			);
+			path = MIDI8BitSynthesiserTests;
+			sourceTree = "<group>";
+		};
 		AA0000000000000000000005 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000011 /* MIDI8BitSynthesiser.app */,
+				AA0000000000000000000041 /* MIDI8BitSynthesiserTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,6 +132,24 @@
 			productReference = AA0000000000000000000011 /* MIDI8BitSynthesiser.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA000000000000000000001D /* MIDI8BitSynthesiserTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000000000000000000001E /* Build configuration list for PBXNativeTarget "MIDI8BitSynthesiserTests" */;
+			buildPhases = (
+				AA000000000000000000001C /* Sources */,
+				AA000000000000000000001A /* Frameworks */,
+				AA000000000000000000001B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000025 /* PBXTargetDependency */,
+			);
+			name = MIDI8BitSynthesiserTests;
+			productName = MIDI8BitSynthesiserTests;
+			productReference = AA0000000000000000000041 /* MIDI8BitSynthesiserTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -114,6 +162,10 @@
 				TargetAttributes = {
 					AA0000000000000000000010 = {
 						CreatedOnToolsVersion = 16.2;
+					};
+					AA000000000000000000001D = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = AA0000000000000000000010;
 					};
 				};
 			};
@@ -131,12 +183,20 @@
 			projectRoot = "";
 			targets = (
 				AA0000000000000000000010 /* MIDI8BitSynthesiser */,
+				AA000000000000000000001D /* MIDI8BitSynthesiserTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000014 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA000000000000000000001B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -181,7 +241,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA000000000000000000001C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000060 /* MIDI8BitSynthesiserTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000000000000000000025 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000010 /* MIDI8BitSynthesiser */;
+			targetProxy = AA0000000000000000000024 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA0000000000000000000018 /* Debug */ = {
@@ -221,9 +297,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_TESTABILITY = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "MIDI-8bit Synthesiser";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
@@ -236,6 +314,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yangyi.midi8bitsynthesiser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -264,6 +343,42 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000022 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yangyi.midi8bitsynthesiser.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MIDI8BitSynthesiser.app/Contents/MacOS/MIDI8BitSynthesiser";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000023 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yangyi.midi8bitsynthesiser.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MIDI8BitSynthesiser.app/Contents/MacOS/MIDI8BitSynthesiser";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -281,6 +396,15 @@
 			buildConfigurations = (
 				AA0000000000000000000020 /* Debug */,
 				AA0000000000000000000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000000000000000000001E /* Build configuration list for PBXNativeTarget "MIDI8BitSynthesiserTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000022 /* Debug */,
+				AA0000000000000000000023 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -196,6 +196,61 @@ class FrequencyCurveEvaluationTests(unittest.TestCase):
         self.assertEqual(-12.0, gain_db)
 
 
+class OutputNamingTests(unittest.TestCase):
+    def test_build_output_suffix_uses_wave_type_without_curve(self):
+        suffix = midi_to_wave.build_output_suffix([{
+            "type": "pulse",
+            "duty": 0.5,
+            "volume": 1.0,
+            "frequency_curve": [],
+        }])
+
+        self.assertEqual("pulse", suffix)
+
+    def test_build_output_suffix_uses_mix_for_multiple_layers_without_curve(self):
+        suffix = midi_to_wave.build_output_suffix([
+            {
+                "type": "pulse",
+                "duty": 0.5,
+                "volume": 1.0,
+                "frequency_curve": [],
+            },
+            {
+                "type": "triangle",
+                "duty": 0.5,
+                "volume": 0.4,
+                "frequency_curve": [],
+            },
+        ])
+
+        self.assertEqual("mix", suffix)
+
+    def test_build_output_suffix_appends_curve_hash(self):
+        suffix = midi_to_wave.build_output_suffix([{
+            "type": "pulse",
+            "duty": 0.5,
+            "volume": 1.0,
+            "frequency_curve": [
+                {"frequency_hz": midi_to_wave.MIN_CURVE_FREQUENCY_HZ, "gain_db": 0.0},
+                {"frequency_hz": midi_to_wave.MAX_CURVE_FREQUENCY_HZ, "gain_db": 0.0},
+            ],
+        }])
+
+        self.assertEqual("pulse_dee027b8", suffix)
+        self.assertEqual(
+            "lead_pulse_dee027b8.wav",
+            midi_to_wave.build_output_filename("lead", [{
+                "type": "pulse",
+                "duty": 0.5,
+                "volume": 1.0,
+                "frequency_curve": [
+                    {"frequency_hz": midi_to_wave.MIN_CURVE_FREQUENCY_HZ, "gain_db": 0.0},
+                    {"frequency_hz": midi_to_wave.MAX_CURVE_FREQUENCY_HZ, "gain_db": 0.0},
+                ],
+            }]),
+        )
+
+
 class MidiToAudioTests(unittest.TestCase):
     def test_frequency_curve_changes_note_level_gain_by_pitch(self):
         with tempfile.TemporaryDirectory() as temp_dir:
