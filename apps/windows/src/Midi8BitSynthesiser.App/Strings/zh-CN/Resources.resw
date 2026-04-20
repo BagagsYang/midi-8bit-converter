@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="QueueSectionTitle.Text" xml:space="preserve">
+    <value>队列</value>
+  </data>
+  <data name="QueueSectionDescription.Text" xml:space="preserve">
+    <value>添加或拖放 MIDI 文件，然后批量导出 WAV。</value>
+  </data>
+  <data name="EmptyQueueTitle.Text" xml:space="preserve">
+    <value>将 MIDI 文件拖放到此处</value>
+  </data>
+  <data name="EmptyQueueDescription.Text" xml:space="preserve">
+    <value>支持 .mid 和 .midi 文件。</value>
+  </data>
+  <data name="MoveJobUpButton.Content" xml:space="preserve">
+    <value>上移</value>
+  </data>
+  <data name="MoveJobDownButton.Content" xml:space="preserve">
+    <value>下移</value>
+  </data>
+  <data name="RemoveJobButton.Content" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="ImportFilesButton.Content" xml:space="preserve">
+    <value>添加 MIDI</value>
+  </data>
+  <data name="ClearQueueButton.Content" xml:space="preserve">
+    <value>清空队列</value>
+  </data>
+  <data name="SoundDesignTitle.Text" xml:space="preserve">
+    <value>音色设计</value>
+  </data>
+  <data name="SoundDesignDescription.Text" xml:space="preserve">
+    <value>最多叠加三层波形，可预听后将当前队列导出为 WAV。</value>
+  </data>
+  <data name="QueuedSummaryLabel.Text" xml:space="preserve">
+    <value>已排队：</value>
+  </data>
+  <data name="LayersSummaryLabel.Text" xml:space="preserve">
+    <value>层数：</value>
+  </data>
+  <data name="AudibleSummaryLabel.Text" xml:space="preserve">
+    <value>可听：</value>
+  </data>
+  <data name="LayersSectionTitle.Text" xml:space="preserve">
+    <value>层</value>
+  </data>
+  <data name="LayersSectionDescription.Text" xml:space="preserve">
+    <value>最多混合三种波形，并支持内联预听播放。</value>
+  </data>
+  <data name="AddLayerButton.Content" xml:space="preserve">
+    <value>添加层</value>
+  </data>
+  <data name="PreviewLayerButton.Content" xml:space="preserve">
+    <value>预听</value>
+  </data>
+  <data name="RemoveLayerButton.Content" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="OutputSectionTitle.Text" xml:space="preserve">
+    <value>输出</value>
+  </data>
+  <data name="OutputSectionDescription.Text" xml:space="preserve">
+    <value>选择导出采样率。输出命名与现有应用保持一致。</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>MIDI-8bit Synthesiser</value>
+  </data>
+  <data name="ClearQueueDialogTitle" xml:space="preserve">
+    <value>清空整个队列？</value>
+  </data>
+  <data name="ClearQueueDialogContent" xml:space="preserve">
+    <value>这会重置当前批次，但会保留你的音色设计设置。</value>
+  </data>
+  <data name="ClearQueueDialogPrimaryButton" xml:space="preserve">
+    <value>清空队列</value>
+  </data>
+  <data name="ClearQueueDialogCloseButton" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="StatusInitial" xml:space="preserve">
+    <value>添加 MIDI 文件，设置波形层混合，然后批量导出 WAV。</value>
+  </data>
+  <data name="StatusCompatibilityWarning" xml:space="preserve">
+    <value>检测到兼容性警告。导出前请查看提示信息。</value>
+  </data>
+  <data name="ExportButtonProcessing" xml:space="preserve">
+    <value>处理中...</value>
+  </data>
+  <data name="ExportButtonReady" xml:space="preserve">
+    <value>导出 WAV</value>
+  </data>
+  <data name="SampleRate44100" xml:space="preserve">
+    <value>44.1 kHz</value>
+  </data>
+  <data name="SampleRate48000" xml:space="preserve">
+    <value>48 kHz</value>
+  </data>
+  <data name="SampleRate96000" xml:space="preserve">
+    <value>96 kHz</value>
+  </data>
+  <data name="SampleRateCustomFormat" xml:space="preserve">
+    <value>{0} Hz</value>
+  </data>
+  <data name="ErrorUnsupportedFileType" xml:space="preserve">
+    <value>只能将 .mid 和 .midi 文件加入队列。</value>
+  </data>
+  <data name="StatusFilesQueuedFormat" xml:space="preserve">
+    <value>已将 {0} 个文件加入导出队列。</value>
+  </data>
+  <data name="StatusQueueCleared" xml:space="preserve">
+    <value>队列已清空。添加 MIDI 文件以开始下一批。</value>
+  </data>
+  <data name="StatusExportCancelled" xml:space="preserve">
+    <value>已取消导出。</value>
+  </data>
+  <data name="StatusExportBlockedByCompatibility" xml:space="preserve">
+    <value>导出已被兼容性检查阻止。</value>
+  </data>
+  <data name="StatusProcessingFormat" xml:space="preserve">
+    <value>正在处理 {0}/{1}: {2}</value>
+  </data>
+  <data name="StatusFinishedFormat" xml:space="preserve">
+    <value>已完成 {0} 个文件。</value>
+  </data>
+  <data name="SummaryCompletedFailedFormat" xml:space="preserve">
+    <value>{0} 个成功，{1} 个失败。</value>
+  </data>
+  <data name="ConversionJobQueued" xml:space="preserve">
+    <value>已排队</value>
+  </data>
+  <data name="ConversionJobProcessing" xml:space="preserve">
+    <value>处理中</value>
+  </data>
+  <data name="ConversionJobCompleted" xml:space="preserve">
+    <value>已完成</value>
+  </data>
+  <data name="ConversionJobFailed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="WaveTypePulse" xml:space="preserve">
+    <value>方波</value>
+  </data>
+  <data name="WaveTypeSine" xml:space="preserve">
+    <value>正弦波</value>
+  </data>
+  <data name="WaveTypeSawtooth" xml:space="preserve">
+    <value>锯齿波</value>
+  </data>
+  <data name="WaveTypeTriangle" xml:space="preserve">
+    <value>三角波</value>
+  </data>
+  <data name="WaveLayerTitleFormat" xml:space="preserve">
+    <value>第 {0} 层</value>
+  </data>
+  <data name="WaveLayerDutyLabelFormat" xml:space="preserve">
+    <value>脉冲宽度：{0:F2}</value>
+  </data>
+  <data name="WaveLayerVolumeLabelFormat" xml:space="preserve">
+    <value>音量：{0:F1}</value>
+  </data>
+  <data name="CompatibilityWindowTitle" xml:space="preserve">
+    <value>MIDI-8bit Synthesiser 兼容性检查</value>
+  </data>
+  <data name="CompatibilityWindowClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="CompatibilityWindowHeader" xml:space="preserve">
+    <value>兼容性检查</value>
+  </data>
+  <data name="CompatibilityWindowFooter" xml:space="preserve">
+    <value>此 Windows 版本为自包含发布。最终用户无需安装 .NET SDK 即可运行，但当前机器仍需满足此版本的兼容性要求。</value>
+  </data>
+  <data name="CompatibilityReportBlockedHeadline" xml:space="preserve">
+    <value>这台电脑不满足当前 Windows 版本的运行要求。</value>
+  </data>
+  <data name="CompatibilityReportWarningHeadline" xml:space="preserve">
+    <value>这台电脑可以运行应用，但检测到一项或多项兼容性警告。</value>
+  </data>
+  <data name="CompatibilityReportSupportedHeadline" xml:space="preserve">
+    <value>这台电脑满足当前 Windows 版本的运行要求。</value>
+  </data>
+  <data name="CompatibilityReportNoIssues" xml:space="preserve">
+    <value>未检测到兼容性问题。</value>
+  </data>
+  <data name="CompatibilityReportHowToFixPrefix" xml:space="preserve">
+    <value>处理方法：</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionTitle" xml:space="preserve">
+    <value>Windows 版本不受支持</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionDescriptionFormat" xml:space="preserve">
+    <value>此版本要求 Windows {0} 或更高版本，但当前机器报告的版本为 {1}。</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionRemediationFormat" xml:space="preserve">
+    <value>请在 Windows {0} 或更高版本上安装此应用。</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureTitle" xml:space="preserve">
+    <value>处理器架构不受支持</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureDescriptionFormat" xml:space="preserve">
+    <value>此版本发布为 {0}，当前操作系统架构为 {1}。</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureRemediation" xml:space="preserve">
+    <value>请在受支持的 x64 Windows 设备上使用此版本。</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsTitle" xml:space="preserve">
+    <value>缺少随应用附带的预览资源</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsDescriptionFormat" xml:space="preserve">
+    <value>已发布的应用缺少以下必需的预览文件：{0}。</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsRemediation" xml:space="preserve">
+    <value>请重新安装应用，或使用包含完整已发布内容的发行包。</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteTitle" xml:space="preserve">
+    <value>临时导出文件夹不可写</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteDescriptionFormat" xml:space="preserve">
+    <value>应用无法写入临时文件夹“{0}”。{1}</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteRemediation" xml:space="preserve">
+    <value>启动应用前，请确保当前 Windows 用户对临时文件夹有写入权限。</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputTitle" xml:space="preserve">
+    <value>默认输出文件夹不可写</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputDescriptionFormat" xml:space="preserve">
+    <value>默认输出位置“{0}”不可写。{1}</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputRemediation" xml:space="preserve">
+    <value>导出 WAV 文件时，请选择其他可写的文件夹。</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteTitle" xml:space="preserve">
+    <value>所选输出文件夹不可写</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteDescriptionFormat" xml:space="preserve">
+    <value>应用无法写入“{0}”。{1}</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteRemediation" xml:space="preserve">
+    <value>导出 WAV 文件前，请选择可写文件夹。</value>
+  </data>
+  <data name="CompatibilityEnvironmentEmptyPath" xml:space="preserve">
+    <value>文件夹路径为空。</value>
+  </data>
+  <data name="CompatibilityEnvironmentMissingFolderFormat" xml:space="preserve">
+    <value>文件夹不存在：{0}</value>
+  </data>
+  <data name="PreviewMissingSampleFormat" xml:space="preserve">
+    <value>缺少随应用附带的预览采样：{0}.wav</value>
+  </data>
+</root>

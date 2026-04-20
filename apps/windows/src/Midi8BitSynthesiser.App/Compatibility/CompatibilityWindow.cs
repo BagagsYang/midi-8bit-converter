@@ -1,3 +1,4 @@
+using Midi8BitSynthesiser.App;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -7,11 +8,13 @@ internal sealed class CompatibilityWindow : Window
 {
     public CompatibilityWindow(CompatibilityReport report)
     {
-        Title = "MIDI-8bit Synthesiser Compatibility Check";
+        Title = LocalizedStrings.Get(
+            "CompatibilityWindowTitle",
+            "MIDI-8bit Synthesiser Compatibility Check");
 
         var closeButton = new Button
         {
-            Content = "Close",
+            Content = LocalizedStrings.Get("CompatibilityWindowClose", "Close"),
             HorizontalAlignment = HorizontalAlignment.Left,
         };
         closeButton.Click += (_, _) => Close();
@@ -26,7 +29,7 @@ internal sealed class CompatibilityWindow : Window
                 {
                     new TextBlock
                     {
-                        Text = "Compatibility Check",
+                        Text = LocalizedStrings.Get("CompatibilityWindowHeader", "Compatibility Check"),
                         FontSize = 28,
                         FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                     },
@@ -42,7 +45,9 @@ internal sealed class CompatibilityWindow : Window
                     },
                     new TextBlock
                     {
-                        Text = "This Windows release is self-contained. End users do not need the .NET SDK to run it, but this machine still must meet the release compatibility requirements.",
+                        Text = LocalizedStrings.Get(
+                            "CompatibilityWindowFooter",
+                            "This Windows release is self-contained. End users do not need the .NET SDK to run it, but this machine still must meet the release compatibility requirements."),
                         TextWrapping = TextWrapping.WrapWholeWords,
                     },
                     closeButton,

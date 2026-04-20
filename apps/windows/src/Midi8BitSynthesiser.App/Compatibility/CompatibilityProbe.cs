@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Midi8BitSynthesiser.App;
 
 namespace Midi8BitSynthesiser.App.Compatibility;
 
@@ -36,9 +37,16 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         {
             issues.Add(new CompatibilityIssue(
                 "windows-version",
-                "Unsupported Windows version",
-                $"This release requires Windows {_policy.MinimumWindowsVersionDisplay} or newer, but the current machine reports {_environment.OperatingSystemVersion}.",
-                $"Install the app on Windows {_policy.MinimumWindowsVersionDisplay} or newer.",
+                LocalizedStrings.Get("CompatibilityIssueWindowsVersionTitle", "Unsupported Windows version"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueWindowsVersionDescriptionFormat",
+                    "This release requires Windows {0} or newer, but the current machine reports {1}.",
+                    _policy.MinimumWindowsVersionDisplay,
+                    _environment.OperatingSystemVersion),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueWindowsVersionRemediationFormat",
+                    "Install the app on Windows {0} or newer.",
+                    _policy.MinimumWindowsVersionDisplay),
                 isBlocking: true));
         }
 
@@ -46,9 +54,15 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         {
             issues.Add(new CompatibilityIssue(
                 "architecture",
-                "Unsupported processor architecture",
-                $"This release is published as {_policy.RuntimeIdentifier} and the current operating system architecture is {_environment.OperatingSystemArchitecture}.",
-                "Use a supported x64 Windows machine for this release.",
+                LocalizedStrings.Get("CompatibilityIssueArchitectureTitle", "Unsupported processor architecture"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueArchitectureDescriptionFormat",
+                    "This release is published as {0} and the current operating system architecture is {1}.",
+                    _policy.RuntimeIdentifier,
+                    _environment.OperatingSystemArchitecture),
+                LocalizedStrings.Get(
+                    "CompatibilityIssueArchitectureRemediation",
+                    "Use a supported x64 Windows machine for this release."),
                 isBlocking: true));
         }
 
@@ -59,9 +73,14 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         {
             issues.Add(new CompatibilityIssue(
                 "missing-assets",
-                "Bundled preview assets are missing",
-                $"The published app is missing required preview files: {string.Join(", ", missingAssets)}.",
-                "Reinstall the app or use a release package that contains the full published output.",
+                LocalizedStrings.Get("CompatibilityIssueMissingAssetsTitle", "Bundled preview assets are missing"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueMissingAssetsDescriptionFormat",
+                    "The published app is missing required preview files: {0}.",
+                    string.Join(", ", missingAssets)),
+                LocalizedStrings.Get(
+                    "CompatibilityIssueMissingAssetsRemediation",
+                    "Reinstall the app or use a release package that contains the full published output."),
                 isBlocking: true));
         }
 
@@ -69,9 +88,17 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         {
             issues.Add(new CompatibilityIssue(
                 "temp-write",
-                "Temporary export folder is not writable",
-                $"The app could not write to the temporary folder '{_environment.TempDirectory}'. {tempWriteError}",
-                "Make sure the current Windows user can write to the temp folder before launching the app.",
+                LocalizedStrings.Get(
+                    "CompatibilityIssueTempWriteTitle",
+                    "Temporary export folder is not writable"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueTempWriteDescriptionFormat",
+                    "The app could not write to the temporary folder '{0}'. {1}",
+                    _environment.TempDirectory,
+                    tempWriteError),
+                LocalizedStrings.Get(
+                    "CompatibilityIssueTempWriteRemediation",
+                    "Make sure the current Windows user can write to the temp folder before launching the app."),
                 isBlocking: true));
         }
 
@@ -80,9 +107,17 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         {
             issues.Add(new CompatibilityIssue(
                 "default-output",
-                "Default output folder is not writable",
-                $"The default output location '{defaultOutputDirectory}' is not writable. {outputWriteError}",
-                "Choose another writable export folder when you export WAV files.",
+                LocalizedStrings.Get(
+                    "CompatibilityIssueDefaultOutputTitle",
+                    "Default output folder is not writable"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueDefaultOutputDescriptionFormat",
+                    "The default output location '{0}' is not writable. {1}",
+                    defaultOutputDirectory,
+                    outputWriteError),
+                LocalizedStrings.Get(
+                    "CompatibilityIssueDefaultOutputRemediation",
+                    "Choose another writable export folder when you export WAV files."),
                 isBlocking: false));
         }
 
@@ -100,9 +135,17 @@ internal sealed class CompatibilityProbe : ICompatibilityProbe
         [
             new CompatibilityIssue(
                 "output-write",
-                "Selected output folder is not writable",
-                $"The app could not write to '{outputDirectory}'. {error}",
-                "Choose a writable folder before exporting WAV files.",
+                LocalizedStrings.Get(
+                    "CompatibilityIssueOutputWriteTitle",
+                    "Selected output folder is not writable"),
+                LocalizedStrings.Format(
+                    "CompatibilityIssueOutputWriteDescriptionFormat",
+                    "The app could not write to '{0}'. {1}",
+                    outputDirectory,
+                    error),
+                LocalizedStrings.Get(
+                    "CompatibilityIssueOutputWriteRemediation",
+                    "Choose a writable folder before exporting WAV files."),
                 isBlocking: true),
         ]);
     }

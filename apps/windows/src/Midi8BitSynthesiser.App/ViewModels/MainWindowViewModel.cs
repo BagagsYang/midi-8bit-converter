@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Midi8BitSynthesiser.App;
 using Midi8BitSynthesiser.App.Compatibility;
 using Midi8BitSynthesiser.App.Services;
 using Midi8BitSynthesiser.Core;
@@ -16,7 +17,9 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private int _sampleRate = 48_000;
     private bool _isProcessing;
-    private string _statusMessage = "Add MIDI files, choose your layer blend, then export a WAV batch.";
+    private string _statusMessage = LocalizedStrings.Get(
+        "StatusInitial",
+        "Add MIDI files, choose your layer blend, then export a WAV batch.");
     private string? _lastRunSummary;
     private string? _lastErrorMessage;
 
@@ -39,7 +42,9 @@ public sealed class MainWindowViewModel : ObservableObject
 
         if (startupReport is { Status: CompatibilityStatus.Warning })
         {
-            StatusMessage = "Compatibility warning detected. Review the message before exporting.";
+            StatusMessage = LocalizedStrings.Get(
+                "StatusCompatibilityWarning",
+                "Compatibility warning detected. Review the message before exporting.");
             LastErrorMessage = startupReport.DisplayMessage;
         }
     }
@@ -118,7 +123,9 @@ public sealed class MainWindowViewModel : ObservableObject
 
     public int AudibleLayerCount => Layers.Count(layer => layer.Volume > 0);
 
-    public string ExportButtonTitle => IsProcessing ? "Processing..." : "Export WAV";
+    public string ExportButtonTitle => IsProcessing
+        ? LocalizedStrings.Get("ExportButtonProcessing", "Processing...")
+        : LocalizedStrings.Get("ExportButtonReady", "Export WAV");
 
     public string QueueSummary => Queue.Count.ToString();
 
@@ -134,10 +141,10 @@ public sealed class MainWindowViewModel : ObservableObject
 
     public string SampleRateTitle => SampleRate switch
     {
-        44_100 => "44.1 kHz",
-        48_000 => "48 kHz",
-        96_000 => "96 kHz",
-        _ => $"{SampleRate} Hz",
+        44_100 => LocalizedStrings.Get("SampleRate44100", "44.1 kHz"),
+        48_000 => LocalizedStrings.Get("SampleRate48000", "48 kHz"),
+        96_000 => LocalizedStrings.Get("SampleRate96000", "96 kHz"),
+        _ => LocalizedStrings.Format("SampleRateCustomFormat", "{0} Hz", SampleRate),
     };
 
     public async Task ImportFilesAsync(CancellationToken cancellationToken = default)
@@ -164,7 +171,9 @@ public sealed class MainWindowViewModel : ObservableObject
 
         if (midiPaths.Count == 0)
         {
-            LastErrorMessage = "Only .mid and .midi files can be queued.";
+            LastErrorMessage = LocalizedStrings.Get(
+                "ErrorUnsupportedFileType",
+                "Only .mid and .midi files can be queued.");
             return;
         }
 
@@ -175,7 +184,10 @@ public sealed class MainWindowViewModel : ObservableObject
 
         LastErrorMessage = null;
         LastRunSummary = null;
-        StatusMessage = $"{Queue.Count} file(s) queued for export.";
+        StatusMessage = LocalizedStrings.Format(
+            "StatusFilesQueuedFormat",
+            "{0} file(s) queued for export.",
+            Queue.Count);
     }
 
     public void ClearQueue()
@@ -183,7 +195,9 @@ public sealed class MainWindowViewModel : ObservableObject
         Queue.Clear();
         LastRunSummary = null;
         LastErrorMessage = null;
-        StatusMessage = "Queue cleared. Add MIDI files to start another batch.";
+        StatusMessage = LocalizedStrings.Get(
+            "StatusQueueCleared",
+            "Queue cleared. Add MIDI files to start another batch.");
     }
 
     public void RemoveJob(ConversionJobViewModel job)
@@ -250,14 +264,16 @@ public sealed class MainWindowViewModel : ObservableObject
         var outputDirectory = await _fileDialogService.PickOutputFolderAsync(defaultDirectory, cancellationToken);
         if (string.IsNullOrWhiteSpace(outputDirectory))
         {
-            StatusMessage = "Export cancelled.";
+            StatusMessage = LocalizedStrings.Get("StatusExportCancelled", "Export cancelled.");
             return;
         }
 
         var outputCompatibility = _compatibilityProbe.EvaluateOutputDirectory(outputDirectory);
         if (outputCompatibility.IsBlocked)
         {
-            StatusMessage = "Export blocked by compatibility check.";
+            StatusMessage = LocalizedStrings.Get(
+                "StatusExportBlockedByCompatibility",
+                "Export blocked by compatibility check.");
             LastErrorMessage = outputCompatibility.DisplayMessage;
             return;
         }
@@ -288,7 +304,12 @@ public sealed class MainWindowViewModel : ObservableObject
                 var outputPath = FileNameBuilder.BuildOutputPath(job.InputPath, outputDirectory, preparedLayers);
 
                 job.State = ConversionJobState.Processing;
-                StatusMessage = $"Processing {index + 1} of {Queue.Count}: {job.FileName}";
+                StatusMessage = LocalizedStrings.Format(
+                    "StatusProcessingFormat",
+                    "Processing {0} of {1}: {2}",
+                    index + 1,
+                    Queue.Count,
+                    job.FileName);
 
                 try
                 {
@@ -314,8 +335,15 @@ public sealed class MainWindowViewModel : ObservableObject
             IsProcessing = false;
         }
 
-        StatusMessage = $"Finished {Queue.Count} file(s).";
-        LastRunSummary = $"{completedCount} completed, {failedCount} failed.";
+        StatusMessage = LocalizedStrings.Format(
+            "StatusFinishedFormat",
+            "Finished {0} file(s).",
+            Queue.Count);
+        LastRunSummary = LocalizedStrings.Format(
+            "SummaryCompletedFailedFormat",
+            "{0} completed, {1} failed.",
+            completedCount,
+            failedCount);
     }
 
     private void MoveJob(ConversionJobViewModel job, int offset)

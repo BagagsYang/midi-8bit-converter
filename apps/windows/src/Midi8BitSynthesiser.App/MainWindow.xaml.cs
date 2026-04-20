@@ -24,7 +24,7 @@ public sealed partial class MainWindow : Window
     internal MainWindow(ICompatibilityProbe compatibilityProbe, CompatibilityReport startupReport)
     {
         InitializeComponent();
-        Title = "MIDI-8bit Synthesiser";
+        Title = LocalizedStrings.Get("MainWindowTitle", "MIDI-8bit Synthesiser");
 
         _previewAudioPlayer = new PreviewAudioPlayer();
         ViewModel = new MainWindowViewModel(
@@ -95,10 +95,12 @@ public sealed partial class MainWindow : Window
     {
         var dialog = new ContentDialog
         {
-            Title = "Clear the entire queue?",
-            Content = "This resets the current batch while keeping your sound design settings.",
-            PrimaryButtonText = "Clear Queue",
-            CloseButtonText = "Cancel",
+            Title = LocalizedStrings.Get("ClearQueueDialogTitle", "Clear the entire queue?"),
+            Content = LocalizedStrings.Get(
+                "ClearQueueDialogContent",
+                "This resets the current batch while keeping your sound design settings."),
+            PrimaryButtonText = LocalizedStrings.Get("ClearQueueDialogPrimaryButton", "Clear Queue"),
+            CloseButtonText = LocalizedStrings.Get("ClearQueueDialogCloseButton", "Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = ((FrameworkElement)Content).XamlRoot,
         };

@@ -1,3 +1,5 @@
+using Midi8BitSynthesiser.App;
+
 namespace Midi8BitSynthesiser.App.ViewModels;
 
 public enum ConversionJobState
@@ -63,17 +65,17 @@ public sealed class ConversionJobViewModel : ObservableObject
 
     public string StateText => State switch
     {
-        ConversionJobState.Queued => "Queued",
-        ConversionJobState.Processing => "Processing",
-        ConversionJobState.Completed => "Completed",
-        ConversionJobState.Failed => "Failed",
-        _ => "Queued",
+        ConversionJobState.Queued => LocalizedStrings.Get("ConversionJobQueued", "Queued"),
+        ConversionJobState.Processing => LocalizedStrings.Get("ConversionJobProcessing", "Processing"),
+        ConversionJobState.Completed => LocalizedStrings.Get("ConversionJobCompleted", "Completed"),
+        ConversionJobState.Failed => LocalizedStrings.Get("ConversionJobFailed", "Failed"),
+        _ => LocalizedStrings.Get("ConversionJobQueued", "Queued"),
     };
 
     public string StateDetail => State switch
     {
-        ConversionJobState.Completed => OutputPath ?? "Completed",
-        ConversionJobState.Failed => Message ?? "Failed",
+        ConversionJobState.Completed => OutputPath ?? LocalizedStrings.Get("ConversionJobCompleted", "Completed"),
+        ConversionJobState.Failed => Message ?? LocalizedStrings.Get("ConversionJobFailed", "Failed"),
         _ => Message ?? string.Empty,
     };
 }

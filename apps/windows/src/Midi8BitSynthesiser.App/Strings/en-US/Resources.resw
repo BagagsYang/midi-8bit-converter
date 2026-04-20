@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="QueueSectionTitle.Text" xml:space="preserve">
+    <value>Queue</value>
+  </data>
+  <data name="QueueSectionDescription.Text" xml:space="preserve">
+    <value>Add or drop MIDI files, then export a WAV batch.</value>
+  </data>
+  <data name="EmptyQueueTitle.Text" xml:space="preserve">
+    <value>Drop MIDI Files Here</value>
+  </data>
+  <data name="EmptyQueueDescription.Text" xml:space="preserve">
+    <value>Supports .mid and .midi files.</value>
+  </data>
+  <data name="MoveJobUpButton.Content" xml:space="preserve">
+    <value>Up</value>
+  </data>
+  <data name="MoveJobDownButton.Content" xml:space="preserve">
+    <value>Down</value>
+  </data>
+  <data name="RemoveJobButton.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ImportFilesButton.Content" xml:space="preserve">
+    <value>Add MIDI</value>
+  </data>
+  <data name="ClearQueueButton.Content" xml:space="preserve">
+    <value>Clear Queue</value>
+  </data>
+  <data name="SoundDesignTitle.Text" xml:space="preserve">
+    <value>Sound Design</value>
+  </data>
+  <data name="SoundDesignDescription.Text" xml:space="preserve">
+    <value>Shape up to three waveform layers, preview them, then export the current queue as WAV.</value>
+  </data>
+  <data name="QueuedSummaryLabel.Text" xml:space="preserve">
+    <value>Queued:</value>
+  </data>
+  <data name="LayersSummaryLabel.Text" xml:space="preserve">
+    <value>Layers:</value>
+  </data>
+  <data name="AudibleSummaryLabel.Text" xml:space="preserve">
+    <value>Audible:</value>
+  </data>
+  <data name="LayersSectionTitle.Text" xml:space="preserve">
+    <value>Layers</value>
+  </data>
+  <data name="LayersSectionDescription.Text" xml:space="preserve">
+    <value>Blend up to three waveforms with inline preview playback.</value>
+  </data>
+  <data name="AddLayerButton.Content" xml:space="preserve">
+    <value>Add Layer</value>
+  </data>
+  <data name="PreviewLayerButton.Content" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="RemoveLayerButton.Content" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="OutputSectionTitle.Text" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="OutputSectionDescription.Text" xml:space="preserve">
+    <value>Choose the export sample rate. Output naming stays aligned with the existing apps.</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>MIDI-8bit Synthesiser</value>
+  </data>
+  <data name="ClearQueueDialogTitle" xml:space="preserve">
+    <value>Clear the entire queue?</value>
+  </data>
+  <data name="ClearQueueDialogContent" xml:space="preserve">
+    <value>This resets the current batch while keeping your sound design settings.</value>
+  </data>
+  <data name="ClearQueueDialogPrimaryButton" xml:space="preserve">
+    <value>Clear Queue</value>
+  </data>
+  <data name="ClearQueueDialogCloseButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="StatusInitial" xml:space="preserve">
+    <value>Add MIDI files, choose your layer blend, then export a WAV batch.</value>
+  </data>
+  <data name="StatusCompatibilityWarning" xml:space="preserve">
+    <value>Compatibility warning detected. Review the message before exporting.</value>
+  </data>
+  <data name="ExportButtonProcessing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="ExportButtonReady" xml:space="preserve">
+    <value>Export WAV</value>
+  </data>
+  <data name="SampleRate44100" xml:space="preserve">
+    <value>44.1 kHz</value>
+  </data>
+  <data name="SampleRate48000" xml:space="preserve">
+    <value>48 kHz</value>
+  </data>
+  <data name="SampleRate96000" xml:space="preserve">
+    <value>96 kHz</value>
+  </data>
+  <data name="SampleRateCustomFormat" xml:space="preserve">
+    <value>{0} Hz</value>
+  </data>
+  <data name="ErrorUnsupportedFileType" xml:space="preserve">
+    <value>Only .mid and .midi files can be queued.</value>
+  </data>
+  <data name="StatusFilesQueuedFormat" xml:space="preserve">
+    <value>{0} file(s) queued for export.</value>
+  </data>
+  <data name="StatusQueueCleared" xml:space="preserve">
+    <value>Queue cleared. Add MIDI files to start another batch.</value>
+  </data>
+  <data name="StatusExportCancelled" xml:space="preserve">
+    <value>Export cancelled.</value>
+  </data>
+  <data name="StatusExportBlockedByCompatibility" xml:space="preserve">
+    <value>Export blocked by compatibility check.</value>
+  </data>
+  <data name="StatusProcessingFormat" xml:space="preserve">
+    <value>Processing {0} of {1}: {2}</value>
+  </data>
+  <data name="StatusFinishedFormat" xml:space="preserve">
+    <value>Finished {0} file(s).</value>
+  </data>
+  <data name="SummaryCompletedFailedFormat" xml:space="preserve">
+    <value>{0} completed, {1} failed.</value>
+  </data>
+  <data name="ConversionJobQueued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="ConversionJobProcessing" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="ConversionJobCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="ConversionJobFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="WaveTypePulse" xml:space="preserve">
+    <value>Pulse</value>
+  </data>
+  <data name="WaveTypeSine" xml:space="preserve">
+    <value>Sine</value>
+  </data>
+  <data name="WaveTypeSawtooth" xml:space="preserve">
+    <value>Sawtooth</value>
+  </data>
+  <data name="WaveTypeTriangle" xml:space="preserve">
+    <value>Triangle</value>
+  </data>
+  <data name="WaveLayerTitleFormat" xml:space="preserve">
+    <value>Layer {0}</value>
+  </data>
+  <data name="WaveLayerDutyLabelFormat" xml:space="preserve">
+    <value>Pulse Width: {0:F2}</value>
+  </data>
+  <data name="WaveLayerVolumeLabelFormat" xml:space="preserve">
+    <value>Volume: {0:F1}</value>
+  </data>
+  <data name="CompatibilityWindowTitle" xml:space="preserve">
+    <value>MIDI-8bit Synthesiser Compatibility Check</value>
+  </data>
+  <data name="CompatibilityWindowClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CompatibilityWindowHeader" xml:space="preserve">
+    <value>Compatibility Check</value>
+  </data>
+  <data name="CompatibilityWindowFooter" xml:space="preserve">
+    <value>This Windows release is self-contained. End users do not need the .NET SDK to run it, but this machine still must meet the release compatibility requirements.</value>
+  </data>
+  <data name="CompatibilityReportBlockedHeadline" xml:space="preserve">
+    <value>This PC does not meet the current Windows release requirements.</value>
+  </data>
+  <data name="CompatibilityReportWarningHeadline" xml:space="preserve">
+    <value>This PC can run the app, but one or more compatibility warnings were detected.</value>
+  </data>
+  <data name="CompatibilityReportSupportedHeadline" xml:space="preserve">
+    <value>This PC satisfies the current Windows release requirements.</value>
+  </data>
+  <data name="CompatibilityReportNoIssues" xml:space="preserve">
+    <value>No compatibility issues were detected.</value>
+  </data>
+  <data name="CompatibilityReportHowToFixPrefix" xml:space="preserve">
+    <value>How to fix:</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionTitle" xml:space="preserve">
+    <value>Unsupported Windows version</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionDescriptionFormat" xml:space="preserve">
+    <value>This release requires Windows {0} or newer, but the current machine reports {1}.</value>
+  </data>
+  <data name="CompatibilityIssueWindowsVersionRemediationFormat" xml:space="preserve">
+    <value>Install the app on Windows {0} or newer.</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureTitle" xml:space="preserve">
+    <value>Unsupported processor architecture</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureDescriptionFormat" xml:space="preserve">
+    <value>This release is published as {0} and the current operating system architecture is {1}.</value>
+  </data>
+  <data name="CompatibilityIssueArchitectureRemediation" xml:space="preserve">
+    <value>Use a supported x64 Windows machine for this release.</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsTitle" xml:space="preserve">
+    <value>Bundled preview assets are missing</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsDescriptionFormat" xml:space="preserve">
+    <value>The published app is missing required preview files: {0}.</value>
+  </data>
+  <data name="CompatibilityIssueMissingAssetsRemediation" xml:space="preserve">
+    <value>Reinstall the app or use a release package that contains the full published output.</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteTitle" xml:space="preserve">
+    <value>Temporary export folder is not writable</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteDescriptionFormat" xml:space="preserve">
+    <value>The app could not write to the temporary folder '{0}'. {1}</value>
+  </data>
+  <data name="CompatibilityIssueTempWriteRemediation" xml:space="preserve">
+    <value>Make sure the current Windows user can write to the temp folder before launching the app.</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputTitle" xml:space="preserve">
+    <value>Default output folder is not writable</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputDescriptionFormat" xml:space="preserve">
+    <value>The default output location '{0}' is not writable. {1}</value>
+  </data>
+  <data name="CompatibilityIssueDefaultOutputRemediation" xml:space="preserve">
+    <value>Choose another writable export folder when you export WAV files.</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteTitle" xml:space="preserve">
+    <value>Selected output folder is not writable</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteDescriptionFormat" xml:space="preserve">
+    <value>The app could not write to '{0}'. {1}</value>
+  </data>
+  <data name="CompatibilityIssueOutputWriteRemediation" xml:space="preserve">
+    <value>Choose a writable folder before exporting WAV files.</value>
+  </data>
+  <data name="CompatibilityEnvironmentEmptyPath" xml:space="preserve">
+    <value>The folder path is empty.</value>
+  </data>
+  <data name="CompatibilityEnvironmentMissingFolderFormat" xml:space="preserve">
+    <value>The folder does not exist: {0}</value>
+  </data>
+  <data name="PreviewMissingSampleFormat" xml:space="preserve">
+    <value>Missing bundled preview sample: {0}.wav</value>
+  </data>
+</root>

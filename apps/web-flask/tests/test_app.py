@@ -17,6 +17,53 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         web_app.app.testing = True
         self.client = web_app.app.test_client()
 
+    def test_index_falls_back_to_english(self):
+        response = self.client.get("/", headers={"Accept-Language": "fr-FR,fr;q=0.9"})
+        self.addCleanup(response.close)
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn('<html lang="en"', response.get_data(as_text=True))
+        self.assertIn("MIDI Queue", response.get_data(as_text=True))
+
+    def test_index_uses_browser_language_for_simplified_chinese(self):
+        response = self.client.get("/", headers={"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
+        self.addCleanup(response.close)
+
+        self.assertEqual(200, response.status_code)
+        body = response.get_data(as_text=True)
+        self.assertIn('<html lang="zh-CN"', body)
+        self.assertIn("MIDI 队列", body)
+        self.assertIn("采样率", body)
+
+    def test_index_query_parameter_overrides_browser_language(self):
+        response = self.client.get("/?lang=zh-CN", headers={"Accept-Language": "en-US,en;q=0.9"})
+        self.addCleanup(response.close)
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn("MIDI 队列", response.get_data(as_text=True))
+        self.assertIn("web_locale=zh-CN", response.headers.get("Set-Cookie", ""))
+
+    def test_index_includes_language_switch_state_preservation_script(self):
+        response = self.client.get("/")
+        self.addCleanup(response.close)
+
+        body = response.get_data(as_text=True)
+        self.assertIn("persistLanguageSwitchState", body)
+        self.assertIn("restoreLanguageSwitchState", body)
+        self.assertIn("pendingLanguageSwitchState", body)
+
+    def test_synthesise_localises_missing_file_error_from_cookie(self):
+        self.client.set_cookie(web_app.LOCALE_COOKIE_NAME, "zh-CN")
+        response = self.client.post(
+            "/synthesise",
+            data={},
+            content_type="multipart/form-data",
+        )
+        self.addCleanup(response.close)
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("未上传 MIDI 文件", response.get_json()["error"])
+
     def test_synthesise_accepts_layers_json_and_returns_wav(self):
         response = self.client.post(
             "/synthesise",

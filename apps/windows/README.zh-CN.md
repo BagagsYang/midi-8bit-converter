@@ -1,6 +1,6 @@
 # Windows 应用
 
-语言：简体中文 | [English](./README.md)
+Language/语言: [English](./README.md) | 简体中文
 
 此目录包含 MIDI-8bit Synthesiser 的原生 Windows 桌面重写版本。
 

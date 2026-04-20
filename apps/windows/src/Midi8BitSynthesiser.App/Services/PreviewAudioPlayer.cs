@@ -1,3 +1,4 @@
+using Midi8BitSynthesiser.App;
 using Midi8BitSynthesiser.Core;
 using NAudio.Wave;
 
@@ -16,7 +17,12 @@ public sealed class PreviewAudioPlayer : IAudioPreviewPlayer
         var previewPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Previews", $"{resourceName}.wav");
         if (!File.Exists(previewPath))
         {
-            throw new FileNotFoundException($"Missing bundled preview sample: {resourceName}.wav", previewPath);
+            throw new FileNotFoundException(
+                LocalizedStrings.Format(
+                    "PreviewMissingSampleFormat",
+                    "Missing bundled preview sample: {0}.wav",
+                    resourceName),
+                previewPath);
         }
 
         StopCurrentPlayback();

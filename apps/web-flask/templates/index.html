@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="{{ locale }}" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎹 MIDI-8bit Synthesiser</title>
+    <title>{{ translations["meta.page_title"] }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -64,10 +64,17 @@
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .theme-toggle {
+        .top-controls {
             position: absolute;
             top: 15px;
             right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .theme-toggle {
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -80,7 +87,6 @@
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
             font-size: 1.1rem;
-            z-index: 10;
             padding: 0;
             line-height: 1;
         }
@@ -88,6 +94,20 @@
         .theme-toggle:hover {
             transform: scale(1.1);
             background-color: var(--item-bg);
+        }
+
+        .language-select {
+            min-width: 126px;
+            height: 32px;
+            border-radius: 999px;
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 12px;
+            padding-right: 32px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
         }
 
         .header {
@@ -326,7 +346,8 @@
         }
 
         [data-bs-theme="light"] .form-select,
-        [data-bs-theme="light"] .form-control {
+        [data-bs-theme="light"] .form-control,
+        [data-bs-theme="light"] .language-select {
             background-color: #fff;
             color: #212529;
             border-color: #ced4da;
@@ -336,29 +357,54 @@
             .container-main {
                 padding: 22px 18px;
             }
+
+            .top-controls {
+                position: static;
+                justify-content: flex-end;
+                margin-bottom: 16px;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container-main">
-    <button type="button" class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode"></button>
+    <div class="top-controls">
+        <select
+            class="form-select form-select-sm language-select"
+            id="languageSelect"
+            title="{{ translations['toolbar.language_title'] }}"
+            aria-label="{{ translations['toolbar.language_title'] }}"
+        >
+            {% for language_code in supported_locales %}
+            <option value="{{ language_code }}" {% if language_code == locale %}selected{% endif %}>{{ translations["toolbar.language_option." ~ language_code] }}</option>
+            {% endfor %}
+        </select>
+        <button
+            type="button"
+            class="theme-toggle"
+            id="themeToggle"
+            title="{{ translations['toolbar.toggle_theme'] }}"
+            aria-label="{{ translations['toolbar.toggle_theme'] }}"
+        ></button>
+    </div>
+
     <div class="header">
-        <h2>🎹 MIDI-8bit Synthesiser</h2>
+        <h2>{{ translations["meta.page_title"] }}</h2>
     </div>
 
     <form id="synthForm">
         <div class="row g-4">
             <div class="col-md-5">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">MIDI Queue</label>
+                    <label class="form-label fw-bold">{{ translations["queue.title"] }}</label>
                     <div class="drop-zone" id="dropZone">
-                        <span class="drop-zone-prompt">Click or Drag & Drop MIDI Files</span>
+                        <span class="drop-zone-prompt">{{ translations["queue.drop_prompt"] }}</span>
                         <input class="form-control" type="file" id="midi_file" accept=".mid,.midi" multiple>
                     </div>
                 </div>
                 <ul class="queue-list mb-3" id="queueList"></ul>
-                <button type="button" class="btn btn-sm btn-outline-danger w-100" id="clearQueueBtn" style="display: none;">Clear Queue</button>
+                <button type="button" class="btn btn-sm btn-outline-danger w-100" id="clearQueueBtn" style="display: none;">{{ translations["queue.clear"] }}</button>
                 <div class="form-check form-switch mt-3">
                     <input
                         class="form-check-input"
@@ -367,23 +413,23 @@
                         id="keepQueueToggle"
                     >
                     <label class="form-check-label small" for="keepQueueToggle">
-                        Keep queue after synthesising.
+                        {{ translations["queue.keep_after"] }}
                     </label>
                 </div>
             </div>
 
             <div class="col-md-7">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Waveform Layers</label>
+                    <label class="form-label fw-bold">{{ translations["layers.title"] }}</label>
                     <div id="layersContainer"></div>
                     <div class="d-flex gap-2 mb-4">
-                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 fw-bold" id="addLayerBtn">+ Add Layer</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger w-100 fw-bold" id="removeLayerBtn">- Remove Layer</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 fw-bold" id="addLayerBtn">{{ translations["layers.add"] }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100 fw-bold" id="removeLayerBtn">{{ translations["layers.remove"] }}</button>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold" for="rate">Sample Rate</label>
+                    <label class="form-label fw-bold" for="rate">{{ translations["output.sample_rate"] }}</label>
                     <select class="form-select" id="rate" name="rate">
                         <option value="44100">44100 Hz</option>
                         <option value="48000" selected>48000 Hz</option>
@@ -391,18 +437,27 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="submitBtn">Synthesise Queue (<span id="queueCount">0</span>)</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">{{ translations["actions.synthesise_queue"] }} (<span id="queueCount">0</span>)</button>
             </div>
         </div>
     </form>
 
     <div class="loading text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2" id="processingStatus">Generating audio...</p>
+        <p class="mt-2" id="processingStatus">{{ translations["status.generating_audio"] }}</p>
     </div>
 </div>
 
 <script>
+    const TRANSLATIONS = {{ translations|tojson }};
+    const CURRENT_LOCALE = {{ locale|tojson }};
+    const DEFAULT_LOCALE = {{ default_locale|tojson }};
+    const LOCALE_COOKIE_NAME = {{ locale_cookie_name|tojson }};
+    const LOCALE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+    const LANGUAGE_SWITCH_STATE_KEY = 'pendingLanguageSwitchState';
+    const LANGUAGE_SWITCH_STATE_DB_NAME = 'midi8bitWebState';
+    const LANGUAGE_SWITCH_STATE_STORE_NAME = 'pageState';
+    const LANGUAGE_SWITCH_STATE_RECORD_KEY = 'pending-language-switch';
     const MIN_CURVE_FREQUENCY_HZ = 8.175798915643707;
     const MAX_CURVE_FREQUENCY_HZ = 12543.853951415975;
     const MIN_CURVE_GAIN_DB = -36.0;
@@ -419,6 +474,16 @@
         { type: 'sawtooth', duty: 0.5, volume: 1.0 },
     ];
     const maxLayers = layerPresets.length;
+
+    function t(key, params = {}) {
+        const template = Object.prototype.hasOwnProperty.call(TRANSLATIONS, key)
+            ? TRANSLATIONS[key]
+            : key;
+
+        return template.replace(/\{(\w+)\}/g, (match, token) => {
+            return Object.prototype.hasOwnProperty.call(params, token) ? params[token] : match;
+        });
+    }
 
     function createDefaultCurve() {
         return [
@@ -459,11 +524,16 @@
     const queueCountSpan = document.getElementById('queueCount');
     const processingStatus = document.getElementById('processingStatus');
     const themeToggle = document.getElementById('themeToggle');
+    const languageSelect = document.getElementById('languageSelect');
     const layersContainer = document.getElementById('layersContainer');
     const addLayerBtn = document.getElementById('addLayerBtn');
     const removeLayerBtn = document.getElementById('removeLayerBtn');
     const rateSelect = document.getElementById('rate');
     const savedKeepQueuePreference = localStorage.getItem('keepQueueAfterSynth');
+
+    document.title = t('meta.page_title');
+    htmlElement.setAttribute('lang', CURRENT_LOCALE);
+    languageSelect.value = CURRENT_LOCALE;
 
     const savedTheme = localStorage.getItem('theme') || 'dark';
     htmlElement.setAttribute('data-bs-theme', savedTheme);
@@ -478,12 +548,231 @@
         updateThemeIcon(newTheme);
     });
 
+    languageSelect.addEventListener('change', async () => {
+        const nextLocale = languageSelect.value === 'zh-CN' ? 'zh-CN' : DEFAULT_LOCALE;
+        if (nextLocale === CURRENT_LOCALE) {
+            return;
+        }
+
+        languageSelect.disabled = true;
+        try {
+            await persistLanguageSwitchState();
+        } catch (error) {
+            console.warn('Failed to preserve page state during language change.', error);
+        }
+
+        document.cookie = `${LOCALE_COOKIE_NAME}=${encodeURIComponent(nextLocale)}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+
+        const url = new URL(window.location.href);
+        if (nextLocale === DEFAULT_LOCALE) {
+            url.searchParams.delete('lang');
+        } else {
+            url.searchParams.set('lang', nextLocale);
+        }
+        window.location.href = url.toString();
+    });
+
     keepQueueToggle.addEventListener('change', () => {
         localStorage.setItem('keepQueueAfterSynth', keepQueueToggle.checked);
     });
 
     function updateThemeIcon(theme) {
         themeToggle.textContent = theme === 'dark' ? '🌞' : '🌛';
+    }
+
+    function supportsIndexedDb() {
+        return typeof window.indexedDB !== 'undefined';
+    }
+
+    function openLanguageSwitchDb() {
+        return new Promise((resolve, reject) => {
+            const request = window.indexedDB.open(LANGUAGE_SWITCH_STATE_DB_NAME, 1);
+
+            request.onupgradeneeded = () => {
+                const database = request.result;
+                if (!database.objectStoreNames.contains(LANGUAGE_SWITCH_STATE_STORE_NAME)) {
+                    database.createObjectStore(LANGUAGE_SWITCH_STATE_STORE_NAME);
+                }
+            };
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    function requestToPromise(request) {
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    function transactionDone(transaction) {
+        return new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve();
+            transaction.onabort = () => reject(transaction.error);
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+
+    async function writeLanguageSwitchState(state) {
+        const database = await openLanguageSwitchDb();
+        try {
+            const transaction = database.transaction(LANGUAGE_SWITCH_STATE_STORE_NAME, 'readwrite');
+            transaction.objectStore(LANGUAGE_SWITCH_STATE_STORE_NAME).put(state, LANGUAGE_SWITCH_STATE_RECORD_KEY);
+            await transactionDone(transaction);
+        } finally {
+            database.close();
+        }
+    }
+
+    async function readLanguageSwitchState() {
+        const database = await openLanguageSwitchDb();
+        try {
+            const transaction = database.transaction(LANGUAGE_SWITCH_STATE_STORE_NAME, 'readonly');
+            const request = transaction.objectStore(LANGUAGE_SWITCH_STATE_STORE_NAME).get(LANGUAGE_SWITCH_STATE_RECORD_KEY);
+            const state = await requestToPromise(request);
+            await transactionDone(transaction);
+            return state;
+        } finally {
+            database.close();
+        }
+    }
+
+    async function clearLanguageSwitchState() {
+        if (!supportsIndexedDb()) {
+            return;
+        }
+
+        const database = await openLanguageSwitchDb();
+        try {
+            const transaction = database.transaction(LANGUAGE_SWITCH_STATE_STORE_NAME, 'readwrite');
+            transaction.objectStore(LANGUAGE_SWITCH_STATE_STORE_NAME).delete(LANGUAGE_SWITCH_STATE_RECORD_KEY);
+            await transactionDone(transaction);
+        } finally {
+            database.close();
+        }
+    }
+
+    function cloneCurve(points) {
+        return points.map((point) => ({
+            frequency_hz: point.frequency_hz,
+            gain_db: point.gain_db,
+        }));
+    }
+
+    function cloneLayerState(layer) {
+        return {
+            active: layer.active,
+            type: layer.type,
+            duty: layer.duty,
+            volume: layer.volume,
+            curveEnabled: layer.curveEnabled,
+            frequencyCurve: cloneCurve(layer.frequencyCurve),
+            selectedPointIndex: layer.selectedPointIndex,
+        };
+    }
+
+    function sanitiseLayerState(rawLayer, index) {
+        const fallbackLayer = createDefaultLayer(index);
+        const allowedTypes = new Set(layerPresets.map((preset) => preset.type));
+        const dutyValue = Number(rawLayer?.duty);
+        const volumeValue = Number(rawLayer?.volume);
+        const frequencyCurve = Array.isArray(rawLayer?.frequencyCurve) && rawLayer.frequencyCurve.length >= 2
+            ? rawLayer.frequencyCurve
+                .map((point) => ({
+                    frequency_hz: clamp(
+                        Number(point.frequency_hz) || MIN_CURVE_FREQUENCY_HZ,
+                        MIN_CURVE_FREQUENCY_HZ,
+                        MAX_CURVE_FREQUENCY_HZ,
+                    ),
+                    gain_db: clamp(
+                        Number(point.gain_db) || 0.0,
+                        MIN_CURVE_GAIN_DB,
+                        MAX_CURVE_GAIN_DB,
+                    ),
+                }))
+                .sort((leftPoint, rightPoint) => leftPoint.frequency_hz - rightPoint.frequency_hz)
+            : fallbackLayer.frequencyCurve;
+
+        const selectedPointIndex = clamp(
+            Math.trunc(Number(rawLayer?.selectedPointIndex) || 0),
+            0,
+            frequencyCurve.length - 1,
+        );
+
+        return {
+            active: Boolean(rawLayer?.active),
+            type: allowedTypes.has(rawLayer?.type) ? rawLayer.type : fallbackLayer.type,
+            duty: clamp(Number.isFinite(dutyValue) ? dutyValue : fallbackLayer.duty, 0.01, 0.99),
+            volume: clamp(Number.isFinite(volumeValue) ? volumeValue : fallbackLayer.volume, 0.0, 2.0),
+            curveEnabled: Boolean(rawLayer?.curveEnabled),
+            frequencyCurve,
+            selectedPointIndex,
+        };
+    }
+
+    async function persistLanguageSwitchState() {
+        if (!supportsIndexedDb()) {
+            return;
+        }
+
+        const state = {
+            fileQueue: [...fileQueue],
+            layerCount,
+            layers: layers.map((layer) => cloneLayerState(layer)),
+            rate: rateSelect.value,
+            keepQueue: keepQueueToggle.checked,
+        };
+
+        await writeLanguageSwitchState(state);
+        sessionStorage.setItem(LANGUAGE_SWITCH_STATE_KEY, '1');
+    }
+
+    async function restoreLanguageSwitchState() {
+        if (sessionStorage.getItem(LANGUAGE_SWITCH_STATE_KEY) !== '1') {
+            return;
+        }
+
+        sessionStorage.removeItem(LANGUAGE_SWITCH_STATE_KEY);
+
+        if (!supportsIndexedDb()) {
+            return;
+        }
+
+        try {
+            const savedState = await readLanguageSwitchState();
+            if (!savedState) {
+                return;
+            }
+
+            fileQueue = Array.isArray(savedState.fileQueue)
+                ? savedState.fileQueue.filter((file) => file instanceof File && isMidiFile(file))
+                : [];
+
+            const restoredLayerCount = clamp(
+                Math.trunc(Number(savedState.layerCount) || 1),
+                1,
+                maxLayers,
+            );
+            layerCount = restoredLayerCount;
+
+            for (let index = 0; index < maxLayers; index += 1) {
+                const rawLayer = Array.isArray(savedState.layers) ? savedState.layers[index] : null;
+                layers[index] = rawLayer ? sanitiseLayerState(rawLayer, index) : createDefaultLayer(index);
+            }
+
+            if (typeof savedState.rate === 'string' && Array.from(rateSelect.options).some((option) => option.value === savedState.rate)) {
+                rateSelect.value = savedState.rate;
+            }
+
+            if (typeof savedState.keepQueue === 'boolean') {
+                keepQueueToggle.checked = savedState.keepQueue;
+                localStorage.setItem('keepQueueAfterSynth', String(savedState.keepQueue));
+            }
+        } finally {
+            await clearLanguageSwitchState();
+        }
     }
 
     function isMidiFile(file) {
@@ -644,10 +933,10 @@
 
     function createWaveOptions(currentType) {
         const options = [
-            ['pulse', 'Square/Pulse'],
-            ['sine', 'Sine'],
-            ['sawtooth', 'Sawtooth'],
-            ['triangle', 'Triangle'],
+            ['pulse', t('wave.pulse')],
+            ['sine', t('wave.sine')],
+            ['sawtooth', t('wave.sawtooth')],
+            ['triangle', t('wave.triangle')],
         ];
         return options.map(([value, label]) => `
             <option value="${value}" ${currentType === value ? 'selected' : ''}>${label}</option>
@@ -669,20 +958,22 @@
     }
 
     function buildCurveSvg(layer, layerIndex) {
-        const zeroY = gainToY(0);
         const selectedPoint = layer.frequencyCurve[layer.selectedPointIndex] || layer.frequencyCurve[0];
         const gainTicks = [MAX_CURVE_GAIN_DB, 0, MIN_CURVE_GAIN_DB];
         const freqTicks = [MIN_CURVE_FREQUENCY_HZ, 27.5, 110.0, 440.0, 1760.0, MAX_CURVE_FREQUENCY_HZ];
 
         return `
             <div class="curve-summary">
-                Selected point: ${formatFrequency(selectedPoint.frequency_hz)} / ${formatGainDb(selectedPoint.gain_db)}
+                ${t('curve.selected_point', {
+                    frequency: formatFrequency(selectedPoint.frequency_hz),
+                    gain: formatGainDb(selectedPoint.gain_db),
+                })}
             </div>
             <svg
                 class="curve-svg"
                 id="curveSvg${layerIndex}"
                 viewBox="0 0 ${CURVE_WIDTH} ${CURVE_HEIGHT}"
-                aria-label="Frequency gain editor for layer ${layerIndex + 1}"
+                aria-label="${t('curve.aria_label', { index: layerIndex + 1 })}"
             >
                 <rect
                     x="${CURVE_MARGIN.left}"
@@ -751,13 +1042,19 @@
             card.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <div class="fw-bold">Layer ${layerIndex + 1}</div>
-                        <div class="text-muted small">${layer.curveEnabled ? 'Curve active' : 'Flat gain across all note frequencies'}</div>
+                        <div class="fw-bold">${t('layer.title', { index: layerIndex + 1 })}</div>
+                        <div class="text-muted small">${layer.curveEnabled ? t('layer.curve_active') : t('layer.curve_flat')}</div>
                     </div>
-                    <button type="button" class="preview-btn" onclick="playPreview(${layerIndex})" title="Play Preview">▶</button>
+                    <button
+                        type="button"
+                        class="preview-btn"
+                        onclick="playPreview(${layerIndex})"
+                        title="${t('layer.play_preview')}"
+                        aria-label="${t('layer.play_preview')}"
+                    >▶</button>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small">Waveform Type</label>
+                    <label class="form-label small">${t('layer.waveform_type')}</label>
                     <div class="wave-type-group">
                         <select class="form-select form-select-sm" onchange="updateLayerType(${layerIndex}, this.value)">
                             ${createWaveOptions(layer.type)}
@@ -765,7 +1062,7 @@
                     </div>
                 </div>
                 <div class="mb-3" style="display: ${layer.type === 'pulse' ? 'block' : 'none'};">
-                    <label class="form-label small">Pulse Width: <span id="dutyValue${layerIndex}">${layer.duty.toFixed(2)}</span></label>
+                    <label class="form-label small">${t('layer.pulse_width')}: <span id="dutyValue${layerIndex}">${layer.duty.toFixed(2)}</span></label>
                     <input
                         type="range"
                         class="form-range"
@@ -777,7 +1074,7 @@
                     >
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small">Base Volume: <span id="volumeValue${layerIndex}">${layer.volume.toFixed(1)}</span></label>
+                    <label class="form-label small">${t('layer.base_volume')}: <span id="volumeValue${layerIndex}">${layer.volume.toFixed(1)}</span></label>
                     <input
                         type="range"
                         class="form-range"
@@ -797,7 +1094,7 @@
                         onchange="toggleCurveEnabled(${layerIndex}, this.checked)"
                     >
                     <label class="form-check-label small" for="curveToggle${layerIndex}">
-                        Enable frequency-gain curve
+                        ${t('layer.enable_curve')}
                     </label>
                 </div>
                 ${layer.curveEnabled ? `
@@ -809,7 +1106,7 @@
                                 onclick="addCurvePoint(${layerIndex})"
                                 ${layer.frequencyCurve.length >= MAX_CURVE_POINTS ? 'disabled' : ''}
                             >
-                                Add Point
+                                ${t('curve.add_point')}
                             </button>
                             <button
                                 type="button"
@@ -817,22 +1114,26 @@
                                 onclick="removeSelectedPoint(${layerIndex})"
                                 ${canRemoveSelected ? '' : 'disabled'}
                             >
-                                Remove Selected
+                                ${t('curve.remove_selected')}
                             </button>
                             <button
                                 type="button"
                                 class="btn btn-sm btn-outline-secondary"
                                 onclick="resetCurve(${layerIndex})"
                             >
-                                Reset Curve
+                                ${t('curve.reset')}
                             </button>
                         </div>
                         <div class="curve-summary">
-                            Drag points to change gain by pitch. Endpoints stay at the minimum and maximum supported note frequencies.
+                            ${t('curve.drag_help')}
                         </div>
                         ${buildCurveSvg(layer, layerIndex)}
                         <div class="curve-summary mt-2">
-                            Curve points: ${layer.frequencyCurve.length}. Selected: ${formatFrequency(selectedPoint.frequency_hz)} / ${formatGainDb(selectedPoint.gain_db)}
+                            ${t('curve.points_summary', {
+                                count: layer.frequencyCurve.length,
+                                frequency: formatFrequency(selectedPoint.frequency_hz),
+                                gain: formatGainDb(selectedPoint.gain_db),
+                            })}
                         </div>
                     </div>
                 ` : ''}
@@ -1037,7 +1338,11 @@
         const layersJson = JSON.stringify(activeLayersPayload());
         for (let index = 0; index < filesToProcess.length; index += 1) {
             const file = filesToProcess[index];
-            processingStatus.textContent = `Processing ${index + 1} of ${filesToProcess.length}: ${file.name}`;
+            processingStatus.textContent = t('status.processing_file', {
+                current: index + 1,
+                total: filesToProcess.length,
+                filename: file.name,
+            });
 
             const formData = new FormData();
             formData.append('rate', rateSelect.value);
@@ -1052,7 +1357,10 @@
                 if (!response.ok) {
                     const errorPayload = await response.json();
                     failedFiles.push(file);
-                    alert(`Error processing ${file.name}: ${errorPayload.error}`);
+                    alert(t('alerts.processing_error', {
+                        filename: file.name,
+                        error: errorPayload.error,
+                    }));
                     continue;
                 }
 
@@ -1068,12 +1376,13 @@
                 window.URL.revokeObjectURL(url);
             } catch (error) {
                 failedFiles.push(file);
-                alert(`An error occurred while processing ${file.name}.`);
+                alert(t('alerts.processing_unknown', { filename: file.name }));
             }
         }
 
         loading.style.display = 'none';
         submitBtn.disabled = false;
+        processingStatus.textContent = t('status.generating_audio');
         if (!keepQueueToggle.checked) {
             fileQueue = failedFiles;
         }
@@ -1081,8 +1390,17 @@
         fileInput.value = '';
     };
 
-    renderQueue();
-    renderLayers();
+    async function initialisePage() {
+        try {
+            await restoreLanguageSwitchState();
+        } catch (error) {
+            console.warn('Failed to restore page state after language change.', error);
+        }
+        renderQueue();
+        renderLayers();
+    }
+
+    initialisePage();
 </script>
 
 </body>

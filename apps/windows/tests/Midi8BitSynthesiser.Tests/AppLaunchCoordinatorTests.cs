@@ -35,6 +35,7 @@ public sealed class AppLaunchCoordinatorTests
     [Fact]
     public void CompatibilityReport_DisplayMessageReflectsExactIssueText()
     {
+        using var _ = new TestCultureScope("en-US");
         var report = CompatibilityReport.Create(
         [
             new CompatibilityIssue(

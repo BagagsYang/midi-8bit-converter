@@ -1,6 +1,6 @@
 # 仓库结构
 
-语言：简体中文 | [English](./repository-layout.md)
+Language/语言: [English](./repository-layout.md) | 简体中文
 
 该仓库保持为一个单体仓库，目录结构是显式定义的。
 

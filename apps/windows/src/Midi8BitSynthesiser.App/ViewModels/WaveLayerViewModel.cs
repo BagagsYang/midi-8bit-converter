@@ -1,3 +1,4 @@
+using Midi8BitSynthesiser.App;
 using Midi8BitSynthesiser.Core;
 
 namespace Midi8BitSynthesiser.App.ViewModels;
@@ -15,9 +16,16 @@ public sealed class WaveLayerViewModel : ObservableObject
         _type = type;
         _duty = duty;
         _volume = volume;
+        WaveTypeOptions =
+        [
+            new WaveTypeOption(WaveType.Pulse, LocalizedStrings.Get("WaveTypePulse", "Pulse")),
+            new WaveTypeOption(WaveType.Sine, LocalizedStrings.Get("WaveTypeSine", "Sine")),
+            new WaveTypeOption(WaveType.Sawtooth, LocalizedStrings.Get("WaveTypeSawtooth", "Sawtooth")),
+            new WaveTypeOption(WaveType.Triangle, LocalizedStrings.Get("WaveTypeTriangle", "Triangle")),
+        ];
     }
 
-    public IReadOnlyList<WaveType> WaveTypes { get; } = Enum.GetValues<WaveType>();
+    public IReadOnlyList<WaveTypeOption> WaveTypeOptions { get; }
 
     public WaveType Type
     {
@@ -75,11 +83,11 @@ public sealed class WaveLayerViewModel : ObservableObject
 
     public bool IsPulse => Type == WaveType.Pulse;
 
-    public string Title => $"Layer {DisplayIndex}";
+    public string Title => LocalizedStrings.Format("WaveLayerTitleFormat", "Layer {0}", DisplayIndex);
 
-    public string DutyLabel => $"Pulse Width: {Duty:F2}";
+    public string DutyLabel => LocalizedStrings.Format("WaveLayerDutyLabelFormat", "Pulse Width: {0:F2}", Duty);
 
-    public string VolumeLabel => $"Volume: {Volume:F1}";
+    public string VolumeLabel => LocalizedStrings.Format("WaveLayerVolumeLabelFormat", "Volume: {0:F1}", Volume);
 
     public WaveLayer ToCoreModel() => new(Type, Duty, Volume);
 }

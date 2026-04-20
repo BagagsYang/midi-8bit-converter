@@ -10,6 +10,7 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public void MoveCommands_ReorderQueue()
     {
+        using var _ = new TestCultureScope("en-US");
         var viewModel = CreateViewModel();
         viewModel.AddFiles(["first.mid", "second.mid", "third.mid"]);
 
@@ -22,6 +23,7 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public async Task StartConversionAsync_SetsProcessingStateUntilRendererCompletes()
     {
+        using var _ = new TestCultureScope("en-US");
         var renderGate = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var renderEngine = new BlockingRenderEngine(renderGate);
         var dialogService = new StubFileDialogService(outputFolder: Path.GetTempPath());
@@ -46,6 +48,7 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public async Task StartConversionAsync_HandlesCancelledFolderSelection()
     {
+        using var _ = new TestCultureScope("en-US");
         var viewModel = CreateViewModel(fileDialogService: new StubFileDialogService(outputFolder: null));
         viewModel.AddFiles(["lead.mid"]);
 
@@ -58,6 +61,7 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public async Task StartConversionAsync_BlocksWhenOutputDirectoryFailsCompatibilityCheck()
     {
+        using var _ = new TestCultureScope("en-US");
         var viewModel = CreateViewModel(
             fileDialogService: new StubFileDialogService(outputFolder: Path.GetTempPath()),
             compatibilityProbe: new StubCompatibilityProbe(
@@ -82,6 +86,7 @@ public sealed class MainWindowViewModelTests
     [Fact]
     public void Constructor_ShowsStartupWarning_WhenCompatibilityReportContainsWarnings()
     {
+        using var _ = new TestCultureScope("en-US");
         var startupReport = CompatibilityReport.Create(
         [
             new CompatibilityIssue(
@@ -96,6 +101,20 @@ public sealed class MainWindowViewModelTests
 
         Assert.Equal("Compatibility warning detected. Review the message before exporting.", viewModel.StatusMessage);
         Assert.Contains("Choose another export folder.", viewModel.LastErrorMessage);
+    }
+
+    [Fact]
+    public void WaveLayerViewModel_UsesLocalizedWaveTypeLabels()
+    {
+        using var _ = new TestCultureScope("en-US");
+        var layer = new WaveLayerViewModel(WaveType.Pulse, 0.5, 1.0);
+
+        Assert.Equal(
+            [WaveType.Pulse, WaveType.Sine, WaveType.Sawtooth, WaveType.Triangle],
+            layer.WaveTypeOptions.Select(option => option.Value));
+        Assert.Equal(
+            ["Pulse", "Sine", "Sawtooth", "Triangle"],
+            layer.WaveTypeOptions.Select(option => option.Label));
     }
 
     private static MainWindowViewModel CreateViewModel(

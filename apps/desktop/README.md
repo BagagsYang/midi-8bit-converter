@@ -1,6 +1,6 @@
 # Desktop placeholder
 
-Language: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-CN.md)
 
 This folder preserves the old `desktop-app/` slot as an explicit placeholder.
 

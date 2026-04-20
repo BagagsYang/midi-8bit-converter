@@ -1,6 +1,6 @@
 # MIDI-8bit Synthesiser
 
-Language: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-CN.md)
 
 This repository is a reorganised monorepo for the MIDI-8bit Synthesiser product family. Platform-specific apps live under `apps/`, the Python reference renderer lives under `core/`, and shared preview assets live under `assets/`.
 

@@ -1,6 +1,6 @@
 # MIDI-8bit Synthesiser
 
-语言：简体中文 | [English](./README.md)
+Language/语言: [English](./README.md) | 简体中文
 
 该仓库是为 MIDI-8bit Synthesiser 产品族重新整理后的单体仓库。各平台应用位于 `apps/` 下，Python 参考渲染器位于 `core/` 下，共享预览资源位于 `assets/` 下。
 

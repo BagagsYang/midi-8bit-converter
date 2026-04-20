@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Midi8BitSynthesiser.App;
 
 namespace Midi8BitSynthesiser.App.Compatibility;
 
@@ -22,13 +23,16 @@ internal sealed class SystemCompatibilityEnvironment : ICompatibilityEnvironment
 
         if (string.IsNullOrWhiteSpace(path))
         {
-            errorMessage = "The folder path is empty.";
+            errorMessage = LocalizedStrings.Get("CompatibilityEnvironmentEmptyPath", "The folder path is empty.");
             return false;
         }
 
         if (!Directory.Exists(path))
         {
-            errorMessage = $"The folder does not exist: {path}";
+            errorMessage = LocalizedStrings.Format(
+                "CompatibilityEnvironmentMissingFolderFormat",
+                "The folder does not exist: {0}",
+                path);
             return false;
         }
 

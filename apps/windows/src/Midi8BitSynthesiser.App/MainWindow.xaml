@@ -33,8 +33,8 @@
             CornerRadius="20">
             <Grid RowDefinitions="Auto,*,Auto">
                 <StackPanel Spacing="8">
-                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="Queue" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Add or drop MIDI files, then export a WAV batch." TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Uid="QueueSectionTitle" FontSize="24" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="QueueSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                     <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.QueueSummary, Mode=OneWay}" />
                 </StackPanel>
 
@@ -54,8 +54,8 @@
                         VerticalAlignment="Center"
                         Spacing="12"
                         Visibility="{x:Bind ViewModel.ShowEmptyQueueState, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Drop MIDI Files Here" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Supports .mid and .midi files." />
+                        <TextBlock x:Uid="EmptyQueueTitle" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="EmptyQueueDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
                     <ListView
@@ -76,9 +76,9 @@
                                         </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Button Click="MoveJobUpButton_Click" Content="Up" Tag="{x:Bind}" />
-                                            <Button Click="MoveJobDownButton_Click" Content="Down" Tag="{x:Bind}" />
-                                            <Button Click="RemoveJobButton_Click" Content="Remove" Tag="{x:Bind}" />
+                                            <Button x:Uid="MoveJobUpButton" Click="MoveJobUpButton_Click" Tag="{x:Bind}" />
+                                            <Button x:Uid="MoveJobDownButton" Click="MoveJobDownButton_Click" Tag="{x:Bind}" />
+                                            <Button x:Uid="RemoveJobButton" Click="RemoveJobButton_Click" Tag="{x:Bind}" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -88,8 +88,8 @@
                 </Grid>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
-                    <Button Click="ImportFilesButton_Click" Content="Add MIDI" />
-                    <Button Click="ClearQueueButton_Click" Content="Clear Queue" IsEnabled="{x:Bind ViewModel.CanClearQueue, Mode=OneWay}" />
+                    <Button x:Uid="ImportFilesButton" Click="ImportFilesButton_Click" />
+                    <Button x:Uid="ClearQueueButton" Click="ClearQueueButton_Click" IsEnabled="{x:Bind ViewModel.CanClearQueue, Mode=OneWay}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -104,16 +104,16 @@
                     CornerRadius="20">
                     <StackPanel Spacing="16">
                         <StackPanel>
-                            <TextBlock FontSize="30" FontWeight="SemiBold" Text="Sound Design" />
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Shape up to three waveform layers, preview them, then export the current queue as WAV." TextWrapping="WrapWholeWords" />
+                            <TextBlock x:Uid="SoundDesignTitle" FontSize="30" FontWeight="SemiBold" />
+                            <TextBlock x:Uid="SoundDesignDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="16">
-                            <TextBlock FontWeight="SemiBold" Text="Queued:" />
+                            <TextBlock x:Uid="QueuedSummaryLabel" FontWeight="SemiBold" />
                             <TextBlock Text="{x:Bind ViewModel.QueueSummary, Mode=OneWay}" />
-                            <TextBlock FontWeight="SemiBold" Text="Layers:" />
+                            <TextBlock x:Uid="LayersSummaryLabel" FontWeight="SemiBold" />
                             <TextBlock Text="{x:Bind ViewModel.LayerSummary, Mode=OneWay}" />
-                            <TextBlock FontWeight="SemiBold" Text="Audible:" />
+                            <TextBlock x:Uid="AudibleSummaryLabel" FontWeight="SemiBold" />
                             <TextBlock Text="{x:Bind ViewModel.AudibleLayerCount, Mode=OneWay}" />
                         </StackPanel>
                     </StackPanel>
@@ -128,10 +128,10 @@
                     <StackPanel Spacing="16">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <StackPanel>
-                                <TextBlock FontSize="20" FontWeight="SemiBold" Text="Layers" />
-                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Blend up to three waveforms with inline preview playback." />
+                                <TextBlock x:Uid="LayersSectionTitle" FontSize="20" FontWeight="SemiBold" />
+                                <TextBlock x:Uid="LayersSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             </StackPanel>
-                            <Button Click="AddLayerButton_Click" Content="Add Layer" HorizontalAlignment="Right" />
+                            <Button x:Uid="AddLayerButton" Click="AddLayerButton_Click" HorizontalAlignment="Right" />
                         </StackPanel>
 
                         <ItemsControl ItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}">
@@ -141,13 +141,15 @@
                                         <StackPanel Spacing="12">
                                             <StackPanel Orientation="Horizontal" Spacing="12">
                                                 <TextBlock FontSize="18" FontWeight="SemiBold" Text="{x:Bind Title, Mode=OneWay}" />
-                                                <Button Click="PreviewLayerButton_Click" Content="Preview" Tag="{x:Bind}" />
-                                                <Button Click="RemoveLayerButton_Click" Content="Remove" IsEnabled="{x:Bind CanRemove, Mode=OneWay}" Tag="{x:Bind}" />
+                                                <Button x:Uid="PreviewLayerButton" Click="PreviewLayerButton_Click" Tag="{x:Bind}" />
+                                                <Button x:Uid="RemoveLayerButton" Click="RemoveLayerButton_Click" IsEnabled="{x:Bind CanRemove, Mode=OneWay}" Tag="{x:Bind}" />
                                             </StackPanel>
 
                                             <ComboBox
-                                                ItemsSource="{x:Bind WaveTypes, Mode=OneWay}"
-                                                SelectedItem="{Binding Type, Mode=TwoWay}" />
+                                                DisplayMemberPath="Label"
+                                                ItemsSource="{x:Bind WaveTypeOptions, Mode=OneWay}"
+                                                SelectedValue="{Binding Type, Mode=TwoWay}"
+                                                SelectedValuePath="Value" />
 
                                             <StackPanel Visibility="{x:Bind IsPulse, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
                                                 <TextBlock Text="{x:Bind DutyLabel, Mode=OneWay}" />
@@ -173,8 +175,8 @@
                     BorderThickness="1"
                     CornerRadius="20">
                     <StackPanel Spacing="16">
-                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="Output" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Choose the export sample rate. Output naming stays aligned with the existing apps." />
+                        <TextBlock x:Uid="OutputSectionTitle" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OutputSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <ComboBox ItemsSource="{x:Bind ViewModel.SampleRates, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SampleRate, Mode=TwoWay}" />
                         <TextBlock Text="{x:Bind ViewModel.SampleRateTitle, Mode=OneWay}" />
                     </StackPanel>

@@ -1,6 +1,6 @@
 # Desktop 占位目录
 
-语言：简体中文 | [English](./README.md)
+Language/语言: [English](./README.md) | 简体中文
 
 该目录保留旧的 `desktop-app/` 位置，作为一个显式占位符。
 
