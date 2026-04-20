@@ -6,7 +6,7 @@ Language/语言: [English](./repository-layout.md) | 简体中文
 
 ## 目录结构
 
-- `apps/web-flask/`：旧版 Flask / 浏览器 UI
+- `apps/web-flask/`：主要 Flask / 浏览器 UI
 - `apps/macos/`：Xcode 工程、SwiftUI 应用、macOS 构建辅助工具
 - `apps/windows/`：WinUI 3 解决方案、原生 C# 渲染器、安装程序、对齐测试
 - `apps/desktop/`：保留占位目录

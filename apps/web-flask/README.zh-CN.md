@@ -2,13 +2,13 @@
 
 Language/语言: [English](./README.md) | 简体中文
 
-此目录包含通过浏览器分发的 MIDI-8bit Synthesiser 旧版实现。
+此目录包含通过浏览器分发的 MIDI-8bit Synthesiser 主要实现。
 
 ## 职责
 
 - Flask 入口点与请求处理
 - HTML 模板与 Web 专用静态资源
-- 旧版启动脚本
+- 启动脚本
 - 仅包含浏览器 UI；合成工作委托给 `../../core/python-renderer/` 中的 Python 渲染器
 - 用于验证按层频率-增益曲线 UI 的第一阶段方案
 

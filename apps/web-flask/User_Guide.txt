@@ -1,6 +1,6 @@
 MIDI-8BIT SYNTHESISER USER GUIDE
 
-This guide covers the legacy Flask/browser version of the MIDI-8bit Synthesiser.
+This guide covers the Flask/browser version of the MIDI-8bit Synthesiser.
 
 Project layout:
 - `apps/web-flask/` contains the browser interface.

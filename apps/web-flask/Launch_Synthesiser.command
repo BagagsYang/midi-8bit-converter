@@ -12,9 +12,9 @@ if [ ! -d "${PROJECT_ROOT}/.venv" ]; then
     exit 1
 fi
 
-echo "Starting legacy browser MIDI Synthesiser..."
+echo "Starting browser MIDI Synthesiser..."
 echo "------------------------------------------------"
-echo "LEGACY WEB UI IS ACTIVE at http://127.0.0.1:5002"
+echo "WEB UI IS ACTIVE at http://127.0.0.1:5002"
 echo "------------------------------------------------"
 echo "TO STOP: Press Ctrl+C in this window."
 echo "------------------------------------------------"

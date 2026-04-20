@@ -6,7 +6,7 @@ This repository stays as one monorepo, and the layout is explicit.
 
 ## Layout
 
-- `apps/web-flask/`: legacy Flask/browser UI
+- `apps/web-flask/`: primary Flask/browser UI
 - `apps/macos/`: Xcode project, SwiftUI app, macOS build helper
 - `apps/windows/`: WinUI 3 solution, native C# renderer, installer, parity tests
 - `apps/desktop/`: reserved placeholder

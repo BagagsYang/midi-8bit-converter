@@ -2,13 +2,13 @@
 
 Language/语言: English | [简体中文](./README.zh-CN.md)
 
-This folder contains the legacy browser-distributed version of the MIDI-8bit Synthesiser.
+This folder contains the primary browser-distributed version of the MIDI-8bit Synthesiser.
 
 ## Responsibilities
 
 - Flask entrypoint and request handling
 - HTML templates and web-specific static assets
-- Legacy launcher script
+- Launcher script
 - Browser UI only; synthesis is delegated to the Python renderer in `../../core/python-renderer/`
 - Phase 1 proving UI for per-layer frequency-gain curves
 

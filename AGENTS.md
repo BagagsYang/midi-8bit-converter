@@ -3,7 +3,7 @@
 ## Repository overview
 This repository is a monorepo.
 
-- apps/web-flask: legacy Flask web UI
+- apps/web-flask: primary Flask web UI
 - apps/macos: native SwiftUI macOS app
 - apps/windows: native WinUI 3 Windows app
 - core/python-renderer: canonical Python renderer
