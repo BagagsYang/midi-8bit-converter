@@ -8,7 +8,7 @@ Language/语言: [English](./README.md) | 简体中文
 
 | 目录 | 职责 |
 | --- | --- |
-| `apps/web-flask/` | 旧版 Flask / 浏览器 UI |
+| `apps/web-flask/` | 主要 Flask / 浏览器 UI |
 | `apps/macos/` | 原生 macOS SwiftUI 应用和 Xcode 工程 |
 | `apps/windows/` | 原生 Windows WinUI 3 解决方案、C# 渲染器、安装程序 |
 | `apps/desktop/` | 为未来桌面打包工作保留的占位目录 |

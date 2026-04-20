@@ -8,7 +8,7 @@ This repository is a reorganised monorepo for the MIDI-8bit Synthesiser product 
 
 | Folder | Responsibility |
 | --- | --- |
-| `apps/web-flask/` | Legacy Flask/browser UI |
+| `apps/web-flask/` | Primary Flask/browser UI |
 | `apps/macos/` | Native macOS SwiftUI app and Xcode project |
 | `apps/windows/` | Native Windows WinUI 3 solution, C# renderer, installer |
 | `apps/desktop/` | Reserved placeholder for future desktop packaging work |
