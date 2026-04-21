@@ -3,6 +3,7 @@
   "toolbar.toggle_theme": "Toggle Light/Dark Mode",
   "toolbar.language_title": "Language",
   "toolbar.language_option.en": "English",
+  "toolbar.language_option.fr": "Français",
   "toolbar.language_option.zh-CN": "简体中文",
   "queue.title": "MIDI Queue",
   "queue.drop_prompt": "Click or Drag & Drop MIDI Files",

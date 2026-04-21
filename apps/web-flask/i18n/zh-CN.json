@@ -3,6 +3,7 @@
   "toolbar.toggle_theme": "切换浅色/深色模式",
   "toolbar.language_title": "语言",
   "toolbar.language_option.en": "English",
+  "toolbar.language_option.fr": "Français",
   "toolbar.language_option.zh-CN": "简体中文",
   "queue.title": "MIDI 队列",
   "queue.drop_prompt": "点击或拖放 MIDI 文件",

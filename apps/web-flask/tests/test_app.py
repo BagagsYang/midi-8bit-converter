@@ -18,12 +18,24 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         self.client = web_app.app.test_client()
 
     def test_index_falls_back_to_english(self):
-        response = self.client.get("/", headers={"Accept-Language": "fr-FR,fr;q=0.9"})
+        response = self.client.get("/", headers={"Accept-Language": "de-DE,de;q=0.9"})
         self.addCleanup(response.close)
 
         self.assertEqual(200, response.status_code)
         self.assertIn('<html lang="en"', response.get_data(as_text=True))
         self.assertIn("MIDI Queue", response.get_data(as_text=True))
+
+    def test_index_uses_browser_language_for_french(self):
+        response = self.client.get("/", headers={"Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8"})
+        self.addCleanup(response.close)
+
+        self.assertEqual(200, response.status_code)
+        body = response.get_data(as_text=True)
+        self.assertIn('<html lang="fr"', body)
+        self.assertIn("File MIDI", body)
+        self.assertIn("Synthétiser la file", body)
+        self.assertIn('value="fr" selected', body)
+        self.assertIn("Français", body)
 
     def test_index_uses_browser_language_for_simplified_chinese(self):
         response = self.client.get("/", headers={"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"})
@@ -36,12 +48,12 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         self.assertIn("采样率", body)
 
     def test_index_query_parameter_overrides_browser_language(self):
-        response = self.client.get("/?lang=zh-CN", headers={"Accept-Language": "en-US,en;q=0.9"})
+        response = self.client.get("/?lang=fr", headers={"Accept-Language": "zh-CN,zh;q=0.9"})
         self.addCleanup(response.close)
 
         self.assertEqual(200, response.status_code)
-        self.assertIn("MIDI 队列", response.get_data(as_text=True))
-        self.assertIn("web_locale=zh-CN", response.headers.get("Set-Cookie", ""))
+        self.assertIn("File MIDI", response.get_data(as_text=True))
+        self.assertIn("web_locale=fr", response.headers.get("Set-Cookie", ""))
 
     def test_index_includes_language_switch_state_preservation_script(self):
         response = self.client.get("/")
@@ -51,6 +63,18 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
         self.assertIn("persistLanguageSwitchState", body)
         self.assertIn("restoreLanguageSwitchState", body)
         self.assertIn("pendingLanguageSwitchState", body)
+        self.assertIn("SUPPORTED_LOCALES.includes(selectedLocale)", body)
+
+    def test_supported_locale_catalogs_have_matching_keys(self):
+        base_keys = set(self._load_catalog(web_app.DEFAULT_LOCALE))
+        self.assertEqual(
+            {"en", "fr", "zh-CN"},
+            set(web_app.SUPPORTED_LOCALES),
+        )
+
+        for locale in web_app.SUPPORTED_LOCALES:
+            with self.subTest(locale=locale):
+                self.assertEqual(base_keys, set(self._load_catalog(locale)))
 
     def test_synthesise_localises_missing_file_error_from_cookie(self):
         self.client.set_cookie(web_app.LOCALE_COOKIE_NAME, "zh-CN")
@@ -63,6 +87,18 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual("未上传 MIDI 文件", response.get_json()["error"])
+
+    def test_synthesise_localises_missing_file_error_from_french_cookie(self):
+        self.client.set_cookie(web_app.LOCALE_COOKIE_NAME, "fr")
+        response = self.client.post(
+            "/synthesise",
+            data={},
+            content_type="multipart/form-data",
+        )
+        self.addCleanup(response.close)
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("Aucun fichier MIDI envoyé", response.get_json()["error"])
 
     def test_synthesise_accepts_layers_json_and_returns_wav(self):
         response = self.client.post(
@@ -217,6 +253,11 @@ class WebFlaskSynthesiseTests(unittest.TestCase):
             midi_path = Path(temp_dir) / "test.mid"
             midi.write(str(midi_path))
             return midi_path.read_bytes()
+
+    def _load_catalog(self, locale):
+        catalog_path = Path(web_app.I18N_DIR) / f"{locale}.json"
+        with catalog_path.open(encoding="utf-8") as file:
+            return json.load(file)
 
 
 if __name__ == "__main__":

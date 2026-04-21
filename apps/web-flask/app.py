@@ -22,9 +22,15 @@ REPO_ROOT = os.path.dirname(os.path.dirname(APP_DIR))
 PYTHON_RENDERER_DIR = os.path.join(REPO_ROOT, "core", "python-renderer")
 PREVIEW_ASSETS_DIR = os.path.join(REPO_ROOT, "assets", "previews")
 I18N_DIR = os.path.join(APP_DIR, "i18n")
-SUPPORTED_LOCALES = ("en", "zh-CN")
+SUPPORTED_LOCALES = ("en", "fr", "zh-CN")
 DEFAULT_LOCALE = "en"
 LOCALE_COOKIE_NAME = "web_locale"
+SUPPORTED_LOCALE_LOOKUP = {
+    locale.lower(): locale for locale in SUPPORTED_LOCALES
+}
+LANGUAGE_FALLBACKS = {
+    "zh": "zh-CN",
+}
 
 if PYTHON_RENDERER_DIR not in sys.path:
     sys.path.insert(0, PYTHON_RENDERER_DIR)
@@ -62,11 +68,15 @@ def _normalise_locale(raw_locale):
     if not locale:
         return None
 
-    lowered = locale.lower()
-    if lowered.startswith("zh"):
-        return "zh-CN"
-    if lowered.startswith("en"):
-        return "en"
+    lowered = locale.replace("_", "-").lower()
+    if lowered in SUPPORTED_LOCALE_LOOKUP:
+        return SUPPORTED_LOCALE_LOOKUP[lowered]
+
+    base_language = lowered.split("-", maxsplit=1)[0]
+    if base_language in SUPPORTED_LOCALE_LOOKUP:
+        return SUPPORTED_LOCALE_LOOKUP[base_language]
+    if base_language in LANGUAGE_FALLBACKS:
+        return LANGUAGE_FALLBACKS[base_language]
 
     return None
 

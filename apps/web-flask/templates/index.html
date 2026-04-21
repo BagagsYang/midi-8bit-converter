@@ -452,6 +452,7 @@
     const TRANSLATIONS = {{ translations|tojson }};
     const CURRENT_LOCALE = {{ locale|tojson }};
     const DEFAULT_LOCALE = {{ default_locale|tojson }};
+    const SUPPORTED_LOCALES = {{ supported_locales|tojson }};
     const LOCALE_COOKIE_NAME = {{ locale_cookie_name|tojson }};
     const LOCALE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
     const LANGUAGE_SWITCH_STATE_KEY = 'pendingLanguageSwitchState';
@@ -549,7 +550,8 @@
     });
 
     languageSelect.addEventListener('change', async () => {
-        const nextLocale = languageSelect.value === 'zh-CN' ? 'zh-CN' : DEFAULT_LOCALE;
+        const selectedLocale = languageSelect.value;
+        const nextLocale = SUPPORTED_LOCALES.includes(selectedLocale) ? selectedLocale : DEFAULT_LOCALE;
         if (nextLocale === CURRENT_LOCALE) {
             return;
         }
