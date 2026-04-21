@@ -13,3 +13,4 @@ windows-review-bundle/
 windows-review-bundle.zip
 **/.xcodebuild/
 **/xcuserdata/
+.codex/config.toml
