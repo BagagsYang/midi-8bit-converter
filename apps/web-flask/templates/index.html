@@ -493,21 +493,23 @@
             text-transform: uppercase;
         }
 
-            .readout {
-                width: 64px;
-                min-height: 32px;
-                padding: 3px 8px;
-                border-radius: 6px;
+        .readout {
+            box-sizing: border-box;
+            width: 52px;
+            min-height: 26px;
+            padding: 2px 7px;
+            border-radius: 6px;
             color: var(--accent-strong);
             background: var(--panel-bg-inset);
-                border: 1px solid rgba(199, 122, 67, 0.24);
-                font-family: "Courier New", ui-monospace, monospace;
-                font-size: 0.78rem;
-                text-align: center;
-                appearance: textfield;
-                -moz-appearance: textfield;
-                box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.35);
-            }
+            border: 1px solid rgba(199, 122, 67, 0.24);
+            font-family: "Courier New", ui-monospace, monospace;
+            font-size: 0.78rem;
+            line-height: 1.1;
+            text-align: center;
+            appearance: textfield;
+            -moz-appearance: textfield;
+            box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.35);
+        }
 
         .readout:focus {
             outline: none;
@@ -517,12 +519,12 @@
                 0 0 0 2px rgba(199, 122, 67, 0.12);
         }
 
-            .readout::-webkit-inner-spin-button,
-            .readout::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-                appearance: none;
-                margin: 0;
-            }
+        .readout::-webkit-inner-spin-button,
+        .readout::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
 
         .fader-shell {
             padding: 4px 0;
