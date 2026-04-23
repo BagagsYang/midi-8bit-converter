@@ -62,6 +62,7 @@ Install only the dependencies needed for the area you are touching:
 - Avoid keeping large inline JS in templates when adding localisation.
 - Prefer `i18n/*.json` plus separate JS helpers.
 - Do not change synthesis logic in `core/python-renderer` for localisation-only tasks.
+- Prefer `apps/web-flask/Launch_Synthesiser.command` or `apps/web-flask/Launch_Synthesiser.bat` when asks for running a server.
 
 ## macOS rules
 - Use Apple-native localisation files.
