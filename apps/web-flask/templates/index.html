@@ -529,34 +529,40 @@
         .fader-shell {
             padding: 4px 0;
             border-radius: 8px;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
-                var(--track-bg);
+            background: var(--track-bg);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow:
-                inset 0 2px 10px rgba(0, 0, 0, 0.62),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.62);
             overflow: hidden;
         }
 
         .fader-input {
             --fill: 0%;
-            width: 100%;
+            width: calc(100% - 18px);
             height: 24px;
             display: block;
-            margin: 0;
-            padding: 0 4px;
+            margin: 0 9px;
+            padding: 0;
             box-sizing: border-box;
             appearance: none;
             border-radius: 6px;
-            background:
-                linear-gradient(90deg, var(--accent) 0 var(--fill), transparent var(--fill) 100%),
-                transparent;
+            background: transparent;
             background-clip: content-box;
             border: 0;
             box-shadow: none;
             cursor: pointer;
             transition: box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .fader-input::-webkit-slider-runnable-track {
+            height: 4px;
+            border-radius: 999px;
+            background:
+                linear-gradient(90deg, transparent 0, rgba(218, 214, 205, 0.28) 8px, rgba(218, 214, 205, 0.28) calc(100% - 8px), transparent 100%),
+                linear-gradient(90deg, transparent 0, rgba(0, 0, 0, 0.34) 8px, rgba(0, 0, 0, 0.34) calc(100% - 8px), transparent 100%);
+            background-position: 15px 0;
+            background-repeat: no-repeat;
+            background-size: calc(100% - 30px) 100%;
+            border: 0;
         }
 
         .fader-input:focus-visible,
@@ -566,42 +572,119 @@
             box-shadow: none;
         }
 
+        .fader-input:focus-visible::-webkit-slider-runnable-track,
+        .fader-input:active::-webkit-slider-runnable-track,
+        .fader-input.is-dragging::-webkit-slider-runnable-track {
+            background:
+                linear-gradient(90deg, transparent 0, rgba(218, 214, 205, 0.34) 8px, rgba(218, 214, 205, 0.34) calc(100% - 8px), transparent 100%),
+                linear-gradient(90deg, transparent 0, rgba(0, 0, 0, 0.32) 8px, rgba(0, 0, 0, 0.32) calc(100% - 8px), transparent 100%);
+            background-position: 15px 0;
+            background-repeat: no-repeat;
+            background-size: calc(100% - 30px) 100%;
+        }
+
         .fader-input::-webkit-slider-thumb {
             appearance: none;
-            width: 22px;
-            height: 28px;
-            border-radius: 7px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            width: 30px;
+            height: 20px;
+            margin-top: -8px;
+            border-radius: 4px;
+            border: 1px solid rgba(38, 35, 31, 0.72);
             background:
-                linear-gradient(90deg, transparent 0 8px, rgba(0, 0, 0, 0.32) 8px 10px, transparent 10px 100%),
-                linear-gradient(180deg, #d9d0c0, #8d8377);
+                linear-gradient(90deg,
+                    transparent 0 4px,
+                    rgba(43, 39, 35, 0.38) 4px 5px,
+                    transparent 5px 8px,
+                    rgba(43, 39, 35, 0.38) 8px 9px,
+                    transparent 9px 12px,
+                    rgba(43, 39, 35, 0.38) 12px 14px,
+                    transparent 14px 17px,
+                    rgba(43, 39, 35, 0.38) 17px 18px,
+                    transparent 18px 21px,
+                    rgba(43, 39, 35, 0.38) 21px 22px,
+                    transparent 22px 100%),
+                #b9b1a4;
             box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.45);
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+                0 0 0 1px rgba(0, 0, 0, 0.34);
         }
 
         .fader-input::-moz-range-thumb {
-            width: 22px;
-            height: 28px;
-            border-radius: 7px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(38, 35, 31, 0.72);
             background:
-                linear-gradient(90deg, transparent 0 8px, rgba(0, 0, 0, 0.32) 8px 10px, transparent 10px 100%),
-                linear-gradient(180deg, #d9d0c0, #8d8377);
+                linear-gradient(90deg,
+                    transparent 0 4px,
+                    rgba(43, 39, 35, 0.38) 4px 5px,
+                    transparent 5px 8px,
+                    rgba(43, 39, 35, 0.38) 8px 9px,
+                    transparent 9px 12px,
+                    rgba(43, 39, 35, 0.38) 12px 14px,
+                    transparent 14px 17px,
+                    rgba(43, 39, 35, 0.38) 17px 18px,
+                    transparent 18px 21px,
+                    rgba(43, 39, 35, 0.38) 21px 22px,
+                    transparent 22px 100%),
+                #b9b1a4;
             box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.45);
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+                0 0 0 1px rgba(0, 0, 0, 0.34);
         }
 
         .fader-input::-moz-range-track {
+            height: 4px;
+            border-radius: 999px;
+            background:
+                linear-gradient(90deg, transparent 0, rgba(218, 214, 205, 0.28) 8px, rgba(218, 214, 205, 0.28) calc(100% - 8px), transparent 100%),
+                linear-gradient(90deg, transparent 0, rgba(0, 0, 0, 0.34) 8px, rgba(0, 0, 0, 0.34) calc(100% - 8px), transparent 100%);
+            background-position: 15px 0;
+            background-repeat: no-repeat;
+            background-size: calc(100% - 30px) 100%;
+            border: 0;
+        }
+
+        .fader-input::-moz-range-progress {
+            height: 4px;
+            border-radius: 999px;
             background: transparent;
             border: 0;
+        }
+
+        .fader-input:focus-visible::-moz-range-track,
+        .fader-input:active::-moz-range-track,
+        .fader-input.is-dragging::-moz-range-track {
+            background:
+                linear-gradient(90deg, transparent 0, rgba(218, 214, 205, 0.34) 8px, rgba(218, 214, 205, 0.34) calc(100% - 8px), transparent 100%),
+                linear-gradient(90deg, transparent 0, rgba(0, 0, 0, 0.32) 8px, rgba(0, 0, 0, 0.32) calc(100% - 8px), transparent 100%);
+            background-position: 15px 0;
+            background-repeat: no-repeat;
+            background-size: calc(100% - 30px) 100%;
+        }
+
+        .fader-input:focus-visible::-webkit-slider-thumb,
+        .fader-input:active::-webkit-slider-thumb,
+        .fader-input.is-dragging::-webkit-slider-thumb {
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+                0 0 0 1px rgba(0, 0, 0, 0.38),
+                0 0 0 3px rgba(199, 122, 67, 0.2);
+        }
+
+        .fader-input:focus-visible::-moz-range-thumb,
+        .fader-input:active::-moz-range-thumb,
+        .fader-input.is-dragging::-moz-range-thumb {
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+                0 0 0 1px rgba(0, 0, 0, 0.38),
+                0 0 0 3px rgba(199, 122, 67, 0.2);
         }
 
         .fader-scale {
             position: relative;
             height: 16px;
-            margin: -6px 11px 0;
+            margin: -6px 24px 0;
             color: rgba(218, 214, 205, 0.58);
             font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
             font-size: 0.52rem;
@@ -647,12 +730,12 @@
 
         .fader-scale-mark.is-start,
         .fader-scale-label.is-start {
-            transform: none;
+            transform: translateX(-50%);
         }
 
         .fader-scale-mark.is-end,
         .fader-scale-label.is-end {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
         }
 
         .control-switch {
