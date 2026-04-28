@@ -276,8 +276,11 @@ def midi_to_audio(midi_path, output_path, sample_rate=48000, layers=None):
         if instrument.is_drum: continue
         for note in instrument.notes:
             start_sample = int(note.start * sample_rate)
-            duration = note.end - note.start
-            if duration <= 0: continue
+            end_sample = int(math.ceil(note.end * sample_rate))
+            note_sample_length = end_sample - start_sample
+            if note_sample_length <= 0:
+                continue
+            duration = note_sample_length / sample_rate
             
             freq = pretty_midi.note_number_to_hz(note.pitch)
             note_volume = note.velocity / 127.0
@@ -306,7 +309,6 @@ def midi_to_audio(midi_path, output_path, sample_rate=48000, layers=None):
                 mixed_note_waveform += layer_wave * effective_volume
                 
             mixed_note_waveform = apply_envelope(mixed_note_waveform, sample_rate)
-            
             end_sample = start_sample + len(mixed_note_waveform)
             
             if end_sample > len(audio_buffer):

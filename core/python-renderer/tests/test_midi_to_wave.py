@@ -252,6 +252,33 @@ class OutputNamingTests(unittest.TestCase):
 
 
 class MidiToAudioTests(unittest.TestCase):
+    def test_very_short_note_still_renders_audio_sample(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            midi_path = Path(temp_dir) / "short.mid"
+            wav_path = Path(temp_dir) / "short.wav"
+            self._write_test_midi(
+                midi_path,
+                [
+                    (69, 0.0, 0.00001),
+                ],
+            )
+
+            midi_to_wave.midi_to_audio(
+                str(midi_path),
+                str(wav_path),
+                sample_rate=16000,
+                layers=[{
+                    "type": "pulse",
+                    "duty": 0.5,
+                    "volume": 1.0,
+                    "frequency_curve": [],
+                }],
+            )
+
+            _, data = wavfile.read(wav_path)
+            self.assertGreater(len(data), 0)
+            self.assertNotEqual(0, int(np.max(np.abs(data))))
+
     def test_frequency_curve_changes_note_level_gain_by_pitch(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             midi_path = Path(temp_dir) / "notes.mid"
