@@ -259,14 +259,14 @@ class MidiToAudioTests(unittest.TestCase):
             self._write_test_midi(
                 midi_path,
                 [
-                    (69, 0.0, 0.00001),
+                    (69, 0.0, 0.002),
                 ],
             )
 
             midi_to_wave.midi_to_audio(
                 str(midi_path),
                 str(wav_path),
-                sample_rate=16000,
+                sample_rate=100,
                 layers=[{
                     "type": "pulse",
                     "duty": 0.5,
