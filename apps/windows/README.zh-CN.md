@@ -13,7 +13,6 @@ Language/语言: [English](./README.md) | 简体中文
 - 面向 Windows 的 WinUI 3 桌面界面
 - 原生队列、层编辑、预览与导出工作流
 - 通过 Python 参考渲染器校验的 C# 原生渲染器
-- 用于生成可移植 `win-x64` 发布包和安装程序的 Windows CI 发布流水线
 
 ## 项目结构
 
@@ -31,28 +30,11 @@ Language/语言: [English](./README.md) | 简体中文
    - `dotnet restore apps/windows/Midi8BitSynthesiser.sln`
    - `dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64`
    - `dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build`
-4. 发布可移植包：`dotnet publish apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64`
-
-发布目录包含主 `.exe`、运行时文件，以及从 `assets/previews/` 链接进来的预览 WAV 资源。
-
-## 面向最终用户的运行要求
-
-已发布的 Windows 版本为自包含发布。
-
-最终用户需要：
-
-- 受支持的 64 位 Windows 安装
-- 来自可移植 zip 包或安装程序的已发布应用文件
-
-最终用户不需要：
-
-- .NET SDK
-- 本地源码检出
-- Python
+此仓库中已不再保留受维护的 Windows 发布工作流或 CI 发布流水线。若未来恢复原生打包工作，应基于当前工程文件和安装程序文件重新建立发布步骤，而不是依赖已经移除的工作流。
 
 ## 面向开发者和评审者的构建要求
 
-构建、测试和发布仍然需要：
+构建和测试仍然需要：
 
 - .NET 8 SDK
 - 与 WinUI 3 兼容的 Visual Studio 组件
@@ -82,14 +64,6 @@ apps/windows/scripts/create_review_bundle.sh
 - `apps/windows/`
 - `core/python-renderer/`
 - `assets/previews/`
-- `.github/workflows/windows-release.yml`
 - `global.json`
 
-## 安装程序与可移植发布
-
-保留的 Windows 发布路径以两种形式发布：
-
-- 用于手动分发和评审的自包含可移植 zip 包
-- 面向普通最终用户的 Inno Setup 安装程序
-
-两者都基于相同的已发布 `win-x64` 输出构建。
+历史安装程序文件仍保留在 `installer/` 下，但当前仓库不存在受维护的仓库级 Windows 发布工作流。

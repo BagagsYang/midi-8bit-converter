@@ -44,7 +44,6 @@ The review bundle should include:
 - `core/python-renderer/requirements.txt`
 - `core/python-renderer/README.md`
 - `assets/previews/`
-- `.github/workflows/windows-release.yml`
 - `global.json`
 
 ### Create the bundle
@@ -55,7 +54,9 @@ From the repository root:
 apps/windows/scripts/create_review_bundle.sh
 ```
 
-That script creates `windows-review-bundle.zip` at the repository root and includes the workflow file so the reviewer can validate the intended CI configuration.
+That script creates `windows-review-bundle.zip` at the repository root. The
+bundle no longer includes a Windows release workflow file because that
+repository-level workflow has been removed.
 
 ## Verification
 

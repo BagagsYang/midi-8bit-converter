@@ -10,7 +10,7 @@ API and workspace/synthesis service, and its server-rendered frontend is kept
 as a legacy fallback. The native macOS and Windows apps are deprecated/paused,
 not actively developed, and retained for reference or possible future revival.
 The repository also contains the canonical Python renderer, shared preview
-assets, API contract documentation, deployment files, and release
+assets, API contract documentation, deployment files, and reference
 documentation.
 
 ## Top-level map
@@ -26,7 +26,6 @@ documentation.
 | `docs/` | API contract, repository layout notes, licensing audit, and review reports. |
 | `deploy/production/` | Non-Docker production deployment notes, helper script, and Caddy examples for Vue production. |
 | `deploy/web-flask/` | Docker deployment documentation and Dockerfile for the Flask backend or legacy fallback path. |
-| `.github/workflows/` | Retained GitHub Actions workflow for Windows release builds. |
 | `compose.web.yml` | Docker Compose entry point for the Flask backend or legacy fallback path. |
 | `global.json` | .NET SDK selection for the retained Windows solution. |
 | `.dockerignore`, `.gitignore`, `.gitattributes` | Repository packaging, ignore, and line-ending rules. |
@@ -114,8 +113,8 @@ the web service.
 - `installer/RuntimeNotice.txt`: installer pre-install runtime notice.
 - `scripts/create_review_bundle.sh`: script for preparing a Windows review
   bundle.
-- `README.md`, `README.zh-CN.md`, `REVIEWING.md`: Windows build, review, and
-  release documentation.
+- `README.md`, `README.zh-CN.md`, `REVIEWING.md`: Windows build and review
+  documentation.
 
 The retained Windows app has its own C# renderer and validates it against the
 Python reference renderer in parity tests. The app project links preview WAV
@@ -200,11 +199,10 @@ dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64
 dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
 ```
 
-The retained Windows publishing path uses:
-
-```powershell
-dotnet publish apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64
-```
+No maintained Windows release workflow or CI publish pipeline remains in the
+repository. If native Windows packaging work is revived later, re-establish the
+publish/release steps from the current project files rather than relying on a
+removed workflow.
 
 The paused macOS app builds through Xcode with the `MIDI8BitSynthesiser`
 scheme. The Xcode build phase runs
@@ -264,8 +262,8 @@ assets, and project licence into the image.
 - Production web UI belongs under `apps/web-vue/`.
 - Flask backend API and legacy Flask-rendered fallback logic belongs under
   `apps/web-flask/`.
-- Retained native UI, launch, packaging, and release logic stays under the
-  relevant `apps/` folder.
+- Retained native UI, launch, and packaging logic stays under the relevant
+  `apps/` folder.
 - Shared binary/media assets belong under `assets/`.
 - Repository-wide documentation, audits, and review notes belong under `docs/`.
 - Deployment-specific files belong under `deploy/` and root deployment entry

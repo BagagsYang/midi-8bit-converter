@@ -1,6 +1,6 @@
 # Licensing audit
 
-Date checked: 2026-05-11
+Date checked: 2026-05-19
 
 This is a repository documentation audit, not legal advice. It records what was
 confirmed from the current checkout, installed package metadata, and selected
@@ -12,8 +12,8 @@ redistribution, or ownership are marked for human or legal review.
 This audit covered the repository root and the current tracked file set, with
 local ignored build/cache folders inspected only to understand build outputs.
 The project direction is currently focused on the Vue production frontend plus
-Flask/Gunicorn backend service; native macOS and Windows release paths remain
-documented here only because the code and packaging files are retained for
+Flask/Gunicorn backend service; native macOS and Windows code plus historical
+packaging files remain documented here only because they are retained for
 reference or possible future revival.
 
 Reviewed repository areas:
@@ -29,8 +29,6 @@ Reviewed repository areas:
   `compose.web.yml`, `apps/windows/installer/Midi8BitSynthesiser.iss`,
   `apps/windows/scripts/create_review_bundle.sh`, and the macOS Xcode build
   phase script.
-- CI/CD: `.github/workflows/windows-release.yml`.
-
 Dependency and packaging sources found:
 
 - Python requirements:
@@ -55,9 +53,6 @@ Dependency and packaging sources found:
   - `deploy/web-flask/Dockerfile`
   - `compose.web.yml`
   - `.dockerignore`
-- CI/CD:
-  - `.github/workflows/windows-release.yml`
-
 Dependency sources not found in the current checkout:
 
 - No `pyproject.toml`, `poetry.lock`, `uv.lock`, `Pipfile`, or Python lockfile.
@@ -195,9 +190,8 @@ Confirmed facts:
 
 - The Docker image starts from `python:3.12-slim` and installs
   `apps/web-flask/requirements.txt`.
-- `.github/workflows/windows-release.yml` uses GitHub Actions, .NET setup,
-  Python setup, Chocolatey, and Inno Setup to build the Windows zip and
-  installer.
+- No maintained CI workflow file for Windows release automation exists in the
+  current checkout.
 - `global.json` pins the .NET SDK line to `8.0.100` with `latestFeature`
   roll-forward.
 
@@ -206,9 +200,6 @@ Requires release review:
 - A distributed Docker image includes the Python base image, Debian packages,
   Python itself, and all installed Python wheels. Its notices are not captured
   by repository files alone.
-- GitHub Actions and Chocolatey-installed build tools are build-time services
-  and tools, not bundled source files. If a tool embeds runtime material in a
-  release artefact, verify that artefact's notice obligations.
 - Inno Setup is used to produce the Windows installer, but this audit did not
   inspect the generated installer binary.
 
@@ -364,8 +355,9 @@ For binary, installer, app bundle, or Docker image distribution:
 
 - Run a focused licence check before every public release.
 - Re-run this audit whenever `requirements*.txt`, `.csproj`,
-  `Directory.Packages.props`, Docker files, CI workflows, installer scripts,
-  PyInstaller settings, or bundled assets change.
+  `Directory.Packages.props`, Docker files, installer scripts, PyInstaller
+  settings, or bundled assets change. If CI workflows are reintroduced later,
+  include them in the next audit pass.
 - For active web development, run a lightweight quarterly audit that compares
   the current dependency manifests, package metadata, and release artefacts
   against this document.

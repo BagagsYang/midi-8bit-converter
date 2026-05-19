@@ -1,6 +1,7 @@
 # Windows app review report: OctaBit
 
 > Note: this report predates the repository reorganisation under `apps/`, `core/`, and `assets/`. Historical path references below still use the older layout.
+> Note: the CI/workflow recommendation in Finding 6 is historical. The current repository no longer keeps a Windows release workflow under `.github/workflows/`.
 
 ## Environment
 

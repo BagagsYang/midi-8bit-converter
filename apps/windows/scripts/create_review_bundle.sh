@@ -11,8 +11,7 @@ rm -rf "${BUNDLE_ROOT}" "${ARCHIVE_PATH}"
 mkdir -p \
   "${BUNDLE_ROOT}/apps" \
   "${BUNDLE_ROOT}/core/python-renderer" \
-  "${BUNDLE_ROOT}/assets/previews" \
-  "${BUNDLE_ROOT}/.github/workflows"
+  "${BUNDLE_ROOT}/assets/previews"
 
 rsync -a \
   --exclude '.DS_Store' \
@@ -30,10 +29,6 @@ rsync -a \
   --exclude '.DS_Store' \
   "${REPO_ROOT}/assets/previews/" \
   "${BUNDLE_ROOT}/assets/previews/"
-
-cp \
-  "${REPO_ROOT}/.github/workflows/windows-release.yml" \
-  "${BUNDLE_ROOT}/.github/workflows/"
 
 cp \
   "${REPO_ROOT}/global.json" \

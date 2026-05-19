@@ -15,7 +15,6 @@ for reference.
 - WinUI 3 desktop interface for Windows
 - Native queue, layer editing, preview, and export workflow
 - C# renderer that is validated against the Python reference renderer
-- Windows CI publish pipeline for a portable `win-x64` bundle and installer
 
 ## Project layout
 
@@ -33,28 +32,14 @@ From the repository root:
    - `dotnet restore apps/windows/Midi8BitSynthesiser.sln`
    - `dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64`
    - `dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build`
-4. Publish the portable bundle: `dotnet publish apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64`
-
-The published folder contains the main `.exe`, runtime files, and preview WAV assets linked from `assets/previews/`.
-
-## Runtime requirements for end users
-
-The published Windows release is self-contained.
-
-End users need:
-
-- a supported 64-bit Windows installation
-- the published app files from the portable zip or installer
-
-End users do not need:
-
-- the .NET SDK
-- a local source checkout
-- Python
+No maintained Windows release workflow or CI publish pipeline remains in this
+repository. If native packaging work is revived, recreate the publish/release
+steps from the current project and installer files instead of relying on a
+removed workflow.
 
 ## Build requirements for developers and reviewers
 
-Build, test, and publish still require:
+Build and test still require:
 
 - .NET 8 SDK
 - WinUI 3 compatible Visual Studio components
@@ -84,14 +69,7 @@ The bundle includes:
 - `apps/windows/`
 - `core/python-renderer/`
 - `assets/previews/`
-- `.github/workflows/windows-release.yml`
 - `global.json`
 
-## Installer and portable release
-
-The retained Windows release path ships in two forms:
-
-- a portable self-contained zip for manual distribution and review
-- an Inno Setup installer for ordinary end users
-
-Both are built from the same published `win-x64` output.
+Historical installer files remain under `installer/`, but there is no
+maintained repository-level Windows release workflow at this time.

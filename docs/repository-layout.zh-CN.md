@@ -6,7 +6,7 @@ Language/语言: [English](./repository-layout.md) | 简体中文
 Web 前端是 `apps/web-vue/` 中的 Vue 应用，并从 Vite `dist` 构建产物为 `octabit.cc`
 提供服务。`apps/web-flask/` 中的 Flask/Gunicorn 继续作为私有后端 API 和工作区/合成服务；其服务器端渲染前端保留为
 legacy fallback。原生 macOS 和 Windows 应用已 deprecated/paused，不再作为活跃开发目标；代码保留用于参考或未来可能的恢复。仓库还包含规范
-Python 渲染器、共享预览资源、API 契约文档、部署文件和发布文档。
+Python 渲染器、共享预览资源、API 契约文档、部署文件和参考文档。
 
 ## 顶层结构
 
@@ -21,7 +21,6 @@ Python 渲染器、共享预览资源、API 契约文档、部署文件和发布
 | `docs/` | API 契约、仓库结构说明、许可证审计和评审报告。 |
 | `deploy/production/` | Vue 生产路径的非 Docker 生产部署说明、辅助脚本和 Caddy 示例。 |
 | `deploy/web-flask/` | Flask 后端或旧前端回退路径的 Docker 部署文档和 Dockerfile。 |
-| `.github/workflows/` | 保留的 Windows 发布构建 GitHub Actions 工作流。 |
 | `compose.web.yml` | Flask 后端或旧前端回退路径的 Docker Compose 入口。 |
 | `global.json` | 保留的 Windows 解决方案使用的 .NET SDK 选择。 |
 | `.dockerignore`, `.gitignore`, `.gitattributes` | 仓库打包、忽略和换行规则。 |
@@ -93,7 +92,7 @@ Web 服务期间，它保留用于参考或未来可能的恢复。
 - `installer/Midi8BitSynthesiser.iss`：Inno Setup 安装程序脚本。
 - `installer/RuntimeNotice.txt`：安装前运行时提示。
 - `scripts/create_review_bundle.sh`：准备 Windows 评审包的脚本。
-- `README.md`、`README.zh-CN.md`、`REVIEWING.md`：Windows 构建、评审和发布文档。
+- `README.md`、`README.zh-CN.md`、`REVIEWING.md`：Windows 构建和评审文档。
 
 保留的 Windows 应用有自己的 C# 渲染器，并在对齐测试中用 Python 参考渲染器进行校验。应用工程会从规范
 `assets/previews/` 目录链接预览 WAV 文件，用于构建和发布输出。
@@ -165,11 +164,8 @@ dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64
 dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
 ```
 
-保留的 Windows 发布路径使用：
-
-```powershell
-dotnet publish apps/windows/src/Midi8BitSynthesiser.App/Midi8BitSynthesiser.App.csproj -c Release -r win-x64 --self-contained true -p:Platform=x64
-```
+仓库中已不再保留受维护的 Windows 发布工作流或 CI 发布流水线。若未来恢复原生
+Windows 打包工作，应基于当前工程文件重新建立发布步骤，而不是依赖已经移除的工作流。
 
 已暂停的 macOS 应用通过 Xcode 使用 `MIDI8BitSynthesiser` scheme 构建。Xcode 构建阶段会运行
 `apps/macos/macos/build_desktop_resources.sh`。
@@ -222,7 +218,7 @@ Compose 文件将服务绑定到 `127.0.0.1:8000`，用于先通过隧道测试�
 - 共享渲染行为属于 `core/python-renderer/`。
 - 生产 Web UI 属于 `apps/web-vue/`。
 - Flask 后端 API 和旧 Flask 渲染前端回退逻辑属于 `apps/web-flask/`。
-- 保留的原生 UI、启动、打包和发布逻辑仍位于对应的 `apps/` 目录下。
+- 保留的原生 UI、启动和打包逻辑仍位于对应的 `apps/` 目录下。
 - 共享二进制/媒体资源属于 `assets/`。
 - 仓库级文档、审计和评审记录属于 `docs/`。
 - 部署专用文件属于 `deploy/` 和根目录部署入口，例如 `compose.web.yml`。
