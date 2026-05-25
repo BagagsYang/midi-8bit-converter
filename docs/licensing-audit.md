@@ -21,7 +21,7 @@ Reviewed repository areas:
 - Root documentation and licence files: `README.md`, `README.zh-CN.md`,
   `LICENSE.md`, `AGENTS.md`, `.gitattributes`, `.gitignore`, `.dockerignore`.
 - Current app target and retained app code: `frontend/`, `backend/`, `legacy/web-flask/`,
-  `legacy/native/macos/`, `legacy/native/windows/`, and the placeholder `apps/desktop/`.
+  `legacy/native/macos/` and `legacy/native/windows/`.
 - Shared code and assets: `legacy/python-renderer/` and `assets/previews/`.
 - Documentation and generated review artefacts: `docs/`, tracked files under
   `output/pdf/`, and tracked files under `tmp/pdfs/`.

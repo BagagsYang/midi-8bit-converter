@@ -13,7 +13,6 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 | `AGENTS.md` | 面向编码代理和本地工作流的仓库说明。 |
 | `README.md`, `README.zh-CN.md` | 根项目概览、设置说明、应用入口和仓库许可证摘要。 |
 | `LICENSE.md` | 仓库 AGPL 许可证文本。 |
-| `apps/` | 保留的桌面占位目录。 |
 | `frontend/` | 生产 Vue/Vite 前端。 |
 | `backend/` | 主 Go 后端模块和冻结 Python baseline fixtures。 |
 | `legacy/web-flask/` | 保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。 |
@@ -117,10 +116,6 @@ Web 服务期间，它保留用于参考或未来可能的恢复。
 保留的 Windows 应用有自己的 C# 渲染器，并在对齐测试中用 Python 参考渲染器进行校验。应用工程会从规范
 `assets/previews/` 目录链接预览 WAV 文件，用于构建和发布输出。
 `src/Midi8BitSynthesiser.App/Assets/Previews/` 下也存在一份字节相同的已跟踪副本，但工程文件使用共享资源目录作为构建来源。
-
-### `apps/desktop/`
-
-为未来桌面打包层保留的占位目录。它只包含 README 文件，没有应用实现。
 
 ## 共享核心和资源
 

@@ -78,4 +78,4 @@ cmd/server (main: wires config, store, service, router, graceful shutdown)
 
 ### Repository Layout vs Naming
 
-The `CONTRIBUTING.md` references older paths (`apps/web-vue/`, `apps/web-flask/`, `core/python-renderer/`). The actual layout uses `frontend/`, `backend/`, `legacy/web-flask/`, `legacy/python-renderer/`. Trust the filesystem and `README.md` over the contributor guide when paths disagree.
+Trust the filesystem and `README.md` over the contributor guide when paths disagree.

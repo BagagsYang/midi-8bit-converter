@@ -8,12 +8,13 @@ Language/语言: [English](./CONTRIBUTING.md) | 简体中文
 
 OctaBit 是一个单体仓库。当前活跃的贡献目标是：
 
-- `apps/web-vue/`：生产 Vue 浏览器前端。
-- `apps/web-flask/`：Flask 后端 API、工作区/合成服务，以及旧 Flask 渲染前端回退。
-- `core/python-renderer/`：规范 Python MIDI 转 WAV 渲染器。
+- `frontend/`：生产 Vue 浏览器前端。
+- `backend/`：主 Go 后端 API、工作区/合成服务和 Go 渲染器。
+- `legacy/web-flask/`：保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。
+- `legacy/python-renderer/`：保留作 parity 参考的规范 Python MIDI 转 WAV 渲染器。
 - `docs/`、`deploy/production/`、`deploy/web-flask/` 和 `assets/previews/`：配套文档、部署和共享资源区域。
 
-`apps/macos/` 和 `apps/windows/` 下的原生 macOS 与 Windows 应用是暂停/参考区域。若要在这些区域做较大的工作，请先开 issue，让维护者确认范围。
+`legacy/native/macos/` 和 `legacy/native/windows/` 下的原生 macOS 与 Windows 应用是暂停/参考区域。若要在这些区域做较大的工作，请先开 issue，让维护者确认范围。
 
 更完整的仓库结构请参阅 [docs/repository-layout.zh-CN.md](./docs/repository-layout.zh-CN.md)。
 
@@ -56,25 +57,26 @@ python3 -m venv .venv
 只安装你当前处理区域所需的依赖：
 
 ```bash
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-./.venv/bin/python3 -m pip install -r core/python-renderer/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/python-renderer/requirements.txt
 ```
 
 各区域说明可先阅读：
 
-- [apps/web-vue/README.md](./apps/web-vue/README.md)
-- [apps/web-flask/README.zh-CN.md](./apps/web-flask/README.zh-CN.md)
-- [core/python-renderer/README.zh-CN.md](./core/python-renderer/README.zh-CN.md)
+- [frontend/README.md](./frontend/README.md)
+- [backend/README.md](./backend/README.md)
+- [legacy/web-flask/README.zh-CN.md](./legacy/web-flask/README.zh-CN.md)
+- [legacy/python-renderer/README.zh-CN.md](./legacy/python-renderer/README.zh-CN.md)
 - [deploy/production/README.zh-CN.md](./deploy/production/README.zh-CN.md)
 
 ## 修改代码或文档
 
 - 将 Vue 应用视为生产公开前端。
-- 将 Flask 应用视为后端 API 和旧 Flask 渲染前端回退。
-- 共享合成行为应保留在 `core/python-renderer/`，除非该改动明确只属于某个应用。
+- 将 Go 后端作为主要 API 和合成服务。
+- 共享合成行为应保留在 `backend/internal/renderer/`，parity 参考保留在 `legacy/python-renderer/`。
 - 不要为了本地化复制应用源码树。请使用被修改平台已有的本地化资源。
-- 对 `apps/web-vue/`，优先使用 `src/i18n/*.json` 保存面向用户的 UI 字符串。
-- 对 `apps/web-flask/` 中的旧 Flask 渲染 UI，优先使用 `i18n/*.json` 加独立静态
+- 对 `frontend/`，优先使用 `src/i18n/*.json` 保存面向用户的 UI 字符串。
+- 对 `legacy/web-flask/` 中的旧 Flask 渲染 UI，优先使用 `i18n/*.json` 加独立静态
   JS/CSS，避免在模板中加入大量内联脚本或硬编码面向用户的字符串。
 - 修改成对文档时，请保持英文和简体中文版本一致。
 - 在功能或 bug 修复 pull request 中避免无关重构。
@@ -94,17 +96,23 @@ python3 -m venv .venv
 
 请运行与你改动区域相关的检查，并在 pull request 中报告结果。
 
-Web 应用：
+Go 后端：
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s apps/web-flask/tests
-cd apps/web-vue && npm run build
+cd backend && go test ./...
 ```
 
-Python 渲染器：
+Vue 前端：
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s core/python-renderer/tests
+cd frontend && npm run build
+```
+
+旧 Python 代码：
+
+```bash
+./.venv/bin/python3 -m unittest discover -s legacy/web-flask/tests
+./.venv/bin/python3 -m unittest discover -s legacy/python-renderer/tests
 ```
 
 仅修改文档时，请校对受影响文件；如果同时存在英文和中文版本，请保持两者一致。

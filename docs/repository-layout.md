@@ -19,7 +19,6 @@ or possible future revival.
 | `AGENTS.md` | Repository instructions for coding agents and local workflows. |
 | `README.md`, `README.zh-CN.md` | Root project overview, setup notes, app entry points, and repository licence summary. |
 | `LICENSE.md` | Repository AGPL licence text. |
-| `apps/` | Reserved desktop placeholder. |
 | `frontend/` | Production Vue/Vite frontend. |
 | `backend/` | Primary Go backend module and frozen Python baseline fixtures. |
 | `legacy/web-flask/` | Legacy Flask backend/API and Flask-rendered frontend fallback retained for parity reference. |
@@ -168,11 +167,6 @@ files from the canonical `assets/previews/` folder for build and publish
 output. A byte-identical tracked copy also exists under
 `src/Midi8BitSynthesiser.App/Assets/Previews/`, but the project file uses the
 shared asset folder as the build source.
-
-### `apps/desktop/`
-
-Reserved placeholder for a future desktop packaging layer. It contains README
-files only and no app implementation.
 
 ## Shared core and assets
 

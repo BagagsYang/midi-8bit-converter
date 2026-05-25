@@ -6,9 +6,9 @@ Language/语言: [English](./README.md) | 简体中文
 
 ## 用途
 
-- `apps/web-flask/` 通过专用 Flask 路由提供这些文件。
-- 保留的 `apps/macos/` 代码会在构建时将这些文件复制到应用包中。
-- 保留的 `apps/windows/` 代码会在构建和发布时将这些文件链接到 WinUI 工程中。
+- `legacy/web-flask/` 通过专用 Flask 路由提供这些文件。
+- 保留的 `legacy/native/macos/` 代码会在构建时将这些文件复制到应用包中。
+- 保留的 `legacy/native/windows/` 代码会在构建和发布时将这些文件链接到 WinUI 工程中。
 
 ## 预览资源来源
 

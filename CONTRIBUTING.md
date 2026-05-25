@@ -10,16 +10,19 @@ pull request.
 
 OctaBit is a monorepo. The current active contribution targets are:
 
-- `apps/web-vue/`: the production Vue browser frontend.
-- `apps/web-flask/`: the Flask backend API, workspace/synthesis service, and
-  legacy Flask-rendered frontend fallback.
-- `core/python-renderer/`: the canonical Python MIDI-to-WAV renderer.
+- `frontend/`: the production Vue browser frontend.
+- `backend/`: the primary Go backend API, workspace/synthesis service, and
+  Go renderer.
+- `legacy/web-flask/`: the legacy Flask backend/API and Flask-rendered frontend
+  fallback retained for parity reference.
+- `legacy/python-renderer/`: the canonical Python MIDI-to-WAV renderer retained
+  for parity reference.
 - `docs/`, `deploy/production/`, `deploy/web-flask/`, and `assets/previews/`: supporting
   documentation, deployment, and shared asset areas.
 
-The native macOS and Windows apps under `apps/macos/` and `apps/windows/` are
-paused/reference areas. Please open an issue before starting substantial work
-there so maintainers can confirm the scope.
+The native macOS and Windows apps under `legacy/native/macos/` and
+`legacy/native/windows/` are paused/reference areas. Please open an issue
+before starting substantial work there so maintainers can confirm the scope.
 
 For a fuller map of the repository, see [docs/repository-layout.md](./docs/repository-layout.md).
 
@@ -69,27 +72,28 @@ python3 -m venv .venv
 Install only the dependencies needed for the area you are touching:
 
 ```bash
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-./.venv/bin/python3 -m pip install -r core/python-renderer/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/python-renderer/requirements.txt
 ```
 
-For app-specific notes, start with:
+For area-specific notes, start with:
 
-- [apps/web-vue/README.md](./apps/web-vue/README.md)
-- [apps/web-flask/README.md](./apps/web-flask/README.md)
-- [core/python-renderer/README.md](./core/python-renderer/README.md)
+- [frontend/README.md](./frontend/README.md)
+- [backend/README.md](./backend/README.md)
+- [legacy/web-flask/README.md](./legacy/web-flask/README.md)
+- [legacy/python-renderer/README.md](./legacy/python-renderer/README.md)
 - [deploy/production/README.md](./deploy/production/README.md)
 
 ## Making changes
 
 - Keep the Vue app as the production public frontend.
-- Keep the Flask app as the backend API and legacy Flask-rendered frontend fallback.
-- Keep shared synthesis behavior in `core/python-renderer/` unless the change is
-  explicitly app-specific.
+- Keep the Go backend as the primary API and synthesis service.
+- Keep shared synthesis behavior in `backend/internal/renderer/` and the parity
+  reference in `legacy/python-renderer/`.
 - Do not duplicate app source trees for localisation. Use the existing
   localisation resources for the touched platform.
-- For `apps/web-vue/`, prefer `src/i18n/*.json` for user-facing UI strings.
-- For the legacy Flask-rendered UI in `apps/web-flask/`, prefer `i18n/*.json`
+- For `frontend/`, prefer `src/i18n/*.json` for user-facing UI strings.
+- For the legacy Flask-rendered UI in `legacy/web-flask/`, prefer `i18n/*.json`
   plus separate static JS/CSS over adding large inline scripts or hardcoded
   user-facing strings in templates.
 - Keep English and Simplified Chinese documentation pairs aligned when changing
@@ -113,17 +117,23 @@ Before opening a pull request, make sure it includes:
 Run the checks relevant to the area you touched and report the result in the
 pull request.
 
-For the web app:
+For the Go backend:
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s apps/web-flask/tests
-cd apps/web-vue && npm run build
+cd backend && go test ./...
 ```
 
-For the Python renderer:
+For the Vue frontend:
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s core/python-renderer/tests
+cd frontend && npm run build
+```
+
+For the legacy Python code:
+
+```bash
+./.venv/bin/python3 -m unittest discover -s legacy/web-flask/tests
+./.venv/bin/python3 -m unittest discover -s legacy/python-renderer/tests
 ```
 
 For documentation-only changes, proofread the affected files and keep English
