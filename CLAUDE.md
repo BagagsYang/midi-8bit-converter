@@ -79,3 +79,7 @@ cmd/server (main: wires config, store, service, router, graceful shutdown)
 ### Repository Layout vs Naming
 
 Trust the filesystem and `README.md` over the contributor guide when paths disagree.
+
+## Commit Convention
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope?): description`. Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`.

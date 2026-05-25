@@ -100,6 +100,13 @@ For area-specific notes, start with:
   paired docs.
 - Avoid unrelated refactors in feature or bug-fix pull requests.
 
+## Commit convention
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `type(scope?): description`.
+Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`.
+
+Example: `feat(backend): add export-to-MP3 endpoint`, `fix(ui): correct layer chip alignment`.
+
 ## Pull request checklist
 
 Before opening a pull request, make sure it includes:
