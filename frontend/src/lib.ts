@@ -22,6 +22,9 @@ export const maxCurveFrequencyHz = 12543.853951415975;
 export const minCurveGainDb = -36.0;
 export const maxCurveGainDb = 12.0;
 export const maxCurvePoints = 8;
+export const curveWidth = 320;
+export const curveHeight = 150;
+export const curveMargin = { top: 14, right: 14, bottom: 24, left: 38 };
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);

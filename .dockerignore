@@ -10,21 +10,20 @@
 !deploy/web-flask/README.md
 !deploy/web-flask/README.zh-CN.md
 
-!apps/
-!apps/web-flask/
-!apps/web-flask/app.py
-!apps/web-flask/requirements.txt
-!apps/web-flask/i18n/
-!apps/web-flask/i18n/**
-!apps/web-flask/static/
-!apps/web-flask/static/**
-!apps/web-flask/templates/
-!apps/web-flask/templates/**
+!legacy/
+!legacy/web-flask/
+!legacy/web-flask/app.py
+!legacy/web-flask/requirements.txt
+!legacy/web-flask/i18n/
+!legacy/web-flask/i18n/**
+!legacy/web-flask/static/
+!legacy/web-flask/static/**
+!legacy/web-flask/templates/
+!legacy/web-flask/templates/**
 
-!core/
-!core/python-renderer/
-!core/python-renderer/midi_to_wave.py
-!core/python-renderer/requirements.txt
+!legacy/python-renderer/
+!legacy/python-renderer/midi_to_wave.py
+!legacy/python-renderer/requirements.txt
 
 !assets/
 !assets/previews/

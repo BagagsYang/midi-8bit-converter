@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import {
+  curveHeight,
+  curveMargin,
+  curveWidth,
   formatFrequency,
   formatGainDb,
   maxCurveFrequencyHz,
@@ -25,11 +28,8 @@ const emit = defineEmits<{
   startPointDrag: [pointIndex: number, event: PointerEvent];
 }>();
 
-const curveWidth = 320;
-const curveHeight = 150;
-const margin = { top: 14, right: 14, bottom: 24, left: 38 };
+const margin = curveMargin;
 const curveLogSpan = Math.log(maxCurveFrequencyHz) - Math.log(minCurveFrequencyHz);
-
 const plotWidth = computed(() => curveWidth - margin.left - margin.right);
 const plotHeight = computed(() => curveHeight - margin.top - margin.bottom);
 const selectedPoint = computed(() => props.layer.frequencyCurve[props.layer.selectedPointIndex] || props.layer.frequencyCurve[0]);
