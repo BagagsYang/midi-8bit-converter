@@ -15,4 +15,3 @@ windows-review-bundle.zip
 **/.xcodebuild/
 **/xcuserdata/
 .codex/config.toml
-.sisyphus/
