@@ -3,10 +3,10 @@
 Language/语言: [English](./README.md) | 简体中文
 
 此 Docker 路径打包 Flask 后端和旧 Flask 渲染前端回退。预期的生产路径不使用 Docker：Caddy
-从 `apps/web-vue/dist` 提供 Vue 构建产物，并将 API、预览和旧兼容路由反向代理到
+从 `frontend/dist` 提供 Vue 构建产物，并将 API、预览和旧兼容路由反向代理到
 `127.0.0.1:8000` 上的 Flask/Gunicorn。见 `../production/README.zh-CN.md`。
 
-镜像包含 `apps/web-flask/`、`core/python-renderer/` 中的共享渲染器入口、`assets/previews/`
+镜像包含 `legacy/web-flask/`、`legacy/python-renderer/` 中的共享渲染器入口、`assets/previews/`
 中的共享预览 WAV 文件，以及项目许可证。它不会打包 Vue 前端、macOS 应用或 Windows 桌面应用。
 
 Compose 文件会把服务在服务器上绑定到 `127.0.0.1:8000`，便于在添加公开反向代理之前先通过 SSH 隧道测试。
@@ -72,6 +72,6 @@ docker compose -f compose.web.yml down
 - 工作区文件会在最后一次活动后保留 `WEB_WORKSPACE_TTL_SECONDS` 秒，默认 86400 秒。默认上限是每个工作区 20 个排队文件、100 MiB 活跃 MIDI 上传和 20 个已转换文件。
 - 旧的 ready 渲染任务会保留 `WEB_DOWNLOAD_TTL_SECONDS` 秒，默认 1800 秒。当用户清空队列或已转换文件列表时，浏览器会请求服务器立即删除对应的临时文件。
 - 主机端口有意绑定到 `127.0.0.1:8000`，用于仅通过隧道访问的测试阶段。
-- 在 `octabit.cc` 的 Vue 生产部署中，应由 Caddy 提供 `apps/web-vue/dist`，并将
+- 在 `octabit.cc` 的 Vue 生产部署中，应由 Caddy 提供 `frontend/dist`，并将
   `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到此服务。Flask/Gunicorn
   服务应保持为服务器本机或 Docker 网络内的私有服务。

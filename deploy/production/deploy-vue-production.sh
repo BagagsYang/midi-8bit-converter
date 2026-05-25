@@ -3,9 +3,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-${REPO_DIR:-/home/deploy/octabit}}"
 BRANCH="${BRANCH:-main}"
-PYTHON_BIN="${PYTHON_BIN:-python3}"
-VENV_DIR="${VENV_DIR:-$APP_DIR/.venv}"
-FLASK_SERVICE="${FLASK_SERVICE:-octabit-web}"
+GO_SERVICE="${GO_SERVICE:-octabit-web}"
 CADDY_CONFIG="${CADDY_CONFIG:-/etc/caddy/Caddyfile}"
 RELOAD_CADDY="${RELOAD_CADDY:-1}"
 
@@ -15,19 +13,17 @@ git fetch --prune origin "$BRANCH"
 git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"
 
-if [ ! -x "$VENV_DIR/bin/python3" ]; then
-	"$PYTHON_BIN" -m venv "$VENV_DIR"
-fi
+cd backend
+go build -o octabit-server ./cmd/server
+cd "$APP_DIR"
 
-"$VENV_DIR/bin/python3" -m pip install -r apps/web-flask/requirements.txt
-
-cd apps/web-vue
+cd frontend
 npm ci
 npm run build
 cd "$APP_DIR"
 
-sudo systemctl restart "$FLASK_SERVICE"
-sudo systemctl status "$FLASK_SERVICE" --no-pager --lines=20
+sudo systemctl restart "$GO_SERVICE"
+sudo systemctl status "$GO_SERVICE" --no-pager --lines=20
 
 curl -fsS http://127.0.0.1:8000/api/health
 

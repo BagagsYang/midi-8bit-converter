@@ -2,35 +2,36 @@
 
 This is the intended non-Docker production path for `octabit.cc`.
 
-- Caddy serves the built Vue 3 frontend from `apps/web-vue/dist`.
+- Caddy serves the built Vue 3 frontend from `frontend/dist`.
 - Caddy reverse proxies `/api/*`, `/static/previews/*`, and `/synthesise*` to
-  Flask/Gunicorn on `127.0.0.1:8000`.
-- Flask/Gunicorn remains the private backend for workspace, upload, synthesis,
+  the Go backend on `127.0.0.1:8000`.
+- The Go backend remains private and owns workspace, upload, synthesis,
   download, preview asset, and legacy compatibility routes.
-- The Flask-rendered page remains in the repository and can be restored by
-  switching Caddy back to full reverse proxy mode.
+- The legacy Flask stack remains in the repository for fallback reference and
+  fixture regeneration, not as the normal production path.
 
-The Docker files in `deploy/web-flask/` are an alternate Flask-backend or
-legacy fallback path. Do not introduce Docker into the current production
-cutover unless the production plan changes.
+The Docker files in `deploy/web-flask/` are an alternate legacy Flask fallback
+path. Do not introduce Docker into the current production cutover unless the
+production plan changes.
 
 ## One-Time Server Shape
 
-Use a repository checkout such as `/home/deploy/octabit`, a repo-local Python virtual
-environment, the `octabit-web` systemd service for Gunicorn, and Caddy as the
-public server.
+Use a repository checkout such as `/home/deploy/octabit`, the `octabit-web`
+systemd service for the Go backend, and Caddy as the public server.
 
-Gunicorn should stay private:
+The Go backend should stay private:
 
 ```bash
-/home/deploy/octabit/.venv/bin/python3 -m gunicorn --chdir /home/deploy/octabit/apps/web-flask --bind 127.0.0.1:8000 --workers 2 --timeout 600 app:app
+cd /home/deploy/octabit/backend
+go build -o octabit-server ./cmd/server
+PORT=8000 WEB_SYNTHESISE_JOB_ROOT=/var/lib/octabit ./octabit-server
 ```
 
 Install Node.js and npm from the server's normal package source before the Vue
 cutover. The Vue dependency install should use the lockfile:
 
 ```bash
-cd /home/deploy/octabit/apps/web-vue
+cd /home/deploy/octabit/frontend
 npm ci
 npm run build
 ```
@@ -56,14 +57,14 @@ octabit.cc {
 	}
 
 	handle {
-		root * /home/deploy/octabit/apps/web-vue/dist
+		root * /home/deploy/octabit/frontend/dist
 		try_files {path} /index.html
 		file_server
 	}
 }
 ```
 
-This keeps the Vue app as the public frontend while preserving the Flask API,
+This keeps the Vue app as the public frontend while preserving the API,
 preview audio route, and legacy synthesis routes. The `try_files` fallback is
 for Vue/Vite browser routes and should not catch API requests because those are
 handled first.
@@ -77,8 +78,10 @@ cd /home/deploy/octabit
 git fetch --prune origin
 git checkout main
 git pull --ff-only origin main
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-cd apps/web-vue
+cd backend
+go build -o octabit-server ./cmd/server
+cd /home/deploy/octabit
+cd frontend
 npm ci
 npm run build
 cd /home/deploy/octabit
@@ -87,14 +90,7 @@ sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-If deploying this branch before merge, set `BRANCH=feature/vue-frontend` when
-using the helper script:
-
-```bash
-BRANCH=feature/vue-frontend deploy/production/deploy-vue-production.sh
-```
-
-After merge, the default helper script target is `main`:
+The default helper script target is `main`:
 
 ```bash
 deploy/production/deploy-vue-production.sh
@@ -109,7 +105,7 @@ Run local checks on the VM:
 
 ```bash
 curl -fsS http://127.0.0.1:8000/api/health
-test -f /home/deploy/octabit/apps/web-vue/dist/index.html
+test -f /home/deploy/octabit/frontend/dist/index.html
 ```
 
 Run public checks after Caddy reload:
@@ -126,22 +122,24 @@ queued/converted files.
 
 ## Rollback
 
-If Vue production serving fails, keep the Flask backend running and replace the
-Caddy site block with `Caddyfile.flask-fallback`:
-
-```caddyfile
-octabit.cc {
-	encode zstd gzip
-	reverse_proxy 127.0.0.1:8000
-}
-```
-
-Validate and reload Caddy:
+If a new Vue build fails after deployment, keep the Go backend running and roll
+the checkout back to the previous known-good revision, then rebuild
+`frontend/dist` and reload Caddy:
 
 ```bash
+cd /home/deploy/octabit
+git checkout <previous-good-revision>
+cd frontend
+npm ci
+npm run build
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-That restores the legacy Flask-rendered frontend while keeping the same
-Gunicorn backend, API, workspace storage, and synthesis paths.
+If the Go backend deployment fails, restart the previous systemd unit or binary
+revision before reloading Caddy:
+
+```bash
+sudo systemctl restart octabit-web
+curl -fsS http://127.0.0.1:8000/api/health
+```

@@ -4,14 +4,13 @@ Language/语言: English | [简体中文](./repository-layout.zh-CN.md)
 
 This repository is a monorepo for OctaBit, a simple web tool for converting
 MIDI files into 8-bit style music. The current production web frontend is the
-Vue app in `apps/web-vue/`, served from its Vite `dist` build for
-`octabit.cc`. Flask/Gunicorn in `apps/web-flask/` remains the private backend
-API and workspace/synthesis service, and its server-rendered frontend is kept
-as a legacy fallback. The native macOS and Windows apps are deprecated/paused,
-not actively developed, and retained for reference or possible future revival.
-The repository also contains the canonical Python renderer, shared preview
-assets, API contract documentation, deployment files, and reference
-documentation.
+Vue app in `frontend/`, served from its Vite `dist` build for `octabit.cc`. The
+primary backend is the Go service in `backend/`, which owns the stable `/api/*`
+contract, workspace/synthesis service, compatibility routes, previews, and
+runtime renderer. Flask and the Python renderer are retained under `legacy/`
+for fixture regeneration and fallback reference. The native macOS and Windows
+apps are deprecated/paused, not actively developed, and retained for reference
+or possible future revival.
 
 ## Top-level map
 
@@ -20,13 +19,18 @@ documentation.
 | `AGENTS.md` | Repository instructions for coding agents and local workflows. |
 | `README.md`, `README.zh-CN.md` | Root project overview, setup notes, app entry points, and repository licence summary. |
 | `LICENSE.md` | Repository AGPL licence text. |
-| `apps/` | Production Vue frontend, Flask backend/fallback, retained native app code, and the reserved desktop placeholder. |
-| `core/python-renderer/` | Canonical Python MIDI-to-WAV renderer and parity reference. |
+| `apps/` | Reserved desktop placeholder. |
+| `frontend/` | Production Vue/Vite frontend. |
+| `backend/` | Primary Go backend module and frozen Python baseline fixtures. |
+| `legacy/web-flask/` | Legacy Flask backend/API and Flask-rendered frontend fallback retained for parity reference. |
+| `legacy/python-renderer/` | Canonical Python MIDI-to-WAV parity reference. |
+| `legacy/native/` | Deprecated/paused macOS and Windows native apps. |
 | `assets/previews/` | Canonical waveform preview WAV files shared by the apps. |
 | `docs/` | API contract, repository layout notes, licensing audit, and review reports. |
 | `deploy/production/` | Non-Docker production deployment notes, helper script, and Caddy examples for Vue production. |
-| `deploy/web-flask/` | Docker deployment documentation and Dockerfile for the Flask backend or legacy fallback path. |
-| `compose.web.yml` | Docker Compose entry point for the Flask backend or legacy fallback path. |
+| `deploy/web-flask/` | Docker deployment documentation and Dockerfile for the legacy Flask fallback path. |
+| `scripts/` | Opt-in local maintenance and fixture-regeneration scripts. |
+| `compose.web.yml` | Docker Compose entry point for the legacy Flask fallback path. |
 | `global.json` | .NET SDK selection for the retained Windows solution. |
 | `.dockerignore`, `.gitignore`, `.gitattributes` | Repository packaging, ignore, and line-ending rules. |
 | `output/`, `tmp/` | Tracked historical generated review artefacts; both paths are ignored for future generated output. |
@@ -35,15 +39,55 @@ Local-only folders such as `.venv/`, build outputs, `.codex/`, `.sisyphus/`,
 `.DS_Store`, `__pycache__/`, `.xcodebuild/`, and app `build/` folders are not
 part of the maintained source layout.
 
+### `backend/`
+
+Primary Go backend runtime and migration proof module. It satisfies the
+OpenAPI contract with frozen Python baseline fixtures while removing Python
+from the normal runtime path.
+
+- `go.mod`: Go module for the migration backend.
+- `cmd/server/`: process startup, environment config, SQLite workspace store
+  opening, logging, graceful shutdown, and HTTP server wiring.
+- `internal/config/`: current Flask-compatible environment variable parsing and
+  defaults.
+- `internal/httpapi/`: initial OpenAPI-shaped HTTP routes for health, the
+  workspace state/upload/queue/config API, workspace-backed
+  `/api/synthesis-jobs` JSON and multipart render/poll/download/delete flows,
+  legacy `/synthesise` plus `/synthesise/jobs` render/poll/download/delete
+  routes, and previews plus route tests, OpenAPI route-registration
+  conformance, and Python-baseline replay for the routes currently covered by
+  frozen fixtures.
+- `internal/jobs/`: bounded render execution, legacy job file storage, and
+  in-memory render job lifecycle tests for queue semantics shared with the
+  workspace-backed job flow.
+- `internal/midi/`: Standard MIDI File note extraction using
+  `gitlab.com/gomidi/midi/v2/smf`, selected through fixture parity against the
+  PrettyMIDI-derived baseline.
+- `internal/renderer/`: renderer limits, layer validation, frequency curve
+  interpolation, curve hashes, output naming, and note-event PCM/WAV synthesis
+  aligned with the Python baseline.
+- `internal/storage/`: SQLite schema, connection pragmas, token hashing, path
+  helpers, and workspace cleanup/cascade behavior aligned with the Flask
+  storage model.
+- `internal/workspace/`: workspace token lifecycle, state payloads, upload
+  queue operations, limits, config persistence, SQLite-backed synthesis jobs,
+  WAV output cleanup, and renderer form payload conversion aligned with the
+  Python baseline.
+- `testdata/python-baseline/`: normalised API transcripts, representative MIDI
+  inputs, parsed note-event fixtures, expected WAV outputs, renderer naming/hash expectations, and
+  workspace config normalisation cases. Regeneration is explicit through
+  `scripts/generate_python_parity_fixtures.py`; routine post-migration tests
+  read these files without requiring Python.
+
 ## Application targets
 
-### `apps/web-vue/`
+### `frontend/`
 
 Production Vue/Vite frontend for the public browser experience.
 
 - `index.html`: Vite application shell.
 - `src/App.vue`: top-level Vue workflow and state orchestration.
-- `src/api/`: typed client for the Flask `/api/*` routes.
+- `src/api/`: typed client for the backend `/api/*` routes.
 - `src/components/`: upload queue, layer editor, output controls, header
   controls, converted files, and curve editor components.
 - `src/i18n/`: English, French, and Simplified Chinese frontend catalogs.
@@ -52,13 +96,14 @@ Production Vue/Vite frontend for the public browser experience.
   `http://127.0.0.1:8000`.
 - `package.json` and `package-lock.json`: Vue/Vite dependency metadata.
 
-Production Caddy serves `apps/web-vue/dist` and proxies API plus preview asset
-requests to Flask/Gunicorn.
+Production Caddy serves `frontend/dist` and proxies API, preview asset, and
+compatibility synthesis requests to the Go backend.
 
-### `apps/web-flask/`
+### `legacy/web-flask/`
 
-Flask backend API, workspace/synthesis service, preview route provider, and
-legacy Flask-rendered frontend fallback.
+Legacy Flask backend API, workspace/synthesis service, preview route provider,
+and legacy Flask-rendered frontend fallback retained for parity fixture
+regeneration and fallback reference.
 
 - `app.py`: Flask entry point, upload handling, synthesis/API endpoints,
   preview routes, and server-side render job endpoints.
@@ -73,10 +118,11 @@ legacy Flask-rendered frontend fallback.
 - `Launch_Synthesiser.command` and `Launch_Synthesiser.bat`: local launchers.
 - `README.md`, `README.zh-CN.md`, `User_Guide.txt`: web app documentation.
 
-The Flask backend delegates synthesis to `core/python-renderer/midi_to_wave.py`
-and serves preview audio from `assets/previews/`.
+The Flask backend delegates synthesis to `legacy/python-renderer/midi_to_wave.py`
+and serves preview audio from `assets/previews/`; normal production runtime
+uses the Go backend instead.
 
-### `apps/macos/`
+### `legacy/native/macos/`
 
 Deprecated/paused native SwiftUI macOS app and Xcode project. This code is not
 the main development target; it is retained for reference or possible future
@@ -94,7 +140,7 @@ revival while the project focuses on the web service.
 The macOS app does not run the Flask server. It launches the bundled Python
 helper for each queued MIDI file.
 
-### `apps/windows/`
+### `legacy/native/windows/`
 
 Deprecated/paused native WinUI 3 Windows app, C# renderer, tests, installer,
 and review tooling. This code is not the main development target; it is
@@ -130,7 +176,7 @@ files only and no app implementation.
 
 ## Shared core and assets
 
-### `core/python-renderer/`
+### `legacy/python-renderer/`
 
 Canonical Python MIDI-to-WAV renderer.
 
@@ -140,7 +186,7 @@ Canonical Python MIDI-to-WAV renderer.
 - `README.md`: renderer interface, layer schema, and dependency boundary.
 
 The renderer accepts platform-neutral file paths and waveform layer settings,
-then writes a WAV file to disk. The Flask backend calls it directly. The
+then writes a WAV file to disk. The legacy Flask backend calls it directly. The
 retained macOS app also calls it directly, and the retained Windows app uses it
 as the parity reference for the native C# renderer.
 
@@ -152,8 +198,9 @@ provenance.
 
 ## Documentation and generated artefacts
 
-- `docs/api-contract.md` and `docs/api-contract.zh-CN.md`: current web API
-  contract, compatibility route notes, job payloads, and public-demo safeguards.
+- `docs/api-contract.md`, `docs/api-contract.zh-CN.md`, and
+  `docs/openapi.yaml`: current web API contract, compatibility route notes, job
+  payloads, and public-demo safeguards.
 - `docs/repository-layout.md` and `docs/repository-layout.zh-CN.md`: current
   repository layout in English and Simplified Chinese.
 - `docs/licensing-audit.md`: licensing and attribution audit for repository and
@@ -178,25 +225,32 @@ python3 -m venv .venv
 Install only the dependencies for the area being worked on:
 
 ```bash
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-./.venv/bin/python3 -m pip install -r apps/macos/requirements-build.txt
-./.venv/bin/python3 -m pip install -r core/python-renderer/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
+./.venv/bin/python3 -m pip install -r legacy/native/macos/requirements-build.txt
+./.venv/bin/python3 -m pip install -r legacy/python-renderer/requirements.txt
 ```
 
-Common checks:
+Routine checks:
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s apps/web-flask/tests
-./.venv/bin/python3 -m unittest discover -s core/python-renderer/tests
+cd backend && go test ./...
+cd frontend && npm run build
+```
+
+Legacy Python checks are for fallback or parity-reference changes:
+
+```bash
+./.venv/bin/python3 -m unittest discover -s legacy/web-flask/tests
+./.venv/bin/python3 -m unittest discover -s legacy/python-renderer/tests
 ```
 
 The paused Windows app can still be inspected with .NET 8 and Python renderer
 dependencies:
 
 ```powershell
-dotnet restore apps/windows/Midi8BitSynthesiser.sln
-dotnet build apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64
-dotnet test apps/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
+dotnet restore legacy/native/windows/Midi8BitSynthesiser.sln
+dotnet build legacy/native/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64
+dotnet test legacy/native/windows/Midi8BitSynthesiser.sln -c Release -p:Platform=x64 --no-build
 ```
 
 No maintained Windows release workflow or CI publish pipeline remains in the
@@ -206,14 +260,18 @@ removed workflow.
 
 The paused macOS app builds through Xcode with the `MIDI8BitSynthesiser`
 scheme. The Xcode build phase runs
-`apps/macos/macos/build_desktop_resources.sh`.
+`legacy/native/macos/macos/build_desktop_resources.sh`.
 
-For Vue development, run the Flask backend on port 8000 and then the Vite dev
+For Vue development, run the Go backend on port 8000 and then the Vite dev
 server:
 
 ```bash
-PORT=8000 WEB_FLASK_OPEN_BROWSER=0 ./.venv/bin/python3 apps/web-flask/app.py
-cd apps/web-vue
+cd backend
+PORT=8000 go run ./cmd/server
+```
+
+```bash
+cd frontend
 npm ci
 npm run dev
 ```
@@ -221,49 +279,51 @@ npm run dev
 For Vue production builds:
 
 ```bash
-cd apps/web-vue
+cd frontend
 npm ci
 npm run build
 ```
 
-The current non-Docker production path runs Flask/Gunicorn from a Python
-virtual environment, with Gunicorn bound privately to `127.0.0.1:8000`, systemd
-managing the service, and Caddy serving `apps/web-vue/dist` while reverse
-proxying `/api/*`, `/static/previews/*`, and `/synthesise*` to that private
-Gunicorn listener. Keep the upload directory, job TTL, maximum upload size, and
-Gunicorn timeout aligned with the current synthesis job behaviour. See
-`deploy/production/README.md` for the Caddy production and rollback examples.
+The current non-Docker production path runs the Go backend privately on
+`127.0.0.1:8000`, with systemd managing the service and Caddy serving
+`frontend/dist` while reverse proxying `/api/*`, `/static/previews/*`, and
+`/synthesise*` to that private listener. Keep the workspace/job directory,
+job TTL, maximum upload size, and render worker settings aligned with the
+current synthesis job behaviour. See `deploy/production/README.md` for the
+Caddy production and rollback examples.
 
-The Docker deployment remains available as an alternate Flask-backend or legacy
-fallback path:
+The Docker deployment remains available as an alternate legacy Flask fallback
+path:
 
 ```bash
 docker compose -f compose.web.yml up -d --build
 ```
 
 The compose file binds the service to `127.0.0.1:8000` for tunnel-first testing
-and builds only the Flask backend/fallback, shared renderer, shared preview
+and builds only the legacy Flask backend/fallback, shared renderer, shared preview
 assets, and project licence into the image.
 
 ## Dependency and packaging boundaries
 
-- Python renderer dependencies live in `core/python-renderer/requirements.txt`.
-- Web-only Python dependencies live in `apps/web-flask/requirements.txt`.
-- Production frontend JavaScript dependencies live in `apps/web-vue/package.json`
-  and `apps/web-vue/package-lock.json`.
-- macOS helper build dependencies live in `apps/macos/requirements-build.txt`.
-- Windows NuGet versions live in `apps/windows/Directory.Packages.props`.
-- Docker deployment files are scoped to the Flask backend/fallback path.
+- Python renderer dependencies live in `legacy/python-renderer/requirements.txt`.
+- Go backend dependencies live in `backend/go.mod` and `backend/go.sum`.
+- Web-only legacy Python dependencies live in `legacy/web-flask/requirements.txt`.
+- Production frontend JavaScript dependencies live in `frontend/package.json`
+  and `frontend/package-lock.json`.
+- macOS helper build dependencies live in `legacy/native/macos/requirements-build.txt`.
+- Windows NuGet versions live in `legacy/native/windows/Directory.Packages.props`.
+- Docker deployment files are scoped to the legacy Flask fallback path.
 - Retained native app packaging stays under the relevant app folder.
 
 ## Ownership boundaries
 
-- Shared renderer behaviour belongs in `core/python-renderer/`.
-- Production web UI belongs under `apps/web-vue/`.
-- Flask backend API and legacy Flask-rendered fallback logic belongs under
-  `apps/web-flask/`.
+- Runtime renderer behaviour belongs in `backend/internal/renderer/`.
+- Python parity reference behaviour belongs in `legacy/python-renderer/`.
+- Production web UI belongs under `frontend/`.
+- Legacy Flask backend API and Flask-rendered fallback logic belongs under
+  `legacy/web-flask/`.
 - Retained native UI, launch, and packaging logic stays under the relevant
-  `apps/` folder.
+  `legacy/native/` folder.
 - Shared binary/media assets belong under `assets/`.
 - Repository-wide documentation, audits, and review notes belong under `docs/`.
 - Deployment-specific files belong under `deploy/` and root deployment entry

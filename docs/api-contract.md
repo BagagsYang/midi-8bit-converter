@@ -2,17 +2,18 @@
 
 Language/语言: English | [简体中文](./api-contract.zh-CN.md)
 
-This document describes the browser-facing API boundary for the Flask/Gunicorn
-OctaBit backend. The production web frontend is the Vue app in `apps/web-vue/`,
-served by Caddy from its Vite `dist` build. Flask remains the private backend
-API and workspace/synthesis service, and synthesis still uses the canonical
-Python renderer in `core/python-renderer/`.
+This document describes the browser-facing API boundary for the Go OctaBit
+backend. The production web frontend is the Vue app in `frontend/`, served by
+Caddy from its Vite `dist` build. The Go service is the private backend API,
+workspace/synthesis service, preview provider, compatibility-route provider,
+and runtime renderer. The machine-readable contract lives in
+[`openapi.yaml`](./openapi.yaml).
 
 ## Scope
 
 - Production frontend code should use the `/api/*` routes.
 - In production, Caddy should reverse proxy `/api/*`, `/static/previews/*`, and
-  `/synthesise*` to Flask/Gunicorn on `127.0.0.1:8000`.
+  `/synthesise*` to the Go backend on `127.0.0.1:8000`.
 - Legacy `/synthesise*` routes remain for compatibility.
 - Anonymous temporary workspaces use a random HttpOnly cookie named
   `octabit_workspace`.
@@ -36,7 +37,7 @@ Python renderer in `core/python-renderer/`.
   Default: `20`.
 - `WEB_DOWNLOAD_TTL_SECONDS`: legacy ready or failed job retention. Default:
   `1800`.
-- `WEB_MAX_UPLOAD_BYTES`: Flask per-request upload cap. Default: `20971520`.
+- `WEB_MAX_UPLOAD_BYTES`: per-request upload cap. Default: `20971520`.
 - Supported upload extensions: `.mid`, `.midi`.
 - Supported sample rates: `44100`, `48000`, `96000`.
 
@@ -344,6 +345,7 @@ Errors:
 - `410` with code `workspace_expired`
 - `413` with code `upload_too_large`
 - `415` with code `unsupported_file_type`
+- `429` with code `render_queue_full`
 - `422` with code `invalid_sample_rate`
 - `422` with code `invalid_layers`
 - `422` with code `invalid_workspace_config`

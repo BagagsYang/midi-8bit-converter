@@ -1,0 +1,110 @@
+{
+  "description": "Normalised Python Flask API error response transcript.",
+  "dynamic_values": "Opaque ids, workspace cookie values, and timestamps are replaced with placeholders.",
+  "records": [
+    {
+      "body": {
+        "error": {
+          "code": "workspace_expired",
+          "message": "The temporary workspace has expired. Refresh to start a new workspace."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "workspace_expired_without_cookie",
+      "status": 410
+    },
+    {
+      "body": {
+        "error": {
+          "code": "missing_midi_file",
+          "message": "No MIDI file uploaded"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "missing_upload_file",
+      "status": 400
+    },
+    {
+      "body": {
+        "error": {
+          "code": "unsupported_file_type",
+          "message": "Unsupported file type. Upload a .mid or .midi file."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "unsupported_upload_extension",
+      "status": 415
+    },
+    {
+      "body": {
+        "error": {
+          "code": "invalid_workspace_config",
+          "message": "Workspace config schema must be octabit.workspace_config.v1."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "invalid_workspace_config",
+      "status": 422
+    },
+    {
+      "body": {
+        "error": {
+          "code": "invalid_file_id",
+          "message": "Invalid file id."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "invalid_json_file_id",
+      "status": 400
+    },
+    {
+      "body": {
+        "error": {
+          "code": "invalid_sample_rate",
+          "message": "Unsupported sample rate. Choose 44100, 48000, or 96000."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "invalid_multipart_sample_rate",
+      "status": 422
+    },
+    {
+      "body": {
+        "error": {
+          "code": "invalid_layers",
+          "message": "Layer 1 frequency_curve frequencies must be strictly increasing."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "invalid_multipart_layers",
+      "status": 422
+    },
+    {
+      "body": {
+        "error": {
+          "code": "render_queue_full",
+          "message": "The render queue is full. Try again after current jobs finish."
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "render_queue_full",
+      "status": 429
+    }
+  ]
+}

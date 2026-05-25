@@ -14,7 +14,7 @@ octabit.cc {
 	}
 
 	handle {
-		root * /home/deploy/octabit/apps/web-vue/dist
+		root * /home/deploy/octabit/frontend/dist
 		try_files {path} /index.html
 		file_server
 	}

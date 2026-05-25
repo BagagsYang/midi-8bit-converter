@@ -12,7 +12,7 @@ redistribution, or ownership are marked for human or legal review.
 This audit covered the repository root and the current tracked file set, with
 local ignored build/cache folders inspected only to understand build outputs.
 The project direction is currently focused on the Vue production frontend plus
-Flask/Gunicorn backend service; native macOS and Windows code plus historical
+Go backend service; native macOS and Windows code plus historical
 packaging files remain documented here only because they are retained for
 reference or possible future revival.
 
@@ -20,34 +20,37 @@ Reviewed repository areas:
 
 - Root documentation and licence files: `README.md`, `README.zh-CN.md`,
   `LICENSE.md`, `AGENTS.md`, `.gitattributes`, `.gitignore`, `.dockerignore`.
-- Current app target and retained app code: `apps/web-vue/`, `apps/web-flask/`,
-  `apps/macos/`, `apps/windows/`, and the placeholder `apps/desktop/`.
-- Shared code and assets: `core/python-renderer/` and `assets/previews/`.
+- Current app target and retained app code: `frontend/`, `backend/`, `legacy/web-flask/`,
+  `legacy/native/macos/`, `legacy/native/windows/`, and the placeholder `apps/desktop/`.
+- Shared code and assets: `legacy/python-renderer/` and `assets/previews/`.
 - Documentation and generated review artefacts: `docs/`, tracked files under
   `output/pdf/`, and tracked files under `tmp/pdfs/`.
 - Deployment and packaging: `deploy/production/`, `deploy/web-flask/Dockerfile`,
-  `compose.web.yml`, `apps/windows/installer/Midi8BitSynthesiser.iss`,
-  `apps/windows/scripts/create_review_bundle.sh`, and the macOS Xcode build
+  `compose.web.yml`, `legacy/native/windows/installer/Midi8BitSynthesiser.iss`,
+  `legacy/native/windows/scripts/create_review_bundle.sh`, and the macOS Xcode build
   phase script.
 Dependency and packaging sources found:
 
 - Python requirements:
-  - `core/python-renderer/requirements.txt`
-  - `apps/web-flask/requirements.txt`
-  - `apps/macos/requirements-build.txt`
+  - `legacy/python-renderer/requirements.txt`
+  - `legacy/web-flask/requirements.txt`
+  - `legacy/native/macos/requirements-build.txt`
+- Go backend:
+  - `backend/go.mod`
+  - `backend/go.sum`
 - .NET and Windows packaging:
   - `global.json`
-  - `apps/windows/Directory.Packages.props`
-  - `apps/windows/Midi8BitSynthesiser.sln`
+  - `legacy/native/windows/Directory.Packages.props`
+  - `legacy/native/windows/Midi8BitSynthesiser.sln`
   - Windows app, core, and test `.csproj` files
-  - `apps/windows/installer/Midi8BitSynthesiser.iss`
+  - `legacy/native/windows/installer/Midi8BitSynthesiser.iss`
 - macOS packaging:
-  - `apps/macos/MIDI8BitSynthesiser.xcodeproj/project.pbxproj`
-  - `apps/macos/macos/build_desktop_resources.sh`
+  - `legacy/native/macos/MIDI8BitSynthesiser.xcodeproj/project.pbxproj`
+  - `legacy/native/macos/macos/build_desktop_resources.sh`
 - Web runtime resources:
-  - Vue frontend package metadata in `apps/web-vue/package.json` and
-    `apps/web-vue/package-lock.json`
-  - CDN Bootstrap CSS in `apps/web-flask/templates/index.html`
+  - Vue frontend package metadata in `frontend/package.json` and
+    `frontend/package-lock.json`
+  - CDN Bootstrap CSS in `legacy/web-flask/templates/index.html`
   - Google-hosted IBM Plex Sans and IBM Plex Mono font CSS in the same template
 - Docker and deployment:
   - `deploy/web-flask/Dockerfile`
@@ -59,7 +62,7 @@ Dependency sources not found in the current checkout:
 - No Swift Package Manager, CocoaPods, or Carthage dependency file.
 - No checked-in NuGet lockfile or restored `project.assets.json`.
 
-The npm dependency licence closure for `apps/web-vue/` should be refreshed
+The npm dependency licence closure for `frontend/` should be refreshed
 before distributing built frontend artefacts outside the live source
 deployment.
 
@@ -70,8 +73,8 @@ Confirmed facts:
 - `LICENSE.md` contains the GNU Affero General Public License v3 text.
 - `README.md` and `README.zh-CN.md` state that the project is licensed under
   `AGPL-3.0-or-later`.
-- `core/python-renderer/midi_to_wave.py` and
-  `core/python-renderer/tests/test_midi_to_wave.py` include copyright and SPDX
+- `legacy/python-renderer/midi_to_wave.py` and
+  `legacy/python-renderer/tests/test_midi_to_wave.py` include copyright and SPDX
   headers for `AGPL-3.0-or-later`.
 
 Reasonable inferences:
@@ -96,7 +99,7 @@ metadata summary rather than a complete transitive SBOM.
 
 ### Python renderer runtime
 
-Source: `core/python-renderer/requirements.txt`; installed metadata checked in
+Source: `legacy/python-renderer/requirements.txt`; installed metadata checked in
 the repo-local virtual environment.
 
 | Package | Version | Licence evidence | Notes |
@@ -112,7 +115,7 @@ the repo-local virtual environment.
 
 ### Web Flask runtime
 
-Source: `apps/web-flask/requirements.txt`; installed metadata checked locally
+Source: `legacy/web-flask/requirements.txt`; installed metadata checked locally
 where available. `gunicorn` was not installed in the checked virtual
 environment, so its licence was checked from PyPI metadata for version 23.0.0.
 
@@ -129,7 +132,7 @@ environment, so its licence was checked from PyPI metadata for version 23.0.0.
 
 ### macOS helper build
 
-Source: `apps/macos/requirements-build.txt`; installed metadata checked in the
+Source: `legacy/native/macos/requirements-build.txt`; installed metadata checked in the
 repo-local virtual environment.
 
 | Package | Version | Licence evidence | Notes |
@@ -141,7 +144,7 @@ repo-local virtual environment.
 
 ### Windows and .NET dependencies
 
-Source: `apps/windows/Directory.Packages.props` and project files; NuGet
+Source: `legacy/native/windows/Directory.Packages.props` and project files; NuGet
 package metadata checked from registry `.nuspec` files where no local NuGet
 cache was present.
 
@@ -170,15 +173,15 @@ Important Windows App SDK observation:
 
 ### Web CDN and font resources
 
-Source: legacy Flask template `apps/web-flask/templates/index.html`;
+Source: legacy Flask template `legacy/web-flask/templates/index.html`;
 registry/upstream metadata checked for the specific named resources.
 
 | Resource | Version/source | Licence evidence | Notes |
 | --- | --- | --- | --- |
 | Bootstrap CSS | `bootstrap@5.3.0` from jsDelivr/npm | MIT npm metadata | Loaded from CDN at runtime; no local Bootstrap files are bundled. |
 | IBM Plex Sans and IBM Plex Mono | Google Fonts CSS loading IBM-hosted font family names | SIL Open Font License 1.1 from IBM Plex upstream licence | Fonts are fetched from Google-hosted URLs at runtime; no font files are checked in. |
-| Lucide inline SVG icons | Copied SVG path data for `play`, `x`, `sun`, `moon-star`, and `languages` from the Lucide icon set | ISC licence from <https://lucide.dev/license> and <https://github.com/lucide-icons/lucide/blob/main/LICENSE>; `x` is also listed as Feather-derived under MIT | Vendored inline in `apps/web-flask/static/js/lucide-icons.js`; no npm package, CDN, or build pipeline is used. |
-| Hugeicons GitHub icon | Copied SVG path data for the `github` icon from <https://hugeicons.com/icon/github>; source SVG at <https://cdn.hugeicons.com/icons/github-stroke-rounded.svg> | The icon page states stroke rounded icons are free for unlimited personal and commercial use and links to the Hugeicons licence agreement at <https://hugeicons.com/license-agreement>. | Vendored inline in `apps/web-flask/static/js/lucide-icons.js`; no npm package, CDN, or build pipeline is used. |
+| Lucide inline SVG icons | Copied SVG path data for `play`, `x`, `sun`, `moon-star`, and `languages` from the Lucide icon set | ISC licence from <https://lucide.dev/license> and <https://github.com/lucide-icons/lucide/blob/main/LICENSE>; `x` is also listed as Feather-derived under MIT | Vendored inline in `legacy/web-flask/static/js/lucide-icons.js`; no npm package, CDN, or build pipeline is used. |
+| Hugeicons GitHub icon | Copied SVG path data for the `github` icon from <https://hugeicons.com/icon/github>; source SVG at <https://cdn.hugeicons.com/icons/github-stroke-rounded.svg> | The icon page states stroke rounded icons are free for unlimited personal and commercial use and links to the Hugeicons licence agreement at <https://hugeicons.com/license-agreement>. | Vendored inline in `legacy/web-flask/static/js/lucide-icons.js`; no npm package, CDN, or build pipeline is used. |
 
 If these resources are vendored later, include their licence texts and notices
 in the repository and release artefacts. If they remain CDN resources, review
@@ -189,7 +192,7 @@ privacy, availability, and supply-chain expectations separately from licensing.
 Confirmed facts:
 
 - The Docker image starts from `python:3.12-slim` and installs
-  `apps/web-flask/requirements.txt`.
+  `legacy/web-flask/requirements.txt`.
 - No maintained CI workflow file for Windows release automation exists in the
   current checkout.
 - `global.json` pins the .NET SDK line to `8.0.100` with `latestFeature`
@@ -214,18 +217,18 @@ Requires release review:
   test assets rendered by this project's own program from maintainer-directed
   MIDI test material, and that they are intended for redistribution with the
   project and app outputs.
-- `apps/macos/macos/build_desktop_resources.sh` copies the canonical preview
+- `legacy/native/macos/macos/build_desktop_resources.sh` copies the canonical preview
   files into the macOS app bundle.
 - The Windows app project links `assets/previews/*.wav` into build and publish
   output.
-- `apps/web-flask/` serves preview WAV files from the shared asset folder.
+- `legacy/web-flask/` serves preview WAV files from the shared asset folder.
 
 Reasonable inferences:
 
 - The preview WAV files are intended to be repository-owned assets covered by
   the repository licence.
 - The duplicate tracked files under
-  `apps/windows/src/Midi8BitSynthesiser.App/Assets/Previews/` are byte-identical
+  `legacy/native/windows/src/Midi8BitSynthesiser.App/Assets/Previews/` are byte-identical
   to `assets/previews/*.wav`, but the current Windows project file links the
   canonical shared files for build and publish.
 
@@ -262,7 +265,7 @@ Requires human review:
 ### Copied or vendored code
 
 The Flask web UI vendors copied Lucide SVG path data in
-`apps/web-flask/static/js/lucide-icons.js`; its source and licence notices are
+`legacy/web-flask/static/js/lucide-icons.js`; its source and licence notices are
 recorded in the file comment and in the web resource table above.
 
 No separate vendored source tree, checked-in font file, checked-in standalone
@@ -361,7 +364,7 @@ For binary, installer, app bundle, or Docker image distribution:
 - For active web development, run a lightweight quarterly audit that compares
   the current dependency manifests, package metadata, and release artefacts
   against this document.
-- Treat the Vue `dist` output plus Flask/Gunicorn backend as the current active
-  release artefact. Treat the Docker image as a backend/fallback artefact, and
+- Treat the Vue `dist` output plus Go backend as the current active release
+  artefact. Treat the Docker image as a legacy Flask fallback artefact, and
   the Windows self-contained app and macOS PyInstaller helper as separate
   release artefacts if native work is revived.

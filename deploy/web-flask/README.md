@@ -4,12 +4,12 @@ Language/语言: English | [简体中文](./README.zh-CN.md)
 
 This Docker path packages the Flask backend and legacy Flask-rendered frontend
 fallback. The intended production path is non-Docker: Caddy serves
-the Vue build from `apps/web-vue/dist` and reverse proxies API/preview/legacy
+the Vue build from `frontend/dist` and reverse proxies API/preview/legacy
 routes to Flask/Gunicorn on `127.0.0.1:8000`. See
 `../production/README.md`.
 
-The image includes `apps/web-flask/`, the shared renderer entrypoint in
-`core/python-renderer/`, the shared preview WAV files in `assets/previews/`,
+The image includes `legacy/web-flask/`, the shared renderer entrypoint in
+`legacy/python-renderer/`, the shared preview WAV files in `assets/previews/`,
 and the project licence. It does not package the Vue frontend, macOS app, or
 Windows desktop app.
 
@@ -76,7 +76,7 @@ docker compose -f compose.web.yml down
 - Workspace files are kept for `WEB_WORKSPACE_TTL_SECONDS` seconds after last activity, defaulting to 86400 seconds. The default caps are 20 queued files, 100 MiB active MIDI uploads, and 20 converted files per workspace.
 - Legacy ready render jobs are kept for `WEB_DOWNLOAD_TTL_SECONDS` seconds, defaulting to 1800 seconds. When a user clears the queue or converted files list, the browser asks the server to delete the corresponding temporary files immediately.
 - The host port is intentionally bound to `127.0.0.1:8000` for tunnel-only testing.
-- For Vue production on `octabit.cc`, serve `apps/web-vue/dist` from Caddy and
+- For Vue production on `octabit.cc`, serve `frontend/dist` from Caddy and
   reverse proxy `/api/*`, `/static/previews/*`, and `/synthesise*` to this
   service. Keep the Flask/Gunicorn service private to the server or Docker
   network.

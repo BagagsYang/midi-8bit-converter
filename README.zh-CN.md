@@ -4,66 +4,75 @@ Language/语言: [English](./README.md) | 简体中文
 
 OctaBit 是一个基于浏览器的工具，用于将 MIDI 文件转换为 8-bit 风格 WAV 音频。公开服务地址是 <https://octabit.cc>。
 
-生产 Web 前端是 `apps/web-vue/` 中的 Vue 3 应用。Flask 继续作为 `apps/web-flask/` 中的后端 API 与工作区/合成服务，并将音频渲染委托给 `core/python-renderer/` 中的规范 Python 渲染器。旧 Flask 渲染前端仍保留在仓库中，作为 legacy fallback。原生 macOS 和 Windows 应用已暂停/弃用，只保留作参考或未来可能恢复。
+生产 Web 前端是 `frontend/` 中的 Vue 3 应用。主后端是 `backend/` 中的 Go 服务，它实现稳定的 `/api/*` 合约、旧 `/synthesise*` 兼容路由、工作区存储、合成任务和 Go MIDI-to-WAV 渲染器。旧 Flask 后端和 Python 渲染器保留在 `legacy/` 下，用于 fixture 再生成和回退参考。原生 macOS 和 Windows 应用已暂停/弃用，只保留作参考或未来可能恢复。
 
 ## 当前活跃内容
 
 | 路径 | 作用 |
 | --- | --- |
-| `apps/web-vue/` | 从 Vite `dist` 构建产物提供服务的生产 Vue 3 前端 |
-| `apps/web-flask/` | Flask 后端 API、工作区/合成服务、预览路由、测试和旧 Flask 渲染前端 |
-| `core/python-renderer/` | Flask 后端使用的规范 MIDI 转 WAV 渲染器 |
-| `assets/previews/` | 通过 Flask 后端提供的共享波形预览 WAV 文件 |
+| `frontend/` | 从 Vite `dist` 构建产物提供服务的生产 Vue 3 前端 |
+| `backend/` | 主 Go 后端 API、工作区/合成服务、兼容路由、Go 渲染器和冻结 Python 对齐 fixtures |
+| `legacy/web-flask/` | 保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退 |
+| `legacy/python-renderer/` | 规范 Python MIDI 转 WAV parity 参考实现 |
+| `assets/previews/` | 通过后端提供的共享波形预览 WAV 文件 |
 | `deploy/production/` | Vue 生产路径的非 Docker 生产部署说明、辅助脚本和 Caddy 示例 |
-| `deploy/web-flask/` | Flask 后端或旧前端回退路径的 Docker 镜像定义和说明 |
-| `compose.web.yml` | Flask 后端或旧前端回退路径的最小 Docker Compose 入口 |
-| `docs/api-contract.md` | Web API 请求和响应契约 |
+| `deploy/web-flask/` | 旧 Flask 后端回退路径的 Docker 镜像定义和说明 |
+| `compose.web.yml` | 旧 Flask 回退路径的最小 Docker Compose 入口 |
+| `docs/api-contract.md`、`docs/openapi.yaml` | Web API 请求和响应契约 |
+| `scripts/generate_python_parity_fixtures.py` | Python baseline fixtures 的显式再生成脚本 |
 
 保留的原生应用目录：
 
 | 路径 | 状态 |
 | --- | --- |
-| `apps/macos/` | 已暂停/弃用的原生 SwiftUI macOS 应用 |
-| `apps/windows/` | 已暂停/弃用的原生 WinUI 3 Windows 应用 |
+| `legacy/native/macos/` | 已暂停/弃用的原生 SwiftUI macOS 应用 |
+| `legacy/native/windows/` | 已暂停/弃用的原生 WinUI 3 Windows 应用 |
 
 ## 运行 Web 应用
 
 在仓库根目录执行：
 
 ```bash
-python3 -m venv .venv
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-PORT=8000 WEB_FLASK_OPEN_BROWSER=0 ./.venv/bin/python3 apps/web-flask/app.py
+cd backend
+PORT=8000 go run ./cmd/server
 ```
 
 在另一个终端运行 Vue 前端：
 
 ```bash
-cd apps/web-vue
+cd frontend
 npm ci
 npm run dev
 ```
 
 打开 `http://127.0.0.1:5173/`。Vite 会把 `/api/*` 和 `/static/previews/*` 代理到
-`127.0.0.1:8000` 上的 Flask。
+`127.0.0.1:8000` 上的 Go 后端。
 
-旧 Flask 渲染前端仍可直接从 Flask 打开，用于回退测试：
+旧 Flask 渲染前端仍可直接打开，用于回退或 fixture 再生成测试：
 
 ```bash
-./.venv/bin/python3 apps/web-flask/app.py
+python3 -m venv .venv
+./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
+./.venv/bin/python3 legacy/web-flask/app.py
 ```
 
-运行活跃 Web 相关测试：
+运行迁移后的常规检查：
 
 ```bash
-./.venv/bin/python3 -m unittest discover -s apps/web-flask/tests
-./.venv/bin/python3 -m unittest discover -s core/python-renderer/tests
-cd apps/web-vue && npm run build
+cd backend && go test ./...
+cd frontend && npm run build
+```
+
+只有修改回退路径或 parity 参考代码时，才运行旧 Python 检查：
+
+```bash
+./.venv/bin/python3 -m unittest discover -s legacy/web-flask/tests
+./.venv/bin/python3 -m unittest discover -s legacy/python-renderer/tests
 ```
 
 ## 用户限制
 
-以下是当前 Web 应用和渲染器的默认限制。部署者可以通过环境变量调整部分 Web 服务限制，但渲染器安全限制会在 `core/python-renderer/midi_to_wave.py` 中强制执行。
+以下是当前 Web 应用和渲染器的默认限制。部署者可以通过环境变量调整 Web 服务限制，渲染器安全限制由 Go 渲染器强制执行，并以 `legacy/python-renderer/midi_to_wave.py` 作为 parity 目标。
 
 | 限制 | 默认值 | 来源 |
 | --- | ---: | --- |
@@ -91,7 +100,7 @@ cd apps/web-vue && npm run build
 
 ## Web API
 
-Vue 前端通过 Flask API 使用基于 cookie 的匿名临时工作区。`GET /api/workspace` 会创建或恢复工作区，资源路由要求携带当前工作区 cookie。完整 API 契约位于 `docs/api-contract.md`。
+Vue 前端通过 Go API 使用基于 cookie 的匿名临时工作区。`GET /api/workspace` 会创建或恢复工作区，资源路由要求携带当前工作区 cookie。可读 API 契约位于 `docs/api-contract.md`，机器可读 OpenAPI 契约位于 `docs/openapi.yaml`。
 
 主要路由：
 
@@ -130,7 +139,7 @@ Web 应用会在临时工作区中保存采样率和声音层设置。合成支�
 
 ## 本地化
 
-生产 Vue UI 使用 `apps/web-vue/src/i18n/` 中的 JSON catalog 文件。旧 Flask 渲染 UI 使用 `apps/web-flask/i18n/` 中的 catalog。修改任一 catalog 集合时，请保持 `en.json`、`fr.json` 和 `zh-CN.json` 的键集合一致。英文是回退语言。
+生产 Vue UI 使用 `frontend/src/i18n/` 中的 JSON catalog 文件。旧 Flask 渲染 UI 使用 `legacy/web-flask/i18n/` 中的 catalog。修改任一 catalog 集合时，请保持 `en.json`、`fr.json` 和 `zh-CN.json` 的键集合一致。英文是回退语言。
 
 面向用户的 Web 字符串应进入 catalog，不应硬编码在模板或 JavaScript 中。只要原生 macOS 和 Windows 应用仍处于暂停状态，它们的本地化工作就不在当前范围内。
 
@@ -139,11 +148,12 @@ Web 应用会在临时工作区中保存采样率和声音层设置。合成支�
 预期生产模型不使用 Docker：
 
 ```bash
-./.venv/bin/python3 -m gunicorn --chdir apps/web-flask --bind 127.0.0.1:8000 --workers 2 --timeout 600 app:app
-cd apps/web-vue && npm ci && npm run build
+cd backend && go build -o octabit-server ./cmd/server
+PORT=8000 WEB_SYNTHESISE_JOB_ROOT=/var/lib/octabit ./octabit-server
+cd frontend && npm ci && npm run build
 ```
 
-公开部署时，应让 Gunicorn 私有监听 `127.0.0.1:8000`。Caddy 将 `apps/web-vue/dist` 作为公开前端，并把 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到 Flask。生产部署说明、Caddy 示例、smoke 检查和回滚步骤位于 `deploy/production/README.zh-CN.md`。
+公开部署时，应让 Go 后端私有监听 `127.0.0.1:8000`。Caddy 将 `frontend/dist` 作为公开前端，并把 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到 Go。生产部署说明、Caddy 示例、smoke 检查和回滚步骤位于 `deploy/production/README.zh-CN.md`。
 
 `deploy/web-flask/` 中的 Docker 镜像仍可用于 Flask 后端或旧 Flask 渲染前端回退路径。它通过摘要固定 Python 基础镜像，并从带哈希锁定的 requirements 文件安装依赖。
 

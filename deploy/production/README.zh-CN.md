@@ -2,29 +2,31 @@
 
 这是 `octabit.cc` 预期使用的非 Docker 生产路径。
 
-- Caddy 从 `apps/web-vue/dist` 提供构建后的 Vue 3 前端。
+- Caddy 从 `frontend/dist` 提供构建后的 Vue 3 前端。
 - Caddy 将 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到
-  `127.0.0.1:8000` 上的 Flask/Gunicorn。
-- Flask/Gunicorn 继续作为私有后端，负责工作区、上传、合成、下载、预览资源和旧路由兼容。
-- Flask 渲染页面仍保留在仓库中；如果切换失败，可把 Caddy 切回完整反向代理模式恢复它。
+  `127.0.0.1:8000` 上的 Go 后端。
+- Go 后端保持私有，负责工作区、上传、合成、下载、预览资源和旧路由兼容。
+- 旧 Flask 栈保留在仓库中，用于回退参考和 fixture 再生成，不作为常规生产路径。
 
-`deploy/web-flask/` 中的 Docker 文件是 Flask 后端或旧前端回退的另一条路径。除非生产计划改变，不要把 Docker 引入当前生产切换流程。
+`deploy/web-flask/` 中的 Docker 文件是旧 Flask 回退的另一条路径。除非生产计划改变，不要把 Docker 引入当前生产切换流程。
 
 ## 一次性服务器形态
 
-建议使用 `/home/deploy/octabit` 这样的仓库检出路径、仓库本地 Python 虚拟环境、用于 Gunicorn 的
+建议使用 `/home/deploy/octabit` 这样的仓库检出路径、用于 Go 后端的
 `octabit-web` systemd 服务，以及作为公开服务器的 Caddy。
 
-Gunicorn 应保持为私有监听：
+Go 后端应保持为私有监听：
 
 ```bash
-/home/deploy/octabit/.venv/bin/python3 -m gunicorn --chdir /home/deploy/octabit/apps/web-flask --bind 127.0.0.1:8000 --workers 2 --timeout 600 app:app
+cd /home/deploy/octabit/backend
+go build -o octabit-server ./cmd/server
+PORT=8000 WEB_SYNTHESISE_JOB_ROOT=/var/lib/octabit ./octabit-server
 ```
 
 Vue 切换前，先用服务器常规软件源安装 Node.js 和 npm。Vue 依赖安装应使用 lockfile：
 
 ```bash
-cd /home/deploy/octabit/apps/web-vue
+cd /home/deploy/octabit/frontend
 npm ci
 npm run build
 ```
@@ -50,14 +52,14 @@ octabit.cc {
 	}
 
 	handle {
-		root * /home/deploy/octabit/apps/web-vue/dist
+		root * /home/deploy/octabit/frontend/dist
 		try_files {path} /index.html
 		file_server
 	}
 }
 ```
 
-这会让 Vue 应用成为公开前端，同时保留 Flask API、预览音频路由和旧合成路由。`try_files`
+这会让 Vue 应用成为公开前端，同时保留 API、预览音频路由和旧合成路由。`try_files`
 回退用于 Vue/Vite 浏览器路由；由于 API 路由先被处理，它不会截获 API 请求。
 
 ## 部署流程
@@ -69,8 +71,10 @@ cd /home/deploy/octabit
 git fetch --prune origin
 git checkout main
 git pull --ff-only origin main
-./.venv/bin/python3 -m pip install -r apps/web-flask/requirements.txt
-cd apps/web-vue
+cd backend
+go build -o octabit-server ./cmd/server
+cd /home/deploy/octabit
+cd frontend
 npm ci
 npm run build
 cd /home/deploy/octabit
@@ -79,13 +83,7 @@ sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-如果合并前先部署当前分支，使用辅助脚本时设置 `BRANCH=feature/vue-frontend`：
-
-```bash
-BRANCH=feature/vue-frontend deploy/production/deploy-vue-production.sh
-```
-
-合并后，辅助脚本默认目标是 `main`：
+辅助脚本默认目标是 `main`：
 
 ```bash
 deploy/production/deploy-vue-production.sh
@@ -99,7 +97,7 @@ deploy/production/deploy-vue-production.sh
 
 ```bash
 curl -fsS http://127.0.0.1:8000/api/health
-test -f /home/deploy/octabit/apps/web-vue/dist/index.html
+test -f /home/deploy/octabit/frontend/dist/index.html
 ```
 
 Caddy reload 后运行公开检查：
@@ -114,21 +112,22 @@ curl -fsSI https://octabit.cc/static/previews/pulse_50.wav
 
 ## 回滚
 
-如果 Vue 生产静态服务失败，保持 Flask 后端运行，并将 Caddy 站点块替换为
-`Caddyfile.flask-fallback`：
-
-```caddyfile
-octabit.cc {
-	encode zstd gzip
-	reverse_proxy 127.0.0.1:8000
-}
-```
-
-验证并重载 Caddy：
+如果新的 Vue 构建在部署后失败，保持 Go 后端运行，并将检出回滚到上一个已知可用版本，然后重建
+`frontend/dist` 并重载 Caddy：
 
 ```bash
+cd /home/deploy/octabit
+git checkout <previous-good-revision>
+cd frontend
+npm ci
+npm run build
 sudo caddy validate --config /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-这会恢复旧 Flask 渲染前端，同时保留同一个 Gunicorn 后端、API、工作区存储和合成路径。
+如果 Go 后端部署失败，先恢复前一个 systemd unit 或二进制版本：
+
+```bash
+sudo systemctl restart octabit-web
+curl -fsS http://127.0.0.1:8000/api/health
+```

@@ -1,0 +1,30 @@
+{
+  "description": "Normalised Python Flask transcript for routes currently implemented by the Go backend.",
+  "dynamic_values": "Binary bodies are recorded by hash, size, and prefix.",
+  "records": [
+    {
+      "body": {
+        "service": "octabit-web",
+        "status": "ok"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "api_health",
+      "status": 200
+    },
+    {
+      "body": {
+        "prefix_hex": "52494646a420050057415645",
+        "sha256": "1b1faf48cd3354b839dd40099ed8560c630810617cb0849592e8ff575c2ae07c",
+        "size": 336044
+      },
+      "headers": {
+        "Content-Disposition": "inline; filename=pulse_50.wav",
+        "Content-Type": "audio/x-wav"
+      },
+      "label": "preview_pulse_50",
+      "status": 200
+    }
+  ]
+}

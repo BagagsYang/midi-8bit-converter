@@ -1,0 +1,72 @@
+{
+  "config_from_form": {
+    "layers": [
+      {
+        "curve_enabled": true,
+        "duty": 0.3333,
+        "frequency_curve": [
+          {
+            "frequency_hz": 8.175798915643707,
+            "gain_db": -6.1235
+          },
+          {
+            "frequency_hz": 12543.853951415975,
+            "gain_db": 12.0
+          }
+        ],
+        "type": "pulse",
+        "volume": 1.2346
+      }
+    ],
+    "sample_rate": 48000,
+    "schema": "octabit.workspace_config.v1"
+  },
+  "form_payload": {
+    "layers_json": "[{\"type\": \"pulse\", \"duty\": 0.3333, \"volume\": 1.2346, \"frequency_curve\": [{\"frequency_hz\": 8.175798915643707, \"gain_db\": -6.1235}, {\"frequency_hz\": 12543.853951415975, \"gain_db\": 12.0}]}]",
+    "rate": "48000"
+  },
+  "normalised_config": {
+    "layers": [
+      {
+        "curve_enabled": true,
+        "duty": 0.3333,
+        "frequency_curve": [
+          {
+            "frequency_hz": 8.175798915643707,
+            "gain_db": -6.1235
+          },
+          {
+            "frequency_hz": 12543.853951415975,
+            "gain_db": 12.0
+          }
+        ],
+        "type": "pulse",
+        "volume": 1.2346
+      }
+    ],
+    "sample_rate": 48000,
+    "schema": "octabit.workspace_config.v1"
+  },
+  "raw_config": {
+    "layers": [
+      {
+        "curve_enabled": true,
+        "duty": 0.333333,
+        "frequency_curve": [
+          {
+            "frequency_hz": 12543.853951415975,
+            "gain_db": 12.0
+          },
+          {
+            "frequency_hz": 8.175798915643707,
+            "gain_db": -6.123456
+          }
+        ],
+        "type": "pulse",
+        "volume": 1.23456
+      }
+    ],
+    "sample_rate": "48000",
+    "schema": "octabit.workspace_config.v1"
+  }
+}

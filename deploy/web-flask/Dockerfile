@@ -25,8 +25,8 @@ COPY deploy/web-flask/requirements.lock ./deploy/web-flask/requirements.lock
 RUN python -m pip install --no-cache-dir --require-hashes -r deploy/web-flask/build-requirements.lock \
     && python -m pip install --no-cache-dir --no-build-isolation --require-hashes -r deploy/web-flask/requirements.lock
 
-COPY apps/web-flask ./apps/web-flask
-COPY core/python-renderer ./core/python-renderer
+COPY legacy/web-flask ./legacy/web-flask
+COPY legacy/python-renderer ./legacy/python-renderer
 COPY assets/previews ./assets/previews
 COPY LICENSE.md ./LICENSE.md
 
@@ -38,4 +38,4 @@ EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/' % os.environ.get('PORT', '8000'), timeout=5).read(1)"
 
-CMD ["sh", "-c", "gunicorn --chdir /app/apps/web-flask --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout ${GUNICORN_TIMEOUT:-600} --access-logfile - --error-logfile - app:app"]
+CMD ["sh", "-c", "gunicorn --chdir /app/legacy/web-flask --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout ${GUNICORN_TIMEOUT:-600} --access-logfile - --error-logfile - app:app"]

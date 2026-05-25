@@ -2,16 +2,16 @@
 
 Language/语言: [English](./api-contract.md) | 简体中文
 
-本文档描述 Flask/Gunicorn OctaBit 后端面向浏览器的 API 边界。生产 Web 前端是
-`apps/web-vue/` 中的 Vue 应用，由 Caddy 从 Vite `dist` 构建产物提供服务。Flask
-继续作为私有后端 API 和工作区/合成服务，合成仍使用 `core/python-renderer/` 中的规范
-Python 渲染器。
+本文档描述 Go OctaBit 后端面向浏览器的 API 边界。生产 Web 前端是
+`frontend/` 中的 Vue 应用，由 Caddy 从 Vite `dist` 构建产物提供服务。Go 服务是私有后端
+API、工作区/合成服务、预览提供方、兼容路由提供方和运行时渲染器。机器可读契约位于
+[`openapi.yaml`](./openapi.yaml)。
 
 ## 范围
 
 - 生产前端代码应使用 `/api/*` 路由。
 - 生产环境中，Caddy 应将 `/api/*`、`/static/previews/*` 和 `/synthesise*`
-  反向代理到 `127.0.0.1:8000` 上的 Flask/Gunicorn。
+  反向代理到 `127.0.0.1:8000` 上的 Go 后端。
 - 旧的 `/synthesise*` 路由保留用于兼容。
 - 匿名临时工作区使用名为 `octabit_workspace` 的随机 HttpOnly cookie。
 - SQLite 存储工作区元数据。MIDI 和 WAV 二进制文件仍存储在文件系统中。
@@ -28,7 +28,7 @@ Python 渲染器。
 - `WEB_WORKSPACE_MAX_UPLOAD_BYTES`：每个工作区活跃 MIDI 上传总字节上限。默认值为 `104857600`。
 - `WEB_WORKSPACE_MAX_CONVERTED_FILES`：每个工作区活跃已转换任务数量上限。默认值为 `20`。
 - `WEB_DOWNLOAD_TTL_SECONDS`：旧任务 ready 或 failed 状态的保留时间。默认值为 `1800`。
-- `WEB_MAX_UPLOAD_BYTES`：Flask 单请求上传大小上限。默认值为 `20971520`。
+- `WEB_MAX_UPLOAD_BYTES`：单请求上传大小上限。默认值为 `20971520`。
 - 支持的上传扩展名：`.mid`、`.midi`。
 - 支持的采样率：`44100`、`48000`、`96000`。
 
@@ -334,6 +334,7 @@ journal mode，并设置 `PRAGMA busy_timeout=5000` 以减少多 worker 下的�
 - `410`，代码 `workspace_expired`
 - `413`，代码 `upload_too_large`
 - `415`，代码 `unsupported_file_type`
+- `429`，代码 `render_queue_full`
 - `422`，代码 `invalid_sample_rate`
 - `422`，代码 `invalid_layers`
 - `422`，代码 `invalid_workspace_config`
