@@ -284,6 +284,7 @@ func TestSynthesisJobWorkspaceFileFlow(t *testing.T) {
 		GenerateResourceID: sequenceGenerator(
 			"00000000000000000000000000000001",
 			"00000000000000000000000000000002",
+			"00000000000000000000000000000003",
 		),
 	})
 	router := NewRouterWithOptions(config.Config{MaxUploadBytes: 1024 * 1024}, Options{WorkspaceService: service})
@@ -335,6 +336,34 @@ func TestSynthesisJobWorkspaceFileFlow(t *testing.T) {
 	}
 	if disposition := downloadResponse.Header().Get("Content-Disposition"); disposition != "attachment; filename=lead_pulse.wav" {
 		t.Fatalf("Content-Disposition = %q", disposition)
+	}
+
+	nonDefaultRequest := jsonRequest(t, http.MethodPost, "/api/synthesis-jobs", map[string]any{
+		"file_id": upload.FileID,
+		"config":  sineWorkspaceConfigPayload(),
+	})
+	nonDefaultRequest.AddCookie(workspaceCookie)
+	nonDefaultCreateResponse := httptest.NewRecorder()
+	router.ServeHTTP(nonDefaultCreateResponse, nonDefaultRequest)
+	if nonDefaultCreateResponse.Code != http.StatusAccepted {
+		t.Fatalf("non-default create status = %d body=%s", nonDefaultCreateResponse.Code, nonDefaultCreateResponse.Body.String())
+	}
+	var nonDefaultPayload workspace.JobPayload
+	if err := json.Unmarshal(nonDefaultCreateResponse.Body.Bytes(), &nonDefaultPayload); err != nil {
+		t.Fatal(err)
+	}
+	if nonDefaultPayload.Status != "ready" || nonDefaultPayload.DownloadName != "lead_sine.wav" {
+		t.Fatalf("non-default create payload = %#v", nonDefaultPayload)
+	}
+	nonDefaultDownloadRequest := httptest.NewRequest(http.MethodGet, nonDefaultPayload.DownloadURL, nil)
+	nonDefaultDownloadRequest.AddCookie(workspaceCookie)
+	nonDefaultDownloadResponse := httptest.NewRecorder()
+	router.ServeHTTP(nonDefaultDownloadResponse, nonDefaultDownloadRequest)
+	if nonDefaultDownloadResponse.Code != http.StatusOK {
+		t.Fatalf("non-default download status = %d body=%s", nonDefaultDownloadResponse.Code, nonDefaultDownloadResponse.Body.String())
+	}
+	if bytes.Equal(downloadResponse.Body.Bytes(), nonDefaultDownloadResponse.Body.Bytes()) {
+		t.Fatal("non-default synthesis config did not change downloaded WAV bytes")
 	}
 
 	deleteRequest := httptest.NewRequest(http.MethodDelete, createPayload.DeleteURL, nil)
@@ -853,4 +882,12 @@ func defaultWorkspaceConfigPayload() map[string]any {
 			},
 		},
 	}
+}
+
+func sineWorkspaceConfigPayload() map[string]any {
+	payload := defaultWorkspaceConfigPayload()
+	layers := payload["layers"].([]any)
+	layer := layers[0].(map[string]any)
+	layer["type"] = "sine"
+	return payload
 }

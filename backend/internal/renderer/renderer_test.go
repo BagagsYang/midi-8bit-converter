@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
@@ -130,6 +131,102 @@ func TestRenderNotesWAVMatchesPythonBaselineBytes(t *testing.T) {
 	}
 }
 
+func TestRenderNotesWAVPeakNormalisationKeepsGainOnlyChangesByteIdentical(t *testing.T) {
+	notes := []Note{{Pitch: 69, Start: 0, End: 0.5, Velocity: 100}}
+	sampleRate := 48000
+	base, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.5,
+		Volume: 1.0,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	quiet, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.5,
+		Volume: 0.2,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	flatCurve, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.5,
+		Volume: 1.0,
+		FrequencyCurve: []FrequencyCurvePoint{
+			{FrequencyHz: MinCurveFrequencyHz, GainDB: -12.0},
+			{FrequencyHz: MaxCurveFrequencyHz, GainDB: -12.0},
+		},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(base, quiet) {
+		t.Fatal("volume-only gain change should remain byte-identical after peak normalisation")
+	}
+	if !bytes.Equal(base, flatCurve) {
+		t.Fatal("flat frequency-curve gain should remain byte-identical after peak normalisation")
+	}
+}
+
+func TestRenderNotesWAVAppliesShapeAndRelativeLayerChanges(t *testing.T) {
+	notes := []Note{
+		{Pitch: 60, Start: 0, End: 0.25, Velocity: 96},
+		{Pitch: 64, Start: 0.3, End: 0.55, Velocity: 104},
+		{Pitch: 67, Start: 0.6, End: 0.9, Velocity: 112},
+	}
+	sampleRate := 44100
+	base, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.5,
+		Volume: 1.0,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	narrowPulse, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.25,
+		Volume: 1.0,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tiltedCurve, err := RenderNotesWAV(notes, sampleRate, []Layer{{
+		Type:   "pulse",
+		Duty:   0.5,
+		Volume: 1.0,
+		FrequencyCurve: []FrequencyCurvePoint{
+			{FrequencyHz: MinCurveFrequencyHz, GainDB: -12.0},
+			{FrequencyHz: 440.0, GainDB: 0.0},
+			{FrequencyHz: MaxCurveFrequencyHz, GainDB: 12.0},
+		},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pulseLead, err := RenderNotesWAV(notes, sampleRate, []Layer{
+		{Type: "pulse", Duty: 0.5, Volume: 1.0},
+		{Type: "sine", Duty: 0.5, Volume: 0.2},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sineLead, err := RenderNotesWAV(notes, sampleRate, []Layer{
+		{Type: "pulse", Duty: 0.5, Volume: 0.2},
+		{Type: "sine", Duty: 0.5, Volume: 1.0},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertDifferentWAVBytes(t, base, narrowPulse, "pulse duty change")
+	assertDifferentWAVBytes(t, base, tiltedCurve, "non-flat frequency curve")
+	assertDifferentWAVBytes(t, pulseLead, sineLead, "relative layer balance")
+}
+
 func TestInvalidLayerErrorsMatchPythonBaseline(t *testing.T) {
 	expectations := loadRendererExpectations(t)
 
@@ -170,6 +267,13 @@ func TestNormaliseRuntimeLayersDropsSilentLayers(t *testing.T) {
 	}
 	if len(layers) != 1 || layers[0].Type != "pulse" || layers[0].Volume != 1.0 {
 		t.Fatalf("silent layers did not fall back to default pulse layer: %#v", layers)
+	}
+}
+
+func assertDifferentWAVBytes(t *testing.T, left, right []byte, label string) {
+	t.Helper()
+	if bytes.Equal(left, right) {
+		t.Fatalf("%s should change rendered WAV bytes", label)
 	}
 }
 

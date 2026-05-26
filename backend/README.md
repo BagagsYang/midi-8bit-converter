@@ -37,6 +37,12 @@ Current scope:
 - `testdata/python-baseline`: frozen Python parity fixtures generated from the
   current Flask backend and Python renderer.
 
+Renderer note: layer `volume` and frequency-curve gain are applied before the
+final Python-parity peak normalisation step. A single-layer volume change, or a
+flat curve that only changes every note by the same gain, can therefore produce
+byte-identical WAV output. Waveform type, pulse duty, non-flat curves, and
+relative gains between multiple audible layers still change the rendered audio.
+
 Run the current Go checks from this directory:
 
 ```bash
