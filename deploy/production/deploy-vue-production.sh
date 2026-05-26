@@ -11,7 +11,7 @@ cd "$APP_DIR"
 
 git fetch --prune origin "$BRANCH"
 git checkout "$BRANCH"
-git pull --ff-only origin "$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 cd backend
 go build -o octabit-server ./cmd/server
