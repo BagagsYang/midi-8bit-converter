@@ -7,6 +7,8 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 10
+    auto-merge: patch
     groups:
       go-patch:
         update-types:
@@ -19,6 +21,8 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 10
+    auto-merge: patch
     groups:
       npm-patch:
         update-types:
