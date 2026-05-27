@@ -4,7 +4,7 @@ Language/语言: [English](./repository-layout.md) | 简体中文
 
 该仓库是 OctaBit 的单体仓库。OctaBit 是一个用于将 MIDI 文件转换为 8-bit 风格音乐的简单 Web 工具。当前生产
 Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为 `octabit.cc`
-提供服务。主后端是 `backend/` 中的 Go 服务，负责稳定的 `/api/*` 合约、工作区/合成服务、兼容路由、预览和运行时渲染器。Flask 和 Python 渲染器保留在 `legacy/` 下，用于 fixture 再生成和回退参考。原生 macOS 和 Windows 应用已 deprecated/paused，不再作为活跃开发目标；代码保留用于参考或未来可能的恢复。
+提供服务。主后端是 `backend/` 中的 Go 服务，负责稳定的 `/api/*` 合约、工作区/合成服务、兼容路由、预览和运行时渲染器。Flask 和 Python 渲染器保留在 `legacy/` 下，用于 fixture 重新生成和回退参考。原生 macOS 和 Windows 应用已 deprecated/paused，不再作为活跃开发目标；代码保留用于参考或未来可能的恢复。
 
 ## 顶层结构
 
@@ -15,14 +15,14 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 | `LICENSE.md` | 仓库 AGPL 许可证文本。 |
 | `frontend/` | 生产 Vue/Vite 前端。 |
 | `backend/` | 主 Go 后端模块和冻结 Python baseline fixtures。 |
-| `legacy/web-flask/` | 保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。 |
+| `legacy/web-flask/` | 保留作为 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。 |
 | `legacy/python-renderer/` | 规范 Python MIDI 转 WAV parity 参考实现。 |
 | `legacy/native/` | 已暂停/弃用的 macOS 和 Windows 原生应用。 |
 | `assets/previews/` | 各应用共享的规范波形预览 WAV 文件。 |
 | `docs/` | API 契约、仓库结构说明、许可证审计和评审报告。 |
 | `deploy/production/` | Vue 生产路径的非 Docker 生产部署说明、辅助脚本和 Caddy 示例。 |
 | `deploy/web-flask/` | 旧 Flask 回退路径的 Docker 部署文档和 Dockerfile。 |
-| `scripts/` | 显式本地维护和 fixture 再生成脚本。 |
+| `scripts/` | 显式本地维护和 fixture 重新生成脚本。 |
 | `compose.web.yml` | 旧 Flask 回退路径的 Docker Compose 入口。 |
 | `global.json` | 保留的 Windows 解决方案使用的 .NET SDK 选择。 |
 | `.dockerignore`, `.gitignore`, `.gitattributes` | 仓库打包、忽略和换行规则。 |
@@ -45,7 +45,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 - `internal/storage/`：与 Flask storage model 对齐的 SQLite schema、connection pragmas、token hashing、路径 helpers 和 workspace cleanup/cascade 行为。
 - `internal/workspace/`：与 Python baseline 对齐的工作区 token lifecycle、state payloads、upload queue 操作、limits、配置持久化、SQLite-backed synthesis jobs、WAV output cleanup 和 renderer form payload 转换。
 - `testdata/python-baseline/`：规范化 API transcripts、代表性 MIDI 输入、期望 WAV
-  输出、parsed note-event fixtures、渲染器命名/hash 预期，以及工作区配置规范化案例。再生成必须显式运行
+  输出、parsed note-event fixtures、渲染器命名/hash 预期，以及工作区配置规范化案例。重新生成必须显式运行
   `scripts/generate_python_parity_fixtures.py`；常规测试直接读取这些文件，不应要求 Python。
 
 ## 应用目标
@@ -68,7 +68,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 
 ### `legacy/web-flask/`
 
-旧 Flask 后端 API、工作区/合成服务、预览路由提供者，以及保留作 parity fixture 再生成和回退参考的旧 Flask 渲染前端回退。
+旧 Flask 后端 API、工作区/合成服务、预览路由提供者，以及保留作为 parity fixture 重新生成和回退参考的旧 Flask 渲染前端回退。
 
 - `app.py`：Flask 入口、上传处理、合成/API 端点、预览路由和服务器端渲染任务端点。
 - `synthesis_jobs.py`：基于文件系统的合成任务生命周期、清理和渲染线程编排。

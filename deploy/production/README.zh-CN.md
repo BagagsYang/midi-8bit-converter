@@ -6,7 +6,7 @@
 - Caddy 将 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到
   `127.0.0.1:8000` 上的 Go 后端。
 - Go 后端保持私有，负责工作区、上传、合成、下载、预览资源和旧路由兼容。
-- 旧 Flask 栈保留在仓库中，用于回退参考和 fixture 再生成，不作为常规生产路径。
+- 旧 Flask 栈保留在仓库中，用于回退参考和 fixture 重新生成，不作为常规生产路径。
 
 `deploy/web-flask/` 中的 Docker 文件是旧 Flask 回退的另一条路径。除非生产计划改变，不要把 Docker 引入当前生产切换流程。
 

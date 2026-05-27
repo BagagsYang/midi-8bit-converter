@@ -4,7 +4,7 @@ Language/语言: [English](./README.md) | 简体中文
 
 OctaBit 是一个基于浏览器的工具，用于将 MIDI 文件转换为 8-bit 风格 WAV 音频。公开服务地址是 <https://octabit.cc>。
 
-生产 Web 前端是 `frontend/` 中的 Vue 3 应用。主后端是 `backend/` 中的 Go 服务，它实现稳定的 `/api/*` 合约、旧 `/synthesise*` 兼容路由、工作区存储、合成任务和 Go MIDI-to-WAV 渲染器。旧 Flask 后端和 Python 渲染器保留在 `legacy/` 下，用于 fixture 再生成和回退参考。原生 macOS 和 Windows 应用已暂停/弃用，只保留作参考或未来可能恢复。
+生产 Web 前端是 `frontend/` 中的 Vue 3 应用。主后端是 `backend/` 中的 Go 服务，它实现稳定的 `/api/*` 合约、旧 `/synthesise*` 兼容路由、工作区存储、合成任务和 Go MIDI-to-WAV 渲染器。旧 Flask 后端和 Python 渲染器保留在 `legacy/` 下，用于 fixture 重新生成和回退参考。原生 macOS 和 Windows 应用已暂停/弃用，仅保留作为参考或未来可能恢复。
 
 ## 当前活跃内容
 
@@ -12,14 +12,14 @@ OctaBit 是一个基于浏览器的工具，用于将 MIDI 文件转换为 8-bit
 | --- | --- |
 | `frontend/` | 从 Vite `dist` 构建产物提供服务的生产 Vue 3 前端 |
 | `backend/` | 主 Go 后端 API、工作区/合成服务、兼容路由、Go 渲染器和冻结 Python 对齐 fixtures |
-| `legacy/web-flask/` | 保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退 |
+| `legacy/web-flask/` | 保留作为 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退 |
 | `legacy/python-renderer/` | 规范 Python MIDI 转 WAV parity 参考实现 |
 | `assets/previews/` | 通过后端提供的共享波形预览 WAV 文件 |
 | `deploy/production/` | Vue 生产路径的非 Docker 生产部署说明、辅助脚本和 Caddy 示例 |
 | `deploy/web-flask/` | 旧 Flask 后端回退路径的 Docker 镜像定义和说明 |
 | `compose.web.yml` | 旧 Flask 回退路径的最小 Docker Compose 入口 |
 | `docs/api-contract.md`、`docs/openapi.yaml` | Web API 请求和响应契约 |
-| `scripts/generate_python_parity_fixtures.py` | Python baseline fixtures 的显式再生成脚本 |
+| `scripts/generate_python_parity_fixtures.py` | Python baseline fixtures 的显式重新生成脚本 |
 
 保留的原生应用目录：
 
@@ -48,7 +48,7 @@ npm run dev
 打开 `http://127.0.0.1:5173/`。Vite 会把 `/api/*` 和 `/static/previews/*` 代理到
 `127.0.0.1:8000` 上的 Go 后端。
 
-旧 Flask 渲染前端仍可直接打开，用于回退或 fixture 再生成测试：
+旧 Flask 渲染前端仍可直接打开，用于回退或 fixture 重新生成测试：
 
 ```bash
 python3 -m venv .venv

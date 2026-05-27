@@ -10,8 +10,8 @@ OctaBit 是一个单体仓库。当前活跃的贡献目标是：
 
 - `frontend/`：生产 Vue 浏览器前端。
 - `backend/`：主 Go 后端 API、工作区/合成服务和 Go 渲染器。
-- `legacy/web-flask/`：保留作 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。
-- `legacy/python-renderer/`：保留作 parity 参考的规范 Python MIDI 转 WAV 渲染器。
+- `legacy/web-flask/`：保留作为 parity 参考的旧 Flask 后端/API 和 Flask 渲染前端回退。
+- `legacy/python-renderer/`：保留作为 parity 参考的规范 Python MIDI 转 WAV 渲染器。
 - `docs/`、`deploy/production/`、`deploy/web-flask/` 和 `assets/previews/`：配套文档、部署和共享资源区域。
 
 `legacy/native/macos/` 和 `legacy/native/windows/` 下的原生 macOS 与 Windows 应用是暂停/参考区域。若要在这些区域做较大的工作，请先开 issue，让维护者确认范围。
