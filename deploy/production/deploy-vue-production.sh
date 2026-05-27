@@ -10,6 +10,7 @@ PUBLIC_URL="${PUBLIC_URL:-https://octabit.cc}"
 
 verify_frontend_locales() {
 	local target="$1"
+	local label="${2:-$target}"
 	local missing=0
 	local catalog locale marker
 
@@ -18,12 +19,12 @@ verify_frontend_locales() {
 		marker="\"toolbar.language_option.$locale\""
 		if [ -d "$target" ]; then
 			if ! grep -R -q "$marker" "$target"; then
-				echo "Missing locale marker $marker in $target" >&2
+				echo "Missing locale marker $marker in $label" >&2
 				missing=1
 			fi
 		else
 			if ! grep -q "$marker" "$target"; then
-				echo "Missing locale marker $marker in $target" >&2
+				echo "Missing locale marker $marker in $label" >&2
 				missing=1
 			fi
 		fi
@@ -50,6 +51,8 @@ npm ci
 npm run build
 cd "$APP_DIR"
 verify_frontend_locales frontend/dist/assets
+local_asset_path="$(sed -n 's/.*src="\([^"]*\/assets\/index-[^"]*\.js\)".*/\1/p' frontend/dist/index.html | head -n 1)"
+echo "Local Vite asset: ${local_asset_path:-not found}"
 
 sudo systemctl restart "$GO_SERVICE"
 sudo systemctl status "$GO_SERVICE" --no-pager --lines=20
@@ -75,6 +78,12 @@ if [ -n "$PUBLIC_URL" ]; then
 		echo "Could not find the Vite JavaScript asset in $PUBLIC_URL/" >&2
 		exit 1
 	fi
-	curl -fsSL "${PUBLIC_URL%/}${asset_path}" -o "$public_js"
-	verify_frontend_locales "$public_js"
+	public_asset_url="${PUBLIC_URL%/}${asset_path}"
+	echo "Public Vite asset: $public_asset_url"
+	if [ -n "$local_asset_path" ] && [ "$asset_path" != "$local_asset_path" ]; then
+		echo "Public index references $asset_path, but the local build references $local_asset_path." >&2
+		echo "Caddy may be serving a different root than $APP_DIR/frontend/dist, or an upstream cache may still be serving stale files." >&2
+	fi
+	curl -fsSL "$public_asset_url" -o "$public_js"
+	verify_frontend_locales "$public_js" "$public_asset_url"
 fi
