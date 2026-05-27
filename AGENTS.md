@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+See [CLAUDE.md](./CLAUDE.md) for comprehensive project context, architecture, and conventions.
+
 ## Project Structure & Module Organization
 
 OctaBit is a monorepo focused on the web app. Work from the repository root unless a subproject README says otherwise.
