@@ -139,7 +139,7 @@ Web 应用会在临时工作区中保存采样率和声音层设置。合成支�
 
 ## 本地化
 
-生产 Vue UI 使用 `frontend/src/i18n/` 中的 JSON catalog 文件。旧 Flask 渲染 UI 使用 `legacy/web-flask/i18n/` 中的 catalog。修改任一 catalog 集合时，请保持 `en.json`、`fr.json` 和 `zh-CN.json` 的键集合一致。英文是回退语言。
+生产 Vue UI 使用 `frontend/src/i18n/` 中的 JSON catalog 文件，覆盖英文、西班牙文、法文和简体中文。旧 Flask 渲染 UI 使用 `legacy/web-flask/i18n/` 中的 catalog。修改生产前端 catalog 时，请保持 `en.json`、`es.json`、`fr.json` 和 `zh-CN.json` 的键集合一致。英文是回退语言。仓库文档仍保持英文和简体中文两种语言。
 
 面向用户的 Web 字符串应进入 catalog，不应硬编码在模板或 JavaScript 中。只要原生 macOS 和 Windows 应用仍处于暂停状态，它们的本地化工作就不在当前范围内。
 

@@ -1,4 +1,8 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
+import en from '../../i18n/en.json';
+import es from '../../i18n/es.json';
+import fr from '../../i18n/fr.json';
+import zhCn from '../../i18n/zh-CN.json';
 import { useLocale } from '../useLocale';
 
 describe('useLocale', () => {
@@ -26,6 +30,12 @@ describe('useLocale', () => {
     expect(locale.value).toBe('fr');
   });
 
+  it('respects Spanish lang URL query parameter', () => {
+    window.history.replaceState({}, '', '/?lang=es');
+    const { locale } = useLocale();
+    expect(locale.value).toBe('es');
+  });
+
   it('falls back to en for unknown locale', () => {
     document.cookie = 'web_locale=de';
     const { locale } = useLocale();
@@ -39,6 +49,15 @@ describe('useLocale', () => {
     expect(document.documentElement.lang).toBe('zh-CN');
   });
 
+  it('updateLocale persists Spanish locale in document, cookie, and URL', () => {
+    const { locale, updateLocale } = useLocale();
+    updateLocale('es');
+    expect(locale.value).toBe('es');
+    expect(document.documentElement.lang).toBe('es');
+    expect(document.cookie).toContain('web_locale=es');
+    expect(window.location.search).toBe('?lang=es');
+  });
+
   it('t() returns translation key when key is missing', () => {
     const { t } = useLocale();
     const result = t('nonexistent.key');
@@ -49,5 +68,12 @@ describe('useLocale', () => {
     const { t } = useLocale();
     const result = t('meta.site_title', { key: 'test' });
     expect(typeof result).toBe('string');
+  });
+
+  it('keeps frontend catalog key sets aligned', () => {
+    const expectedKeys = Object.keys(en).sort();
+    for (const catalog of [es, fr, zhCn]) {
+      expect(Object.keys(catalog).sort()).toEqual(expectedKeys);
+    }
   });
 });

@@ -58,7 +58,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 - `src/App.vue`：顶层 Vue 工作流和状态编排。
 - `src/api/`：后端 `/api/*` 路由的类型化客户端。
 - `src/components/`：上传队列、声音层编辑器、输出控制、头部控制、已转换文件和曲线编辑器组件。
-- `src/i18n/`：英文、法文和简体中文前端 catalog。
+- `src/i18n/`：英文、西班牙文、法文和简体中文前端 catalog。
 - `src/styles/app.css`：从 Flask UI 复用的当前 OctaBit 视觉系统。
 - `vite.config.ts`：开发环境中把 `/api` 和 `/static/previews` 代理到
   `http://127.0.0.1:8000`。

@@ -64,7 +64,7 @@ cmd/server (main: wires config, store, service, router, graceful shutdown)
 - **Composables** (`src/composables/`): `useWorkspace.ts` is the central state machine — fetches workspace, manages upload queue, triggers synthesis, polls jobs. `useLocale.ts` and `useTheme.ts` handle i18n and dark mode.
 - **API client** (`src/api/client.ts`): thin fetch wrapper for all `/api/*` calls, handles cookie passthrough and error normalization.
 - **Components**: `UploadQueue.vue`, `LayerEditor.vue`, `FrequencyCurveEditor.vue`, `OutputControls.vue`, `ConvertedFilesList.vue`, `HeaderControls.vue`. Orchestrated by `App.vue`.
-- **i18n**: JSON catalogs in `src/i18n/` (en, fr, zh-CN). English is the fallback; keep keys aligned across all catalogs you touch.
+- **i18n**: JSON catalogs in `src/i18n/` (en, es, fr, zh-CN). English is the fallback; keep keys aligned across all catalogs you touch.
 - **Testing**: Vitest + jsdom + `@vue/test-utils`. Test setup in `vitest.setup.ts`. Component tests live in `src/composables/__tests__/`.
 
 ### Key Conventions

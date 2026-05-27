@@ -89,7 +89,7 @@ Production Vue/Vite frontend for the public browser experience.
 - `src/api/`: typed client for the backend `/api/*` routes.
 - `src/components/`: upload queue, layer editor, output controls, header
   controls, converted files, and curve editor components.
-- `src/i18n/`: English, French, and Simplified Chinese frontend catalogs.
+- `src/i18n/`: English, Spanish, French, and Simplified Chinese frontend catalogs.
 - `src/styles/app.css`: current OctaBit visual system reused from the Flask UI.
 - `vite.config.ts`: development proxy for `/api` and `/static/previews` to
   `http://127.0.0.1:8000`.
