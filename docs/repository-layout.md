@@ -25,7 +25,7 @@ or possible future revival.
 | `legacy/python-renderer/` | Canonical Python MIDI-to-WAV parity reference. |
 | `legacy/native/` | Deprecated/paused macOS and Windows native apps. |
 | `assets/previews/` | Canonical waveform preview WAV files shared by the apps. |
-| `docs/` | API contract, repository layout notes, licensing audit, and review reports. |
+| `docs/` | API contract, repository layout notes, localisation procedure, licensing audit, and review reports. |
 | `deploy/production/` | Non-Docker production deployment notes, helper script, and Caddy examples for Vue production. |
 | `deploy/web-flask/` | Docker deployment documentation and Dockerfile for the legacy Flask fallback path. |
 | `scripts/` | Opt-in local maintenance and fixture-regeneration scripts. |
@@ -197,6 +197,8 @@ provenance.
   payloads, and public-demo safeguards.
 - `docs/repository-layout.md` and `docs/repository-layout.zh-CN.md`: current
   repository layout in English and Simplified Chinese.
+- `docs/localisation.md` and `docs/localisation.zh-CN.md`: standard procedure
+  for production UI localisation and related documentation updates.
 - `docs/licensing-audit.md`: licensing and attribution audit for repository and
   release planning.
 - `docs/reviews/windows-app-review.md`: Windows review notes.

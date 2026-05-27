@@ -91,6 +91,11 @@ deploy/production/deploy-vue-production.sh
 
 如果生产检出路径不同，可设置 `APP_DIR=/path/to/octabit`。
 
+辅助脚本会打印已部署的 commit，从 `frontend/src/i18n/*.json` 推导预期 UI locale，
+确认本地 Vue bundle 包含每个 `toolbar.language_option.<locale>` 标记，然后在 Caddy
+reload 后抓取 `PUBLIC_URL` 并确认公开 JavaScript bundle 也包含这些标记。`PUBLIC_URL`
+默认是 `https://octabit.cc`；私有 dry run 可设置 `PUBLIC_URL=` 跳过公开检查。
+
 ## Smoke 检查
 
 在 VM 本机运行：

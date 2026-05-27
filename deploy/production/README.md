@@ -99,6 +99,13 @@ deploy/production/deploy-vue-production.sh
 Set `APP_DIR=/path/to/octabit` if the production checkout uses a different
 path.
 
+The helper prints the commit it deployed, derives expected UI locales from
+`frontend/src/i18n/*.json`, verifies the local Vue bundle contains every
+`toolbar.language_option.<locale>` marker, then fetches `PUBLIC_URL` after
+Caddy reload and verifies the public JavaScript bundle too. `PUBLIC_URL`
+defaults to `https://octabit.cc`; set `PUBLIC_URL=` to skip the public check for
+private dry runs.
+
 ## Smoke Checks
 
 Run local checks on the VM:
