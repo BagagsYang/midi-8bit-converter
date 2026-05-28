@@ -1,0 +1,53 @@
+name: close-unsolicited-prs
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-external-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check author is collaborator
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          REPO="${{ github.repository }}"
+          echo "PR author: $AUTHOR"
+
+          HTTP_CODE=$(gh api "repos/${REPO}/collaborators/${AUTHOR}" \
+            --silent \
+            --jq '.login // empty' \
+            -H "Accept: application/vnd.github+json" \
+            -w '%{http_code}' \
+            -o /dev/null 2>&1 || echo "404")
+
+          if [ "$HTTP_CODE" = "204" ]; then
+            echo "Author is a collaborator. Skipping."
+            echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Author is not a collaborator (HTTP $HTTP_CODE)."
+            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Close unsolicited PR
+        if: steps.check.outputs.is_collaborator == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+
+          gh pr comment "$PR" \
+            --repo "$REPO" \
+            --body "Hi @${AUTHOR} — thanks for your interest, but OctaBit is a publicly available single-author project and does not accept unsolicited pull requests. Please see [CONTRIBUTING.md](https://github.com/${REPO}/blob/main/CONTRIBUTING.md) for details."
+
+          gh pr close "$PR" \
+            --repo "$REPO" \
+            --delete-branch
