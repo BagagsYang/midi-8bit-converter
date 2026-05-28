@@ -4,7 +4,7 @@ Language/语言: [English](./README.md) | 简体中文
 
 旧 Flask 渲染前端使用此目录中的 JSON 目录，同时服务于 Flask 渲染的 HTML 和
 `templates/index.html` 中的浏览器 UI。生产 Vue 前端的 catalog 位于
-`frontend/src/i18n/`，覆盖英文、西班牙文、法文和简体中文。请保持旧 Flask
+`frontend/src/i18n/`，覆盖英文、西班牙文、法文、日文和简体中文。请保持旧 Flask
 catalog 的 `en.json`、`fr.json` 和 `zh-CN.json` 键集合对齐；英文仍是回退语言。
 
 ## 法语翻译覆盖范围

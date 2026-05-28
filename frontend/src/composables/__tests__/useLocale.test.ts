@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
 import en from '../../i18n/en.json';
 import es from '../../i18n/es.json';
 import fr from '../../i18n/fr.json';
+import ja from '../../i18n/ja.json';
 import zhCn from '../../i18n/zh-CN.json';
 import { useLocale } from '../useLocale';
 
@@ -36,6 +37,12 @@ describe('useLocale', () => {
     expect(locale.value).toBe('es');
   });
 
+  it('respects Japanese lang URL query parameter', () => {
+    window.history.replaceState({}, '', '/?lang=ja');
+    const { locale } = useLocale();
+    expect(locale.value).toBe('ja');
+  });
+
   it('falls back to en for unknown locale', () => {
     document.cookie = 'web_locale=de';
     const { locale } = useLocale();
@@ -58,6 +65,15 @@ describe('useLocale', () => {
     expect(window.location.search).toBe('?lang=es');
   });
 
+  it('updateLocale persists Japanese locale in document, cookie, and URL', () => {
+    const { locale, updateLocale } = useLocale();
+    updateLocale('ja');
+    expect(locale.value).toBe('ja');
+    expect(document.documentElement.lang).toBe('ja');
+    expect(document.cookie).toContain('web_locale=ja');
+    expect(window.location.search).toBe('?lang=ja');
+  });
+
   it('t() returns translation key when key is missing', () => {
     const { t } = useLocale();
     const result = t('nonexistent.key');
@@ -72,7 +88,7 @@ describe('useLocale', () => {
 
   it('keeps frontend catalog key sets aligned', () => {
     const expectedKeys = Object.keys(en).sort();
-    for (const catalog of [es, fr, zhCn]) {
+    for (const catalog of [es, fr, ja, zhCn]) {
       expect(Object.keys(catalog).sort()).toEqual(expectedKeys);
     }
   });

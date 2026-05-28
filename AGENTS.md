@@ -48,7 +48,7 @@ npm run build
 
 ## Coding Style & Naming Conventions
 
-Prefer small, localized changes. Keep runtime synthesis behavior in `backend/internal/renderer/` and parity reference behavior in `legacy/python-renderer/`. For production Vue UI strings, use `frontend/src/i18n/*.json`; for legacy Flask-rendered UI strings, use `legacy/web-flask/i18n/*.json`. Keep English as fallback and align `en.json`, `es.json`, `fr.json`, and `zh-CN.json` keys in production frontend catalogs you touch. Use descriptive Go/Python names, TypeScript component names in PascalCase, and existing file naming patterns.
+Prefer small, localized changes. Keep runtime synthesis behavior in `backend/internal/renderer/` and parity reference behavior in `legacy/python-renderer/`. For production Vue UI strings, use `frontend/src/i18n/*.json`; for legacy Flask-rendered UI strings, use `legacy/web-flask/i18n/*.json`. Keep English as fallback and align `en.json`, `es.json`, `fr.json`, `ja.json`, and `zh-CN.json` keys in production frontend catalogs you touch. Use descriptive Go/Python names, TypeScript component names in PascalCase, and existing file naming patterns.
 
 ## Testing Guidelines
 
