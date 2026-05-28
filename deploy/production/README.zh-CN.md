@@ -96,6 +96,15 @@ deploy/production/deploy-vue-production.sh
 reload 后抓取 `PUBLIC_URL` 并确认公开 JavaScript bundle 也包含这些标记。`PUBLIC_URL`
 默认是 `https://octabit.cc`；私有 dry run 可设置 `PUBLIC_URL=` 跳过公开检查。
 
+如果 Caddy 服务的是单独静态 root，请设置 `WEB_ROOT`，让辅助脚本在 reload Caddy
+之前把 `frontend/dist/` 发布到该目录。例如当前 VM 可使用：
+
+```bash
+WEB_ROOT=/var/www/octabit deploy/production/deploy-vue-production.sh
+```
+
+`WEB_ROOT` 必须是专用静态 Web root。辅助脚本使用 `rsync --delete`，不要指向包含无关文件的目录。
+
 ## Smoke 检查
 
 在 VM 本机运行：

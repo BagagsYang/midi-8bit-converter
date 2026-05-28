@@ -197,8 +197,8 @@ provenance.
   payloads, and public-demo safeguards.
 - `docs/repository-layout.md` and `docs/repository-layout.zh-CN.md`: current
   repository layout in English and Simplified Chinese.
-- `docs/localisation.md` and `docs/localisation.zh-CN.md`: standard procedure
-  for production UI localisation and related documentation updates.
+- `docs/localisation.md`: English-only agent procedure for production UI
+  localisation and related documentation updates.
 - `docs/licensing-audit.md`: licensing and attribution audit for repository and
   release planning.
 - `docs/reviews/windows-app-review.md`: Windows review notes.

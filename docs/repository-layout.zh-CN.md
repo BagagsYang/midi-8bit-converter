@@ -19,7 +19,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 | `legacy/python-renderer/` | 规范 Python MIDI 转 WAV parity 参考实现。 |
 | `legacy/native/` | 已暂停/弃用的 macOS 和 Windows 原生应用。 |
 | `assets/previews/` | 各应用共享的规范波形预览 WAV 文件。 |
-| `docs/` | API 契约、仓库结构说明、本地化流程、许可证审计和评审报告。 |
+| `docs/` | API 契约、仓库结构说明、agent 本地化流程、许可证审计和评审报告。 |
 | `deploy/production/` | Vue 生产路径的非 Docker 生产部署说明、辅助脚本和 Caddy 示例。 |
 | `deploy/web-flask/` | 旧 Flask 回退路径的 Docker 部署文档和 Dockerfile。 |
 | `scripts/` | 显式本地维护和 fixture 重新生成脚本。 |
@@ -140,7 +140,7 @@ Web 前端/后端路径和保留的原生应用路径使用的规范预览 WAV �
 
 - `docs/api-contract.md`、`docs/api-contract.zh-CN.md` 和 `docs/openapi.yaml`：当前 Web API 契约、兼容路由说明、任务载荷和公开演示安全边界。
 - `docs/repository-layout.md` 和 `docs/repository-layout.zh-CN.md`：当前仓库结构的英文和简体中文说明。
-- `docs/localisation.md` 和 `docs/localisation.zh-CN.md`：生产 UI 本地化及相关文档更新的标准流程。
+- `docs/localisation.md`：面向 agent 的英文生产 UI 本地化及相关文档更新标准流程。
 - `docs/licensing-audit.md`：面向仓库和发布规划的许可证与署名审计。
 - `docs/reviews/windows-app-review.md`：Windows 评审记录。
 - `output/pdf/repo-structure-evaluation.pdf`、

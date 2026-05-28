@@ -106,6 +106,18 @@ Caddy reload and verifies the public JavaScript bundle too. `PUBLIC_URL`
 defaults to `https://octabit.cc`; set `PUBLIC_URL=` to skip the public check for
 private dry runs.
 
+If Caddy serves a separate static root, set `WEB_ROOT` so the helper publishes
+`frontend/dist/` there before reloading Caddy. For example, the current VM can
+use:
+
+```bash
+WEB_ROOT=/var/www/octabit deploy/production/deploy-vue-production.sh
+```
+
+`WEB_ROOT` must be a dedicated static web root. The helper uses
+`rsync --delete`, so do not point it at a directory that contains unrelated
+files.
+
 ## Smoke Checks
 
 Run local checks on the VM:

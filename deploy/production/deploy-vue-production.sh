@@ -7,6 +7,7 @@ GO_SERVICE="${GO_SERVICE:-octabit-web}"
 CADDY_CONFIG="${CADDY_CONFIG:-/etc/caddy/Caddyfile}"
 RELOAD_CADDY="${RELOAD_CADDY:-1}"
 PUBLIC_URL="${PUBLIC_URL:-https://octabit.cc}"
+WEB_ROOT="${WEB_ROOT:-}"
 
 verify_frontend_locales() {
 	local target="$1"
@@ -53,6 +54,17 @@ cd "$APP_DIR"
 verify_frontend_locales frontend/dist/assets
 local_asset_path="$(sed -n 's/.*src="\([^"]*\/assets\/index-[^"]*\.js\)".*/\1/p' frontend/dist/index.html | head -n 1)"
 echo "Local Vite asset: ${local_asset_path:-not found}"
+
+if [ -n "$WEB_ROOT" ]; then
+	if [ "$WEB_ROOT" = "/" ]; then
+		echo "WEB_ROOT must not be /" >&2
+		exit 1
+	fi
+	echo "Publishing frontend/dist to $WEB_ROOT"
+	sudo mkdir -p "$WEB_ROOT"
+	sudo rsync -a --delete frontend/dist/ "${WEB_ROOT%/}/"
+	verify_frontend_locales "${WEB_ROOT%/}/assets" "$WEB_ROOT/assets"
+fi
 
 sudo systemctl restart "$GO_SERVICE"
 sudo systemctl status "$GO_SERVICE" --no-pager --lines=20

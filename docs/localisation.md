@@ -1,20 +1,24 @@
 # Localisation procedure
 
-Language/语言: English | [简体中文](./localisation.zh-CN.md)
-
-This document is the standard process for adding or changing user-facing
-localisation in OctaBit.
+This agent-facing document is the standard process for adding or changing
+user-facing localisation in OctaBit. Its role is similar to `AGENTS.md` and
+`CLAUDE.md`: keep it concise, operational, and directly executable by another
+agent. It is intentionally maintained in English only.
 
 ## Scope
 
 - Production UI localisation lives in `frontend/src/i18n/`.
-- Repository documentation is maintained in English and Simplified Chinese.
+- Repository product documentation is maintained in English and Simplified
+  Chinese, but agent instruction docs such as this file are English-only.
 - Legacy Flask UI catalogues live in `legacy/web-flask/i18n/` and should only
   change when a task explicitly targets the legacy fallback.
 - Paused native macOS and Windows app localisation is out of scope unless those
   apps are explicitly revived or targeted.
 
-## Add a production frontend locale
+## Agent checklist for a production frontend locale
+
+Follow this checklist for every new production UI language. Do not skip steps
+because the deploy script derives its locale checks from the catalog files.
 
 1. Choose a stable locale code. Prefer a generic language code such as `es` or
    `fr` unless the requested locale needs a region, such as `zh-CN`.
@@ -30,6 +34,11 @@ localisation in OctaBit.
 
 Do not hardcode new user-facing web copy in Vue components, composables, or
 templates. Add a catalog key and call `t(...)`.
+
+Keep deploy logic locale-agnostic. A normal locale addition should not change
+`deploy/production/deploy-vue-production.sh`; the script already discovers
+locales from `frontend/src/i18n/*.json` and checks every
+`toolbar.language_option.<locale>` marker.
 
 ## Documentation updates
 
@@ -72,3 +81,14 @@ The production helper `deploy/production/deploy-vue-production.sh` performs the
 same marker check against the local build and, when `PUBLIC_URL` is set, against
 the public JavaScript bundle after Caddy reload.
 
+If Caddy serves a directory other than `frontend/dist`, set `WEB_ROOT` when
+running the helper so the built files are published before the public check:
+
+```bash
+WEB_ROOT=/var/www/octabit deploy/production/deploy-vue-production.sh
+```
+
+`WEB_ROOT` must point at a dedicated static web root. The helper syncs
+`frontend/dist/` there with `rsync --delete`, then verifies locale markers in
+the published assets. Leave `WEB_ROOT` unset when Caddy serves
+`$APP_DIR/frontend/dist` directly.
