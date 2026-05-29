@@ -39,11 +39,18 @@ export interface WorkspaceLimits {
   max_converted_files: number;
 }
 
+export interface MIDIProfile {
+  channels: number[];
+  melodic_channels: number[];
+  multi_channel: boolean;
+}
+
 export interface WorkspaceUpload {
   file_id: string;
   name: string;
   size: number;
   created_at: number;
+  midi_profile: MIDIProfile;
 }
 
 export interface ConvertedFile {

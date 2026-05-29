@@ -11,6 +11,16 @@ import (
 
 const drumChannel = 9
 
+type ReadOptions struct {
+	IncludeDrumChannel bool
+}
+
+type Profile struct {
+	Channels        []int `json:"channels"`
+	MelodicChannels []int `json:"melodic_channels"`
+	MultiChannel    bool  `json:"multi_channel"`
+}
+
 type activeNote struct {
 	startSeconds float64
 	velocity     int
@@ -22,13 +32,30 @@ type noteKey struct {
 }
 
 func ReadNotes(path string) ([]renderer.Note, error) {
+	notes, _, err := readNotesAndProfile(path, ReadOptions{})
+	return notes, err
+}
+
+func ReadNotesWithOptions(path string, options ReadOptions) ([]renderer.Note, error) {
+	notes, _, err := readNotesAndProfile(path, options)
+	return notes, err
+}
+
+func ReadProfile(path string) (Profile, error) {
+	_, profile, err := readNotesAndProfile(path, ReadOptions{})
+	return profile, err
+}
+
+func readNotesAndProfile(path string, options ReadOptions) ([]renderer.Note, Profile, error) {
 	midiFile, err := smf.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, Profile{}, err
 	}
 
 	activeNotes := map[noteKey][]activeNote{}
 	notes := []renderer.Note{}
+	channels := map[int]struct{}{}
+	melodicChannels := map[int]struct{}{}
 	tickToSeconds := newTickConverter(midiFile)
 	for _, track := range midiFile.Tracks {
 		var absTicks int64
@@ -37,7 +64,12 @@ func ReadNotes(path string) ([]renderer.Note, error) {
 			absSeconds := tickToSeconds(absTicks)
 			var channel, pitch, velocity uint8
 			if event.Message.GetNoteStart(&channel, &pitch, &velocity) {
-				if channel == drumChannel {
+				humanChannel := int(channel) + 1
+				channels[humanChannel] = struct{}{}
+				if channel != drumChannel {
+					melodicChannels[humanChannel] = struct{}{}
+				}
+				if channel == drumChannel && !options.IncludeDrumChannel {
 					continue
 				}
 				key := noteKey{channel: channel, pitch: pitch}
@@ -48,7 +80,7 @@ func ReadNotes(path string) ([]renderer.Note, error) {
 				continue
 			}
 			if event.Message.GetNoteEnd(&channel, &pitch) {
-				if channel == drumChannel {
+				if channel == drumChannel && !options.IncludeDrumChannel {
 					continue
 				}
 				key := noteKey{channel: channel, pitch: pitch}
@@ -67,6 +99,7 @@ func ReadNotes(path string) ([]renderer.Note, error) {
 					Start:    start.startSeconds,
 					End:      absSeconds,
 					Velocity: start.velocity,
+					Channel:  int(channel) + 1,
 				})
 			}
 		}
@@ -84,7 +117,21 @@ func ReadNotes(path string) ([]renderer.Note, error) {
 		}
 		return notes[left].Velocity < notes[right].Velocity
 	})
-	return notes, nil
+	profile := Profile{
+		Channels:        sortedChannels(channels),
+		MelodicChannels: sortedChannels(melodicChannels),
+	}
+	profile.MultiChannel = len(profile.MelodicChannels) >= 2
+	return notes, profile, nil
+}
+
+func sortedChannels(channelSet map[int]struct{}) []int {
+	channels := make([]int, 0, len(channelSet))
+	for channel := range channelSet {
+		channels = append(channels, channel)
+	}
+	sort.Ints(channels)
+	return channels
 }
 
 func newTickConverter(midiFile *smf.SMF) func(absTicks int64) float64 {

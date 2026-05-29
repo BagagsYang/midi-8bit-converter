@@ -1,9 +1,10 @@
-import type { FrequencyCurvePoint, WaveType } from './api';
+import type { FrequencyCurvePoint, MIDIProfile, WaveType } from './api';
 
 export interface QueuedFile {
   fileId: string;
   name: string;
   size: number;
+  midiProfile: MIDIProfile;
 }
 
 export interface ConvertedItem {

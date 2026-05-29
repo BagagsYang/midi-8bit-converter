@@ -17,6 +17,7 @@ type Note struct {
 	Start    float64 `json:"start"`
 	End      float64 `json:"end"`
 	Velocity int     `json:"velocity"`
+	Channel  int     `json:"channel,omitempty"`
 }
 
 func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error) {
