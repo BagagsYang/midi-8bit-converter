@@ -1,9 +1,10 @@
-import type { FrequencyCurvePoint, WaveType } from './api';
+import type { FrequencyCurvePoint, MIDIProfile, WaveType } from './api';
 
 export interface QueuedFile {
   fileId: string;
   name: string;
   size: number;
+  midiProfile: MIDIProfile;
 }
 
 export interface ConvertedItem {
@@ -22,6 +23,9 @@ export interface LayerState {
   curveEnabled: boolean;
   frequencyCurve: FrequencyCurvePoint[];
   selectedPointIndex: number;
+  midiChannels: number[];
+  vibratoDepthCents: number;
+  vibratoRateHz: number;
 }
 
 export type Translate = (key: string, params?: Record<string, string | number>) => string;

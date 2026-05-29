@@ -30,6 +30,7 @@ import {
   sampleRates,
   waveTypeOptions,
 } from '../lib';
+import { proMode } from '../pro';
 import type { SampleRate, SynthesisJobResponse, WaveType, WorkspaceConfigV1, WorkspaceUpload } from '../types/api';
 import type { ConvertedItem, LayerState, QueuedFile } from '../types/ui';
 
@@ -42,6 +43,7 @@ function uploadRecordFromApi(upload: WorkspaceUpload): QueuedFile {
     fileId: upload.file_id,
     name: upload.name,
     size: upload.size,
+    midiProfile: upload.midi_profile || { channels: [], melodic_channels: [], multi_channel: false },
   };
 }
 
@@ -207,7 +209,7 @@ export function useWorkspace(t: Translate) {
 
   function updateLayerType(layerIndex: number, value: WaveType) {
     const validWaveType = waveTypeOptions.some(([optionValue]) => optionValue === value);
-    if (!validWaveType || activeLayerTypes(layerIndex).has(value)) {
+    if (!validWaveType || (!proMode.value && activeLayerTypes(layerIndex).has(value))) {
       return;
     }
     layers.value[layerIndex].type = value;
@@ -221,6 +223,23 @@ export function useWorkspace(t: Translate) {
 
   function updateLayerVolume(layerIndex: number, value: number) {
     layers.value[layerIndex].volume = value;
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateLayerMidiChannels(layerIndex: number, channels: number[]) {
+    layers.value[layerIndex].midiChannels = [...new Set(channels)]
+      .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
+      .sort((left, right) => left - right);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateLayerVibratoDepth(layerIndex: number, value: number) {
+    layers.value[layerIndex].vibratoDepthCents = clamp(value, 0, 200);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateLayerVibratoRate(layerIndex: number, value: number) {
+    layers.value[layerIndex].vibratoRateHz = clamp(value, 0.1, 20);
     scheduleWorkspaceConfigSave();
   }
 
@@ -281,9 +300,11 @@ export function useWorkspace(t: Translate) {
   function addLayer() {
     if (layerCount.value >= maxLayers) return;
     const unusedType = firstUnusedWaveType();
-    if (!unusedType) return;
+    if (!unusedType && !proMode.value) return;
     layers.value[layerCount.value] = createDefaultLayer(layerCount.value);
-    layers.value[layerCount.value].type = unusedType;
+    if (unusedType) {
+      layers.value[layerCount.value].type = unusedType;
+    }
     layerCount.value += 1;
     scheduleWorkspaceConfigSave();
   }
@@ -303,6 +324,9 @@ export function useWorkspace(t: Translate) {
 
   function playPreview(layerIndex: number) {
     const layer = layers.value[layerIndex];
+    if (layer.type === 'noise') {
+      return;
+    }
     let src = `${layer.type}.wav`;
     if (layer.type === 'pulse') {
       src = `pulse_${layer.duty < 0.18 ? '10' : layer.duty < 0.38 ? '25' : '50'}.wav`;
@@ -498,6 +522,9 @@ export function useWorkspace(t: Translate) {
     updateLayerType,
     updateLayerDuty,
     updateLayerVolume,
+    updateLayerMidiChannels,
+    updateLayerVibratoDepth,
+    updateLayerVibratoRate,
     toggleCurve,
     addCurvePoint,
     removeSelectedPoint,

@@ -7,7 +7,10 @@ export const waveTypeOptions: Array<[WaveType, string]> = [
   ['sine', 'wave.sine'],
   ['sawtooth', 'wave.sawtooth'],
   ['triangle', 'wave.triangle'],
+  ['noise', 'wave.noise'],
 ];
+
+export const standardWaveTypeOptions = waveTypeOptions.filter(([value]) => value !== 'noise');
 
 const layerPresets: Array<Pick<LayerState, 'type' | 'duty' | 'volume'>> = [
   { type: 'pulse', duty: 0.5, volume: 1.0 },
@@ -46,6 +49,9 @@ export function createDefaultLayer(index: number): LayerState {
     curveEnabled: false,
     frequencyCurve: createDefaultCurve(),
     selectedPointIndex: 0,
+    midiChannels: [],
+    vibratoDepthCents: 0,
+    vibratoRateHz: 5,
   };
 }
 
@@ -85,6 +91,13 @@ export function layerToConfig(layer: LayerState): WorkspaceLayerConfig {
       frequency_hz: point.frequency_hz,
       gain_db: Number(point.gain_db.toFixed(4)),
     })),
+    pro: {
+      midi_channels: [...new Set(layer.midiChannels)]
+        .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
+        .sort((left, right) => left - right),
+      vibrato_depth_cents: Number(clamp(layer.vibratoDepthCents, 0, 200).toFixed(2)),
+      vibrato_rate_hz: Number(clamp(layer.vibratoRateHz, 0.1, 20).toFixed(2)),
+    },
   };
 }
 
@@ -112,6 +125,17 @@ export function layerFromConfig(configLayer: WorkspaceLayerConfig, index: number
       }))
       : createDefaultCurve(),
     selectedPointIndex: 0,
+    midiChannels: Array.isArray(configLayer.pro?.midi_channels)
+      ? [...new Set(configLayer.pro.midi_channels.map(Number))]
+        .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
+        .sort((left, right) => left - right)
+      : [],
+    vibratoDepthCents: Number.isFinite(Number(configLayer.pro?.vibrato_depth_cents))
+      ? clamp(Number(configLayer.pro?.vibrato_depth_cents), 0, 200)
+      : 0,
+    vibratoRateHz: Number.isFinite(Number(configLayer.pro?.vibrato_rate_hz))
+      ? clamp(Number(configLayer.pro?.vibrato_rate_hz), 0.1, 20)
+      : 5,
   };
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { iconSvg } from '../icons';
+import { useProMode } from '../pro';
 import type { Translate } from '../types/ui';
 
 type ThemeChoice = 'system' | 'light' | 'dark';
@@ -17,6 +18,8 @@ const emit = defineEmits<{
   'update:locale': [value: string];
   'update:themeChoice': [value: ThemeChoice];
 }>();
+
+const { proMode, toggleProMode } = useProMode();
 
 const themeIcon = computed(() => {
   if (props.themeChoice === 'light') return iconSvg('sun', 'lucide-icon theme-option-icon');
@@ -70,6 +73,18 @@ const themeIcon = computed(() => {
           </option>
         </select>
       </span>
+      <slot name="extension-control"></slot>
+      <button
+        type="button"
+        class="top-control-button"
+        :class="{ 'is-active': proMode }"
+        :title="proMode ? t('pro.disable') : t('pro.enable')"
+        :aria-label="proMode ? t('pro.disable') : t('pro.enable')"
+        :aria-pressed="proMode"
+        @click="toggleProMode"
+      >
+        <span aria-hidden="true" v-html="iconSvg('cpu')"></span>
+      </button>
       <a
         class="github-link"
         href="https://github.com/bagags/octabit"

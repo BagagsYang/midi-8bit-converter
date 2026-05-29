@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { iconSvg } from '../icons';
-import { maxLayers, normaliseDecimalInput, waveTypeOptions } from '../lib';
+import { maxLayers, normaliseDecimalInput, standardWaveTypeOptions, waveTypeOptions } from '../lib';
+import { proMode, useProEligibility } from '../pro';
 import type { WaveType } from '../types/api';
-import type { LayerState, Translate } from '../types/ui';
+import type { LayerState, QueuedFile, Translate } from '../types/ui';
 import FrequencyCurveEditor from './FrequencyCurveEditor.vue';
 
 const props = defineProps<{
   t: Translate;
   layers: LayerState[];
   layerCount: number;
+  queuedFiles: QueuedFile[];
 }>();
 
 const emit = defineEmits<{
   updateLayerType: [layerIndex: number, value: WaveType];
   updateLayerDuty: [layerIndex: number, value: number];
   updateLayerVolume: [layerIndex: number, value: number];
+  updateLayerMidiChannels: [layerIndex: number, value: number[]];
+  updateLayerVibratoDepth: [layerIndex: number, value: number];
+  updateLayerVibratoRate: [layerIndex: number, value: number];
   toggleCurve: [layerIndex: number, enabled: boolean];
   addCurvePoint: [layerIndex: number];
   removeSelectedPoint: [layerIndex: number];
@@ -29,8 +34,15 @@ const emit = defineEmits<{
 }>();
 
 const activeLayers = computed(() => props.layers.slice(0, props.layerCount));
+const queuedFilesRef = computed(() => props.queuedFiles);
+const { hasQueuedFiles, allQueuedFilesMultiChannel, availableChannels } = useProEligibility(queuedFilesRef);
 const activeTypes = computed(() => new Set(activeLayers.value.map((layer) => layer.type)));
-const canAddLayer = computed(() => props.layerCount < maxLayers && waveTypeOptions.some(([value]) => !activeTypes.value.has(value)));
+const visibleWaveTypeOptions = computed(() => (proMode.value ? waveTypeOptions : standardWaveTypeOptions));
+const canUseProControls = computed(() => proMode.value && hasQueuedFiles.value && allQueuedFilesMultiChannel.value);
+const canAddLayer = computed(() => (
+  props.layerCount < maxLayers
+  && (proMode.value || standardWaveTypeOptions.some(([value]) => !activeTypes.value.has(value)))
+));
 
 function faderFillPercent(value: number, min: number, max: number): string {
   const ratio = (Number(value) - min) / (max - min);
@@ -46,7 +58,21 @@ function faderScale(ticks: Array<{ value: number; label: string }>, min: number,
 }
 
 function isWaveDisabled(value: WaveType, layerIndex: number): boolean {
-  return props.layers.slice(0, props.layerCount).some((layer, index) => index !== layerIndex && layer.type === value);
+  if (value === 'noise') {
+    return !canUseProControls.value;
+  }
+  return !proMode.value && props.layers.slice(0, props.layerCount).some((layer, index) => index !== layerIndex && layer.type === value);
+}
+
+function selectedChannelValues(event: Event): number[] {
+  const select = event.target as HTMLSelectElement;
+  return Array.from(select.selectedOptions).map((option) => Number(option.value));
+}
+
+function proHint(): string {
+  if (!hasQueuedFiles.value) return props.t('pro.requires_queue');
+  if (!allQueuedFilesMultiChannel.value) return props.t('pro.requires_multi_channel');
+  return props.t('pro.multi_channel_ready');
 }
 </script>
 
@@ -71,6 +97,7 @@ function isWaveDisabled(value: WaveType, layerIndex: number): boolean {
           <button
             type="button"
             class="preview-btn"
+            :disabled="layer.type === 'noise'"
             :title="t('layer.play_preview')"
             :aria-label="t('layer.play_preview')"
             @click="emit('playPreview', layerIndex)"
@@ -88,7 +115,7 @@ function isWaveDisabled(value: WaveType, layerIndex: number): boolean {
               @change="emit('updateLayerType', layerIndex, ($event.target as HTMLSelectElement).value as WaveType)"
             >
               <option
-                v-for="[value, labelKey] in waveTypeOptions"
+                v-for="[value, labelKey] in visibleWaveTypeOptions"
                 :key="value"
                 :value="value"
                 :disabled="isWaveDisabled(value, layerIndex)"
@@ -196,6 +223,99 @@ function isWaveDisabled(value: WaveType, layerIndex: number): boolean {
               </span>
               <span class="control-switch-text">{{ t('layer.enable_curve') }}</span>
             </label>
+          </div>
+        </div>
+
+        <div
+          v-if="proMode"
+          class="extension-layer-panel"
+          :class="{ 'is-disabled': !canUseProControls }"
+        >
+          <p class="extension-hint">{{ proHint() }}</p>
+          <div class="extension-control-grid">
+            <div class="field-block">
+              <label class="field-label" :for="`midiChannels${layerIndex}`">{{ t('pro.midi_channels') }}</label>
+              <select
+                class="form-select control-select"
+                :id="`midiChannels${layerIndex}`"
+                multiple
+                :disabled="!canUseProControls"
+                @change="emit('updateLayerMidiChannels', layerIndex, selectedChannelValues($event))"
+              >
+                <option
+                  v-for="channel in availableChannels"
+                  :key="channel"
+                  :value="channel"
+                  :selected="layer.midiChannels.includes(channel)"
+                >
+                  {{ t('pro.channel', { channel }) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field-block">
+              <label class="fader-label" :for="`vibratoDepth${layerIndex}`">
+                <span>{{ t('pro.vibrato_depth') }}</span>
+                <input
+                  type="number"
+                  class="readout"
+                  :id="`vibratoDepthValue${layerIndex}`"
+                  min="0"
+                  max="200"
+                  step="1"
+                  :value="layer.vibratoDepthCents.toFixed(0)"
+                  inputmode="decimal"
+                  :disabled="!canUseProControls"
+                  @change="emit('updateLayerVibratoDepth', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, 0, 200))"
+                />
+              </label>
+              <div class="fader-shell">
+                <input
+                  type="range"
+                  class="fader-input"
+                  :id="`vibratoDepth${layerIndex}`"
+                  min="0"
+                  max="200"
+                  step="1"
+                  :value="layer.vibratoDepthCents"
+                  :disabled="!canUseProControls"
+                  :style="{ '--fill': faderFillPercent(layer.vibratoDepthCents, 0, 200) }"
+                  @input="emit('updateLayerVibratoDepth', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, 0, 200))"
+                />
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label class="fader-label" :for="`vibratoRate${layerIndex}`">
+                <span>{{ t('pro.vibrato_rate') }}</span>
+                <input
+                  type="number"
+                  class="readout"
+                  :id="`vibratoRateValue${layerIndex}`"
+                  min="0.1"
+                  max="20"
+                  step="0.1"
+                  :value="layer.vibratoRateHz.toFixed(1)"
+                  inputmode="decimal"
+                  :disabled="!canUseProControls || layer.vibratoDepthCents <= 0"
+                  @change="emit('updateLayerVibratoRate', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, 0.1, 20))"
+                />
+              </label>
+              <div class="fader-shell">
+                <input
+                  type="range"
+                  class="fader-input"
+                  :id="`vibratoRate${layerIndex}`"
+                  min="0.1"
+                  max="20"
+                  step="0.1"
+                  :value="layer.vibratoRateHz"
+                  :disabled="!canUseProControls || layer.vibratoDepthCents <= 0"
+                  :style="{ '--fill': faderFillPercent(layer.vibratoRateHz, 0.1, 20) }"
+                  @input="emit('updateLayerVibratoRate', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, 0.1, 20))"
+                />
+              </div>
+            </div>
           </div>
         </div>
 

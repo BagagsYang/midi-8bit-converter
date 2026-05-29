@@ -1,4 +1,4 @@
-export type WaveType = 'pulse' | 'sine' | 'sawtooth' | 'triangle';
+export type WaveType = 'pulse' | 'sine' | 'sawtooth' | 'triangle' | 'noise';
 export type SampleRate = 44100 | 48000 | 96000;
 export type SynthesisJobStatus = 'queued' | 'rendering' | 'ready' | 'failed' | 'expired';
 
@@ -21,6 +21,13 @@ export interface WorkspaceLayerConfig {
   volume: number;
   curve_enabled: boolean;
   frequency_curve: FrequencyCurvePoint[];
+  pro?: WorkspaceLayerProConfig;
+}
+
+export interface WorkspaceLayerProConfig {
+  midi_channels: number[];
+  vibrato_depth_cents: number;
+  vibrato_rate_hz: number;
 }
 
 export interface WorkspaceConfigV1 {
@@ -39,11 +46,18 @@ export interface WorkspaceLimits {
   max_converted_files: number;
 }
 
+export interface MIDIProfile {
+  channels: number[];
+  melodic_channels: number[];
+  multi_channel: boolean;
+}
+
 export interface WorkspaceUpload {
   file_id: string;
   name: string;
   size: number;
   created_at: number;
+  midi_profile: MIDIProfile;
 }
 
 export interface ConvertedFile {
