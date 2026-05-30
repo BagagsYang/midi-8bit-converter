@@ -18,21 +18,28 @@ jobs:
         run: |
           AUTHOR="${{ github.event.pull_request.user.login }}"
           REPO="${{ github.repository }}"
+          OWNER="${{ github.event.repository.owner.login }}"
           echo "PR author: $AUTHOR"
+          echo "Repo owner: $OWNER"
 
-          HTTP_CODE=$(gh api "repos/${REPO}/collaborators/${AUTHOR}" \
-            --silent \
-            --jq '.login // empty' \
-            -H "Accept: application/vnd.github+json" \
-            -w '%{http_code}' \
-            -o /dev/null 2>&1 || echo "404")
-
-          if [ "$HTTP_CODE" = "204" ]; then
-            echo "Author is a collaborator. Skipping."
+          if [ "$AUTHOR" = "$OWNER" ]; then
+            echo "Author is the repo owner. Skipping."
             echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Author is not a collaborator (HTTP $HTTP_CODE)."
-            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+            HTTP_CODE=$(gh api "repos/${REPO}/collaborators/${AUTHOR}" \
+              --silent \
+              --jq '.login // empty' \
+              -H "Accept: application/vnd.github+json" \
+              -w '%{http_code}' \
+              -o /dev/null 2>&1 || echo "404")
+
+            if [ "$HTTP_CODE" = "204" ]; then
+              echo "Author is a collaborator. Skipping."
+              echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Author is not a collaborator (HTTP $HTTP_CODE)."
+              echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Close unsolicited PR
