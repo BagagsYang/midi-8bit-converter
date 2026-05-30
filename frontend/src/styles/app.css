@@ -307,7 +307,8 @@ input:focus-visible,
     flex: 0 0 38px;
 }
 
-.github-link {
+.github-link,
+.top-control-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -321,16 +322,33 @@ input:focus-visible,
     text-decoration: none;
 }
 
+.top-control-button {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
 .github-link:hover,
-.github-link:focus {
+.github-link:focus,
+.top-control-button:hover,
+.top-control-button:focus {
     color: var(--text-color);
     background-color: var(--surface-muted);
 }
 
-.github-link:focus-visible {
+.github-link:focus-visible,
+.top-control-button:focus-visible {
     outline: none;
     border-color: var(--accent-strong);
     box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.top-control-button.is-active {
+    color: var(--accent-strong);
+    border-color: var(--accent-strong);
+    background: var(--accent-muted);
 }
 
 .theme-select,
@@ -415,7 +433,8 @@ input:focus-visible,
     color: currentColor;
 }
 
-.github-link .hugeicon {
+.github-link .hugeicon,
+.top-control-button .lucide-icon {
     width: 17px;
     height: 17px;
     display: block;
@@ -430,6 +449,33 @@ input:focus-visible,
 
 .github-link-svg {
     transform: translateX(-0.5px);
+}
+
+.extension-layer-panel {
+    display: grid;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 7px;
+    background: var(--surface-muted);
+    border: 1px solid var(--item-border);
+}
+
+.extension-layer-panel.is-disabled {
+    color: var(--subtle-text);
+}
+
+.extension-control-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.extension-hint {
+    margin: 0;
+    color: var(--muted-text);
+    font-size: 0.8rem;
 }
 
 .workspace-grid {
@@ -846,6 +892,13 @@ input:focus-visible,
     background: var(--preview-button-bg-active);
 }
 
+.preview-btn:disabled {
+    color: var(--subtle-text);
+    background: var(--surface-muted);
+    border-color: var(--border-color);
+    cursor: not-allowed;
+}
+
 .lucide-icon {
     width: 16px;
     height: 16px;
@@ -1205,7 +1258,8 @@ input:focus-visible,
 }
 
 @media (max-width: 1180px) {
-    .layer-control-grid {
+    .layer-control-grid,
+    .extension-control-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1240,7 +1294,8 @@ input:focus-visible,
         justify-content: flex-start;
     }
 
-    .layer-control-grid {
+    .layer-control-grid,
+    .extension-control-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1282,7 +1337,8 @@ input:focus-visible,
 
     .control-row,
     .layer-actions,
-    .layer-control-grid {
+    .layer-control-grid,
+    .extension-control-grid {
         grid-template-columns: 1fr;
     }
 
