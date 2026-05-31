@@ -32,7 +32,7 @@
   "converted.clear_confirm": "変換済みファイルをクリアすると、サーバー上の一時 WAV ファイルが削除され、保持や再ダウンロードができなくなります。",
   "parameters.title": "パラメーター制御",
   "parameters.reset": "リセット",
-  "parameters.readout": "最大 4",
+  "parameters.readout": "最大 10",
   "layers.title": "波形レイヤー",
   "layers.add": "+ レイヤーを追加",
   "layers.remove": "- レイヤーを削除",

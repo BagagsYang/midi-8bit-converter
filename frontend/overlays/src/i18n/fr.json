@@ -32,7 +32,7 @@
   "converted.clear_confirm": "Vider les fichiers convertis supprime les fichiers WAV temporaires du serveur ; ils ne pourront pas être conservés ni téléchargés à nouveau.",
   "parameters.title": "Centre de contrôle",
   "parameters.reset": "Réinitialiser",
-  "parameters.readout": "4 MAX",
+  "parameters.readout": "10 MAX",
   "layers.title": "Couches de formes d'onde",
   "layers.add": "+ Ajouter une couche",
   "layers.remove": "- Supprimer une couche",

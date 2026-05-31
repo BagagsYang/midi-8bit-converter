@@ -69,6 +69,30 @@ func TestProOctaveShiftRejectsInvalidValues(t *testing.T) {
 	}
 }
 
+func TestProWorkspaceConfigAcceptsTenLayers(t *testing.T) {
+	rawConfig := proOctaveRawConfig(nil)
+	layer := rawConfig["layers"].([]any)[0]
+	layers := make([]any, 10)
+	for index := range layers {
+		layers[index] = layer
+	}
+	rawConfig["layers"] = layers
+
+	config, err := NormaliseConfig(rawConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(config.Layers) != 10 {
+		t.Fatalf("layer count = %d, want 10", len(config.Layers))
+	}
+
+	rawConfig["layers"] = append(layers, layer)
+	_, err = NormaliseConfig(rawConfig)
+	if err == nil || !strings.Contains(err.Error(), "between 1 and 10 layers") {
+		t.Fatalf("11 layers error = %v", err)
+	}
+}
+
 func proOctaveRawConfig(octaveShift any) map[string]any {
 	pro := map[string]any{
 		"midi_channels":       []any{},

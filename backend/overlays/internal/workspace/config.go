@@ -109,8 +109,8 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 	if !ok {
 		return Config{}, fmt.Errorf("Workspace config layers must be an array.")
 	}
-	if len(rawLayers) < 1 || len(rawLayers) > 4 {
-		return Config{}, fmt.Errorf("Workspace config supports between 1 and 4 layers.")
+	if len(rawLayers) < 1 || len(rawLayers) > renderer.MaxProRenderLayers {
+		return Config{}, fmt.Errorf("Workspace config supports between 1 and %d layers.", renderer.MaxProRenderLayers)
 	}
 
 	normalisedLayers := make([]LayerConfig, 0, len(rawLayers))

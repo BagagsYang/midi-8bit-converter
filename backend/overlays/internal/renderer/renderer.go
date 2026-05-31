@@ -22,6 +22,7 @@ const (
 	MaxRenderSeconds          = 30 * 60
 	MaxMIDINotes              = 20_000
 	MaxRenderLayers           = 4
+	MaxProRenderLayers        = 10
 	MinOctaveShift            = -2
 	MaxOctaveShift            = 2
 	NormalisedPeak            = 0.89
@@ -159,7 +160,7 @@ func NormaliseRuntimeLayers(layers []Layer) ([]Layer, error) {
 	if len(layers) == 0 {
 		return []Layer{defaultLayer()}, nil
 	}
-	if err := validateLayerCount(len(layers)); err != nil {
+	if err := validateRuntimeLayerCount(len(layers)); err != nil {
 		return nil, err
 	}
 
@@ -210,7 +211,7 @@ func BuildOutputSuffix(layers []Layer) (string, error) {
 		suffix = "mix"
 	}
 	for _, layer := range runtimeLayers {
-		if len(layer.FrequencyCurve) > 0 {
+		if layerRequiresOutputHash(layer) {
 			hashValue, err := BuildCurvePayloadHash(runtimeLayers)
 			if err != nil {
 				return "", err
@@ -271,6 +272,15 @@ func validateLayerCount(count int) error {
 	if count > MaxRenderLayers {
 		return RenderLimitError{
 			Message: fmt.Sprintf("Synthesis supports at most %d sound layers.", MaxRenderLayers),
+		}
+	}
+	return nil
+}
+
+func validateRuntimeLayerCount(count int) error {
+	if count > MaxProRenderLayers {
+		return RenderLimitError{
+			Message: fmt.Sprintf("Synthesis supports at most %d sound layers.", MaxProRenderLayers),
 		}
 	}
 	return nil
@@ -493,10 +503,37 @@ func canonicalLayersJSON(layers []Layer) string {
 		builder.Write(typeJSON)
 		builder.WriteString(`,"volume":`)
 		builder.WriteString(formatPythonFloat(layer.Volume))
+		if len(layer.MIDIChannels) > 0 {
+			builder.WriteString(`,"midi_channels":[`)
+			for channelIndex, channel := range layer.MIDIChannels {
+				if channelIndex > 0 {
+					builder.WriteByte(',')
+				}
+				builder.WriteString(strconv.Itoa(channel))
+			}
+			builder.WriteByte(']')
+		}
+		if layer.VibratoDepthCents > 0 {
+			builder.WriteString(`,"vibrato_depth_cents":`)
+			builder.WriteString(formatPythonFloat(layer.VibratoDepthCents))
+			builder.WriteString(`,"vibrato_rate_hz":`)
+			builder.WriteString(formatPythonFloat(layer.VibratoRateHz))
+		}
+		if layer.OctaveShift != 0 {
+			builder.WriteString(`,"octave_shift":`)
+			builder.WriteString(strconv.Itoa(layer.OctaveShift))
+		}
 		builder.WriteByte('}')
 	}
 	builder.WriteByte(']')
 	return builder.String()
+}
+
+func layerRequiresOutputHash(layer Layer) bool {
+	return len(layer.FrequencyCurve) > 0 ||
+		len(layer.MIDIChannels) > 0 ||
+		layer.VibratoDepthCents > 0 ||
+		layer.OctaveShift != 0
 }
 
 func formatPythonFloat(value float64) string {

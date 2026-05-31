@@ -32,7 +32,7 @@
   "converted.clear_confirm": "Borrar los archivos convertidos elimina los archivos WAV temporales del servidor, por lo que no podrán conservarse ni descargarse de nuevo.",
   "parameters.title": "Control de parámetros",
   "parameters.reset": "Restablecer",
-  "parameters.readout": "4 MÁX.",
+  "parameters.readout": "10 MÁX.",
   "layers.title": "Capas de forma de onda",
   "layers.add": "+ Añadir capa",
   "layers.remove": "- Eliminar capa",

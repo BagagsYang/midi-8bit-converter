@@ -8,7 +8,7 @@ import LayerEditor from './LayerEditor.vue';
 const labels: Record<string, string> = {
   'parameters.title': 'Parameter Control',
   'parameters.reset': 'Reset',
-  'parameters.readout': '4 MAX',
+  'parameters.readout': '10 MAX',
   'layer.title': 'Layer 1',
   'layer.play_preview': 'Play Preview',
   'layer.waveform_type': 'Waveform Type',

@@ -32,7 +32,7 @@
   "converted.clear_confirm": "Clearing converted files deletes the temporary WAV files from the server, so they cannot be retained or downloaded again.",
   "parameters.title": "Parameter Control",
   "parameters.reset": "Reset",
-  "parameters.readout": "4 MAX",
+  "parameters.readout": "10 MAX",
   "layers.title": "Waveform Layers",
   "layers.add": "+ Add Layer",
   "layers.remove": "- Remove Layer",

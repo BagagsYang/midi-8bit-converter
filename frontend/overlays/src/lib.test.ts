@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createDefaultLayers,
   createDefaultLayer,
   layerFromConfig,
   layerToConfig,
+  maxLayers,
   nextLayerOctaveShift,
 } from './lib';
 import type { WorkspaceLayerConfig } from './types/api';
 
 describe('Pro octave shift layer config', () => {
+  it('supports ten configured layers', () => {
+    expect(maxLayers).toBe(10);
+    expect(createDefaultLayers()).toHaveLength(10);
+  });
+
   it('defaults to zero', () => {
     expect(createDefaultLayer(0).octaveShift).toBe(0);
   });

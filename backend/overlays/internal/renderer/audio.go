@@ -25,6 +25,7 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
+	channelRoutingActive := hasChannelRouting(runtimeLayers)
 	totalSamples, err := validateNoteRenderLimits(notes, sampleRate, runtimeLayers)
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 		mixedNoteWaveform := make([]float32, noteSampleLength)
 
 		for _, layer := range runtimeLayers {
-			if !layerAllowsChannel(layer, note.Channel) {
+			if !layerAllowsChannel(layer, note.Channel, channelRoutingActive) {
 				continue
 			}
 			layerFrequency := frequency * math.Pow(2, float64(layer.OctaveShift))
@@ -85,7 +86,7 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 }
 
 func validateNoteRenderLimits(notes []Note, sampleRate int, layers []Layer) (int, error) {
-	if err := validateLayerCount(len(layers)); err != nil {
+	if err := validateRuntimeLayerCount(len(layers)); err != nil {
 		return 0, err
 	}
 	if len(notes) > MaxMIDINotes {
@@ -129,9 +130,21 @@ func validateNoteRenderLimits(notes []Note, sampleRate int, layers []Layer) (int
 	return totalSamples, nil
 }
 
-func layerAllowsChannel(layer Layer, noteChannel int) bool {
-	if len(layer.MIDIChannels) == 0 || noteChannel == 0 {
+func hasChannelRouting(layers []Layer) bool {
+	for _, layer := range layers {
+		if len(layer.MIDIChannels) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func layerAllowsChannel(layer Layer, noteChannel int, channelRoutingActive bool) bool {
+	if !channelRoutingActive {
 		return true
+	}
+	if len(layer.MIDIChannels) == 0 || noteChannel == 0 {
+		return false
 	}
 	for _, channel := range layer.MIDIChannels {
 		if channel == noteChannel {

@@ -32,7 +32,7 @@
   "converted.clear_confirm": "清空已转换文件会删除服务器上的临时 WAV 文件，之后无法保留或再次下载。",
   "parameters.title": "参数控制中心",
   "parameters.reset": "重置",
-  "parameters.readout": "最多 4 层",
+  "parameters.readout": "最多 10 层",
   "layers.title": "波形层",
   "layers.add": "+ 添加层",
   "layers.remove": "- 删除层",

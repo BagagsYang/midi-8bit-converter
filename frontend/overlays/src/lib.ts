@@ -17,6 +17,12 @@ const layerPresets: Array<Pick<LayerState, 'type' | 'duty' | 'volume'>> = [
   { type: 'sine', duty: 0.5, volume: 1.0 },
   { type: 'triangle', duty: 0.5, volume: 1.0 },
   { type: 'sawtooth', duty: 0.5, volume: 1.0 },
+  { type: 'noise', duty: 0.5, volume: 1.0 },
+  { type: 'pulse', duty: 0.25, volume: 1.0 },
+  { type: 'sine', duty: 0.5, volume: 1.0 },
+  { type: 'triangle', duty: 0.5, volume: 1.0 },
+  { type: 'sawtooth', duty: 0.5, volume: 1.0 },
+  { type: 'pulse', duty: 0.75, volume: 1.0 },
 ];
 
 export const maxLayers = layerPresets.length;

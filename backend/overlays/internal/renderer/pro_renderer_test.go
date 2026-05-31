@@ -3,6 +3,7 @@ package renderer
 import (
 	"bytes"
 	"encoding/binary"
+	"strings"
 	"testing"
 )
 
@@ -46,6 +47,88 @@ func TestProChannelFilteringRoutesLayers(t *testing.T) {
 
 	if bytes.Equal(allChannels, filteredOut) {
 		t.Fatal("layer routed to another channel should not match the audible render")
+	}
+}
+
+func TestProChannelRoutingOnlyPlaysSelectedLayerForChannel(t *testing.T) {
+	sampleRate := 48000
+	channelOneNote := []Note{{Pitch: 60, Start: 0, End: 0.25, Velocity: 100, Channel: 1}}
+	channelTwoNote := []Note{{Pitch: 60, Start: 0, End: 0.25, Velocity: 100, Channel: 2}}
+	channelThreeNote := []Note{{Pitch: 60, Start: 0, End: 0.25, Velocity: 100, Channel: 3}}
+	routedLayers := []Layer{
+		{Type: "pulse", Duty: 0.5, Volume: 1, MIDIChannels: []int{1}},
+		{Type: "sine", Duty: 0.5, Volume: 1, MIDIChannels: []int{2}},
+	}
+
+	channelOneRouted, err := RenderNotesWAV(channelOneNote, sampleRate, routedLayers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	channelOnePulse, err := RenderNotesWAV(channelOneNote, sampleRate, []Layer{{Type: "pulse", Duty: 0.5, Volume: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := proMaxPCM16AbsDiff(t, channelOneRouted, channelOnePulse); diff > 1 {
+		t.Fatalf("channel 1 should use only the pulse layer; max PCM diff = %d", diff)
+	}
+
+	channelTwoRouted, err := RenderNotesWAV(channelTwoNote, sampleRate, routedLayers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	channelTwoSine, err := RenderNotesWAV(channelTwoNote, sampleRate, []Layer{{Type: "sine", Duty: 0.5, Volume: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := proMaxPCM16AbsDiff(t, channelTwoRouted, channelTwoSine); diff > 1 {
+		t.Fatalf("channel 2 should use only the sine layer; max PCM diff = %d", diff)
+	}
+
+	channelThreeRouted, err := RenderNotesWAV(channelThreeNote, sampleRate, routedLayers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if proWAVHasSignal(channelThreeRouted) {
+		t.Fatal("unselected channel should not be audible when channel routing is active")
+	}
+}
+
+func TestProOutputFilenameHashesChannelRouting(t *testing.T) {
+	channelOneName, err := BuildOutputFilename("song", []Layer{
+		{Type: "pulse", Duty: 0.5, Volume: 1, MIDIChannels: []int{1}},
+		{Type: "sine", Duty: 0.5, Volume: 1, MIDIChannels: []int{2}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	channelTwoName, err := BuildOutputFilename("song", []Layer{
+		{Type: "pulse", Duty: 0.5, Volume: 1, MIDIChannels: []int{2}},
+		{Type: "sine", Duty: 0.5, Volume: 1, MIDIChannels: []int{1}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if channelOneName == channelTwoName {
+		t.Fatalf("channel routing should affect output filename hash: %q", channelOneName)
+	}
+	if !strings.HasPrefix(channelOneName, "song_mix_") || !strings.HasPrefix(channelTwoName, "song_mix_") {
+		t.Fatalf("routed filenames should include a mix hash: %q, %q", channelOneName, channelTwoName)
+	}
+}
+
+func TestProRuntimeAllowsTenLayers(t *testing.T) {
+	layers := make([]Layer, 10)
+	for index := range layers {
+		layers[index] = Layer{Type: "pulse", Duty: 0.5, Volume: 1}
+	}
+	if _, err := RenderNotesWAV([]Note{{Pitch: 60, Start: 0, End: 0.1, Velocity: 100, Channel: 1}}, 48000, layers); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := RenderNotesWAV([]Note{{Pitch: 60, Start: 0, End: 0.1, Velocity: 100, Channel: 1}}, 48000, append(layers, Layer{Type: "pulse", Duty: 0.5, Volume: 1}))
+	if err == nil || !strings.Contains(err.Error(), "at most 10 sound layers") {
+		t.Fatalf("11 layers error = %v", err)
 	}
 }
 
@@ -93,4 +176,13 @@ func proMaxPCM16AbsDiff(t *testing.T, left, right []byte) int {
 		}
 	}
 	return maxDiff
+}
+
+func proWAVHasSignal(wavBytes []byte) bool {
+	for offset := 44; offset+1 < len(wavBytes); offset += 2 {
+		if int16(binary.LittleEndian.Uint16(wavBytes[offset:offset+2])) != 0 {
+			return true
+		}
+	}
+	return false
 }
