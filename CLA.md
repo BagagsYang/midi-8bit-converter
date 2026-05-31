@@ -63,7 +63,7 @@ granted, whether by implication, estoppel, or otherwise.
 
 ## 7. Governing Law
 
-This Agreement shall be governed by the laws of Japan.
+This Agreement shall be governed by the laws of the People's Republic of China.
 
 ---
 
