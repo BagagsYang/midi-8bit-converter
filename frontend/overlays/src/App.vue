@@ -88,6 +88,7 @@ onUnmounted(() => {
             @update-layer-midi-channels="workspace.updateLayerMidiChannels"
             @update-layer-vibrato-depth="workspace.updateLayerVibratoDepth"
             @update-layer-vibrato-rate="workspace.updateLayerVibratoRate"
+            @update-layer-octave-shift="workspace.updateLayerOctaveShift"
             @toggle-curve="workspace.toggleCurve"
             @add-curve-point="workspace.addCurvePoint"
             @remove-selected-point="workspace.removeSelectedPoint"

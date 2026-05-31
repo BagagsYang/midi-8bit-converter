@@ -20,6 +20,8 @@ const layerPresets: Array<Pick<LayerState, 'type' | 'duty' | 'volume'>> = [
 ];
 
 export const maxLayers = layerPresets.length;
+export const minLayerOctaveShift = -2;
+export const maxLayerOctaveShift = 2;
 export const minCurveFrequencyHz = 8.175798915643707;
 export const maxCurveFrequencyHz = 12543.853951415975;
 export const minCurveGainDb = -36.0;
@@ -52,6 +54,7 @@ export function createDefaultLayer(index: number): LayerState {
     midiChannels: [],
     vibratoDepthCents: 0,
     vibratoRateHz: 5,
+    octaveShift: 0,
   };
 }
 
@@ -81,6 +84,12 @@ export function normaliseDecimalInput(value: string | number, min: number, max: 
   return Number(clamp(finiteValue, min, max).toFixed(2));
 }
 
+export function nextLayerOctaveShift(value: number, delta: number): number {
+  const currentValue = Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : 0;
+  const deltaValue = Number.isFinite(Number(delta)) ? Math.trunc(Number(delta)) : 0;
+  return clamp(currentValue + deltaValue, minLayerOctaveShift, maxLayerOctaveShift);
+}
+
 export function layerToConfig(layer: LayerState): WorkspaceLayerConfig {
   return {
     type: layer.type,
@@ -97,6 +106,7 @@ export function layerToConfig(layer: LayerState): WorkspaceLayerConfig {
         .sort((left, right) => left - right),
       vibrato_depth_cents: Number(clamp(layer.vibratoDepthCents, 0, 200).toFixed(2)),
       vibrato_rate_hz: Number(clamp(layer.vibratoRateHz, 0.1, 20).toFixed(2)),
+      octave_shift: nextLayerOctaveShift(layer.octaveShift, 0),
     },
   };
 }
@@ -136,6 +146,9 @@ export function layerFromConfig(configLayer: WorkspaceLayerConfig, index: number
     vibratoRateHz: Number.isFinite(Number(configLayer.pro?.vibrato_rate_hz))
       ? clamp(Number(configLayer.pro?.vibrato_rate_hz), 0.1, 20)
       : 5,
+    octaveShift: Number.isFinite(Number(configLayer.pro?.octave_shift))
+      ? nextLayerOctaveShift(Number(configLayer.pro?.octave_shift), 0)
+      : 0,
   };
 }
 

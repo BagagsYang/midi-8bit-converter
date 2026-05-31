@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { iconSvg } from '../icons';
-import { maxLayers, normaliseDecimalInput, standardWaveTypeOptions, waveTypeOptions } from '../lib';
+import {
+  maxLayerOctaveShift,
+  maxLayers,
+  minLayerOctaveShift,
+  normaliseDecimalInput,
+  standardWaveTypeOptions,
+  waveTypeOptions,
+} from '../lib';
 import { proMode, useProEligibility } from '../pro';
 import type { WaveType } from '../types/api';
 import type { LayerState, QueuedFile, Translate } from '../types/ui';
@@ -21,6 +28,7 @@ const emit = defineEmits<{
   updateLayerMidiChannels: [layerIndex: number, value: number[]];
   updateLayerVibratoDepth: [layerIndex: number, value: number];
   updateLayerVibratoRate: [layerIndex: number, value: number];
+  updateLayerOctaveShift: [layerIndex: number, delta: number];
   toggleCurve: [layerIndex: number, enabled: boolean];
   addCurvePoint: [layerIndex: number];
   removeSelectedPoint: [layerIndex: number];
@@ -67,6 +75,11 @@ function isWaveDisabled(value: WaveType, layerIndex: number): boolean {
 function selectedChannelValues(event: Event): number[] {
   const select = event.target as HTMLSelectElement;
   return Array.from(select.selectedOptions).map((option) => Number(option.value));
+}
+
+function formatOctaveShift(value: number): string {
+  if (value > 0) return `+${value}`;
+  return String(value);
 }
 
 function proHint(): string {
@@ -251,6 +264,33 @@ function proHint(): string {
                   {{ t('pro.channel', { channel }) }}
                 </option>
               </select>
+            </div>
+
+            <div class="field-block">
+              <div class="field-label">
+                <span>{{ t('pro.octave_shift') }}</span>
+                <span class="module-readout">{{ formatOctaveShift(layer.octaveShift) }}</span>
+              </div>
+              <div class="layer-actions">
+                <button
+                  type="button"
+                  class="utility-btn fw-bold"
+                  :disabled="!canUseProControls || layer.octaveShift <= minLayerOctaveShift"
+                  :aria-label="t('pro.octave_down_aria')"
+                  @click="emit('updateLayerOctaveShift', layerIndex, -1)"
+                >
+                  {{ t('pro.octave_down') }}
+                </button>
+                <button
+                  type="button"
+                  class="utility-btn fw-bold"
+                  :disabled="!canUseProControls || layer.octaveShift >= maxLayerOctaveShift"
+                  :aria-label="t('pro.octave_up_aria')"
+                  @click="emit('updateLayerOctaveShift', layerIndex, 1)"
+                >
+                  {{ t('pro.octave_up') }}
+                </button>
+              </div>
             </div>
 
             <div class="field-block">

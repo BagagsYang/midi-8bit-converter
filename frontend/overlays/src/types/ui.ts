@@ -26,6 +26,7 @@ export interface LayerState {
   midiChannels: number[];
   vibratoDepthCents: number;
   vibratoRateHz: number;
+  octaveShift: number;
 }
 
 export type Translate = (key: string, params?: Record<string, string | number>) => string;

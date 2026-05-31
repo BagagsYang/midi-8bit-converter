@@ -30,13 +30,14 @@ type LayerConfig struct {
 	Volume         float64                        `json:"volume"`
 	CurveEnabled   bool                           `json:"curve_enabled"`
 	FrequencyCurve []renderer.FrequencyCurvePoint `json:"frequency_curve"`
-	Pro            LayerProConfig                 `json:"pro,omitempty"`
+	Pro            *LayerProConfig                `json:"pro,omitempty"`
 }
 
 type LayerProConfig struct {
 	MIDIChannels      []int   `json:"midi_channels"`
 	VibratoDepthCents float64 `json:"vibrato_depth_cents"`
 	VibratoRateHz     float64 `json:"vibrato_rate_hz"`
+	OctaveShift       int     `json:"octave_shift"`
 }
 
 type FormPayload struct {
@@ -136,6 +137,7 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 			"midi_channels":       rawProValue(rawLayer["pro"], "midi_channels"),
 			"vibrato_depth_cents": rawProValue(rawLayer["pro"], "vibrato_depth_cents"),
 			"vibrato_rate_hz":     rawProValue(rawLayer["pro"], "vibrato_rate_hz"),
+			"octave_shift":        rawProValue(rawLayer["pro"], "octave_shift"),
 		}, index+1)
 		if err != nil {
 			return Config{}, err
@@ -144,27 +146,36 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 			return Config{}, fmt.Errorf("Layer %d volume must be between 0.0 and 2.0.", index+1)
 		}
 
+		normalisedPro := LayerProConfig{
+			MIDIChannels:      rendererLayer.MIDIChannels,
+			VibratoDepthCents: roundConfigNumber(rendererLayer.VibratoDepthCents, 2),
+			VibratoRateHz:     roundConfigNumber(rendererLayer.VibratoRateHz, 2),
+			OctaveShift:       rendererLayer.OctaveShift,
+		}
+		var proConfig *LayerProConfig
+		if shouldIncludeProConfig(rawLayer["pro"], rendererLayer) {
+			proConfig = &normalisedPro
+		}
+
 		normalisedLayer := LayerConfig{
 			Type:           rendererLayer.Type,
 			Duty:           roundConfigNumber(rendererLayer.Duty, 4),
 			Volume:         roundConfigNumber(rendererLayer.Volume, 4),
 			CurveEnabled:   curveEnabled,
 			FrequencyCurve: roundFrequencyCurve(rendererLayer.FrequencyCurve),
-			Pro: LayerProConfig{
-				MIDIChannels:      rendererLayer.MIDIChannels,
-				VibratoDepthCents: roundConfigNumber(rendererLayer.VibratoDepthCents, 2),
-				VibratoRateHz:     roundConfigNumber(rendererLayer.VibratoRateHz, 2),
-			},
+			Pro:            proConfig,
 		}
+		layerPro := layerProConfig(normalisedLayer)
 		normalisedLayers = append(normalisedLayers, normalisedLayer)
 		rendererValidationLayers = append(rendererValidationLayers, renderer.Layer{
 			Type:              normalisedLayer.Type,
 			Duty:              normalisedLayer.Duty,
 			Volume:            normalisedLayer.Volume,
 			FrequencyCurve:    normalisedLayer.FrequencyCurve,
-			MIDIChannels:      normalisedLayer.Pro.MIDIChannels,
-			VibratoDepthCents: normalisedLayer.Pro.VibratoDepthCents,
-			VibratoRateHz:     normalisedLayer.Pro.VibratoRateHz,
+			MIDIChannels:      layerPro.MIDIChannels,
+			VibratoDepthCents: layerPro.VibratoDepthCents,
+			VibratoRateHz:     layerPro.VibratoRateHz,
+			OctaveShift:       layerPro.OctaveShift,
 		})
 	}
 	if _, err := renderer.NormaliseRuntimeLayers(rendererValidationLayers); err != nil {
@@ -187,6 +198,20 @@ func rawProValue(rawPro any, key string) any {
 		return nil
 	}
 	return proObject[key]
+}
+
+func shouldIncludeProConfig(rawPro any, layer renderer.Layer) bool {
+	if _, ok := rawPro.(map[string]any); ok {
+		return true
+	}
+	return len(layer.MIDIChannels) > 0 || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0
+}
+
+func layerProConfig(layer LayerConfig) LayerProConfig {
+	if layer.Pro == nil {
+		return LayerProConfig{}
+	}
+	return *layer.Pro
 }
 
 func formValueOrDefault(value, defaultValue string) string {

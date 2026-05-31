@@ -22,6 +22,8 @@ const (
 	MaxRenderSeconds          = 30 * 60
 	MaxMIDINotes              = 20_000
 	MaxRenderLayers           = 4
+	MinOctaveShift            = -2
+	MaxOctaveShift            = 2
 	NormalisedPeak            = 0.89
 )
 
@@ -46,6 +48,7 @@ type Layer struct {
 	MIDIChannels      []int                 `json:"midi_channels,omitempty"`
 	VibratoDepthCents float64               `json:"vibrato_depth_cents,omitempty"`
 	VibratoRateHz     float64               `json:"vibrato_rate_hz,omitempty"`
+	OctaveShift       int                   `json:"octave_shift,omitempty"`
 }
 
 type RenderLimitError struct {
@@ -132,6 +135,13 @@ func SanitiseLayer(rawLayer map[string]any, layerIndex int) (Layer, error) {
 	if vibratoRateHz < 0.1 || vibratoRateHz > 20 {
 		return Layer{}, fmt.Errorf("Layer %d vibrato_rate_hz must be between 0.1 and 20.", layerIndex)
 	}
+	octaveShift, err := parseLayerInteger(rawLayer, layerIndex, "octave_shift", 0)
+	if err != nil {
+		return Layer{}, err
+	}
+	if octaveShift < MinOctaveShift || octaveShift > MaxOctaveShift {
+		return Layer{}, fmt.Errorf("Layer %d octave_shift must be between %d and %d.", layerIndex, MinOctaveShift, MaxOctaveShift)
+	}
 
 	return Layer{
 		Type:              waveType,
@@ -141,6 +151,7 @@ func SanitiseLayer(rawLayer map[string]any, layerIndex int) (Layer, error) {
 		MIDIChannels:      midiChannels,
 		VibratoDepthCents: vibratoDepthCents,
 		VibratoRateHz:     vibratoRateHz,
+		OctaveShift:       octaveShift,
 	}, nil
 }
 
@@ -162,6 +173,7 @@ func NormaliseRuntimeLayers(layers []Layer) ([]Layer, error) {
 			"midi_channels":       layer.MIDIChannels,
 			"vibrato_depth_cents": layer.VibratoDepthCents,
 			"vibrato_rate_hz":     layer.VibratoRateHz,
+			"octave_shift":        layer.OctaveShift,
 		}
 		sanitisedLayer, err := SanitiseLayer(rawLayer, len(audibleLayers)+1)
 		if err != nil {
@@ -274,6 +286,22 @@ func parseLayerNumber(rawLayer map[string]any, layerIndex int, fieldName string,
 		return 0, err
 	}
 	return value, nil
+}
+
+func parseLayerInteger(rawLayer map[string]any, layerIndex int, fieldName string, defaultValue int) (int, error) {
+	rawValue, ok := rawLayer[fieldName]
+	if !ok || rawValue == nil {
+		return defaultValue, nil
+	}
+	value, err := parseFiniteNumber(rawValue, fmt.Sprintf("Layer %d %s", layerIndex, fieldName))
+	if err != nil {
+		return 0, err
+	}
+	intValue := int(value)
+	if value != float64(intValue) {
+		return 0, fmt.Errorf("Layer %d %s must be an integer.", layerIndex, fieldName)
+	}
+	return intValue, nil
 }
 
 func parseFiniteNumber(rawValue any, fieldLabel string) (float64, error) {

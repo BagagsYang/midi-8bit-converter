@@ -47,12 +47,13 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 			if !layerAllowsChannel(layer, note.Channel) {
 				continue
 			}
-			curveGainDB := EvaluateFrequencyCurveGainDB(layer.FrequencyCurve, frequency)
+			layerFrequency := frequency * math.Pow(2, float64(layer.OctaveShift))
+			curveGainDB := EvaluateFrequencyCurveGainDB(layer.FrequencyCurve, layerFrequency)
 			effectiveVolume := float32(layer.Volume * dbToLinearGain(curveGainDB))
 			if effectiveVolume <= 0 {
 				continue
 			}
-			layerWave := generateWaveform(frequency, sampleRate, noteSampleLength, layer)
+			layerWave := generateWaveform(layerFrequency, sampleRate, noteSampleLength, layer)
 			for index := range mixedNoteWaveform {
 				mixedNoteWaveform[index] += layerWave[index] * effectiveVolume
 			}

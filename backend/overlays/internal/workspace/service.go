@@ -700,14 +700,16 @@ func RuntimeLayers(workspaceConfig Config) []renderer.Layer {
 		if layer.CurveEnabled {
 			frequencyCurve = layer.FrequencyCurve
 		}
+		pro := layerProConfig(layer)
 		runtimeLayers = append(runtimeLayers, renderer.Layer{
 			Type:              layer.Type,
 			Duty:              layer.Duty,
 			Volume:            layer.Volume,
 			FrequencyCurve:    frequencyCurve,
-			MIDIChannels:      layer.Pro.MIDIChannels,
-			VibratoDepthCents: layer.Pro.VibratoDepthCents,
-			VibratoRateHz:     layer.Pro.VibratoRateHz,
+			MIDIChannels:      pro.MIDIChannels,
+			VibratoDepthCents: pro.VibratoDepthCents,
+			VibratoRateHz:     pro.VibratoRateHz,
+			OctaveShift:       pro.OctaveShift,
 		})
 	}
 	return runtimeLayers
@@ -715,7 +717,7 @@ func RuntimeLayers(workspaceConfig Config) []renderer.Layer {
 
 func requiresMultiChannel(layers []renderer.Layer) bool {
 	for _, layer := range layers {
-		if layer.Type == "noise" || layer.VibratoDepthCents > 0 {
+		if layer.Type == "noise" || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0 {
 			return true
 		}
 	}

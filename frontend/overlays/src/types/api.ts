@@ -28,6 +28,7 @@ export interface WorkspaceLayerProConfig {
   midi_channels: number[];
   vibrato_depth_cents: number;
   vibrato_rate_hz: number;
+  octave_shift: number;
 }
 
 export interface WorkspaceConfigV1 {

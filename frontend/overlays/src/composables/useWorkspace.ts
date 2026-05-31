@@ -27,6 +27,7 @@ import {
   maxLayers,
   minCurveFrequencyHz,
   minCurveGainDb,
+  nextLayerOctaveShift,
   sampleRates,
   waveTypeOptions,
 } from '../lib';
@@ -240,6 +241,11 @@ export function useWorkspace(t: Translate) {
 
   function updateLayerVibratoRate(layerIndex: number, value: number) {
     layers.value[layerIndex].vibratoRateHz = clamp(value, 0.1, 20);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateLayerOctaveShift(layerIndex: number, delta: number) {
+    layers.value[layerIndex].octaveShift = nextLayerOctaveShift(layers.value[layerIndex].octaveShift, delta);
     scheduleWorkspaceConfigSave();
   }
 
@@ -525,6 +531,7 @@ export function useWorkspace(t: Translate) {
     updateLayerMidiChannels,
     updateLayerVibratoDepth,
     updateLayerVibratoRate,
+    updateLayerOctaveShift,
     toggleCurve,
     addCurvePoint,
     removeSelectedPoint,
