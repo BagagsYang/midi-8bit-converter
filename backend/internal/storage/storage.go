@@ -31,13 +31,14 @@ type Workspace struct {
 }
 
 type Upload struct {
-	ID            int64
-	WorkspaceID   int64
-	FileID        string
-	OriginalName  string
-	SizeBytes     int64
-	QueuePosition int
-	CreatedAt     float64
+	ID              int64
+	WorkspaceID     int64
+	FileID          string
+	OriginalName    string
+	SizeBytes       int64
+	QueuePosition   int
+	CreatedAt       float64
+	MIDIProfileJSON string
 }
 
 type Job struct {
@@ -204,14 +205,15 @@ func (s *Store) DeleteExpiredWorkspaces(ctx context.Context, now time.Time) ([]i
 func (s *Store) InsertUpload(ctx context.Context, upload Upload) (int64, error) {
 	result, err := s.db.ExecContext(
 		ctx,
-		`INSERT INTO uploads (workspace_id, file_id, original_name, size_bytes, queue_position, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO uploads (workspace_id, file_id, original_name, size_bytes, queue_position, created_at, midi_profile_json)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		upload.WorkspaceID,
 		upload.FileID,
 		upload.OriginalName,
 		upload.SizeBytes,
 		upload.QueuePosition,
 		upload.CreatedAt,
+		upload.MIDIProfileJSON,
 	)
 	if err != nil {
 		return 0, err
@@ -285,7 +287,8 @@ func (s *Store) EnsureSchema(ctx context.Context) error {
 			original_name TEXT NOT NULL,
 			size_bytes INTEGER NOT NULL,
 			queue_position INTEGER NOT NULL,
-			created_at REAL NOT NULL
+			created_at REAL NOT NULL,
+			midi_profile_json TEXT NOT NULL DEFAULT '{}'
 		);
 
 		CREATE INDEX IF NOT EXISTS idx_uploads_workspace_position
@@ -310,6 +313,37 @@ func (s *Store) EnsureSchema(ctx context.Context) error {
 		CREATE INDEX IF NOT EXISTS idx_jobs_workspace_created
 			ON jobs(workspace_id, created_at);
 	`)
+	if err != nil {
+		return err
+	}
+	return s.ensureColumn(ctx, "uploads", "midi_profile_json", "TEXT NOT NULL DEFAULT '{}'")
+}
+
+func (s *Store) ensureColumn(ctx context.Context, tableName, columnName, definition string) error {
+	rows, err := s.db.QueryContext(ctx, "PRAGMA table_info("+tableName+")")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cid int
+		var name string
+		var columnType string
+		var notNull int
+		var defaultValue any
+		var primaryKey int
+		if err := rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey); err != nil {
+			return err
+		}
+		if name == columnName {
+			return nil
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, "ALTER TABLE "+tableName+" ADD COLUMN "+columnName+" "+definition)
 	return err
 }
 

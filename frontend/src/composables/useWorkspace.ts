@@ -42,6 +42,7 @@ function uploadRecordFromApi(upload: WorkspaceUpload): QueuedFile {
     fileId: upload.file_id,
     name: upload.name,
     size: upload.size,
+    midiProfile: upload.midi_profile || { channels: [], melodic_channels: [], multi_channel: false },
   };
 }
 

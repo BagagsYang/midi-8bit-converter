@@ -70,6 +70,7 @@ const themeIcon = computed(() => {
           </option>
         </select>
       </span>
+      <slot name="extension-control"></slot>
       <a
         class="github-link"
         href="https://github.com/bagags/octabit"

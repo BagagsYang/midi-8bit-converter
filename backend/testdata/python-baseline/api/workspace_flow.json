@@ -49,6 +49,15 @@
         "upload": {
           "created_at": "<timestamp>",
           "file_id": "<file_id:1>",
+          "midi_profile": {
+            "channels": [
+              1
+            ],
+            "melodic_channels": [
+              1
+            ],
+            "multi_channel": false
+          },
           "name": "first.mid",
           "size": 64
         }
@@ -64,6 +73,15 @@
         "upload": {
           "created_at": "<timestamp>",
           "file_id": "<file_id:2>",
+          "midi_profile": {
+            "channels": [
+              1
+            ],
+            "melodic_channels": [
+              1
+            ],
+            "multi_channel": false
+          },
           "name": "second.mid",
           "size": 76
         }
@@ -80,12 +98,30 @@
           {
             "created_at": "<timestamp>",
             "file_id": "<file_id:2>",
+            "midi_profile": {
+              "channels": [
+                1
+              ],
+              "melodic_channels": [
+                1
+              ],
+              "multi_channel": false
+            },
             "name": "second.mid",
             "size": 76
           },
           {
             "created_at": "<timestamp>",
             "file_id": "<file_id:1>",
+            "midi_profile": {
+              "channels": [
+                1
+              ],
+              "melodic_channels": [
+                1
+              ],
+              "multi_channel": false
+            },
             "name": "first.mid",
             "size": 64
           }

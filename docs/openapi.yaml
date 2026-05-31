@@ -659,7 +659,7 @@ components:
     WorkspaceUpload:
       type: object
       additionalProperties: false
-      required: [file_id, name, size, created_at]
+      required: [file_id, name, size, created_at, midi_profile]
       properties:
         file_id:
           $ref: "#/components/schemas/OpaqueId"
@@ -670,6 +670,30 @@ components:
           minimum: 0
         created_at:
           $ref: "#/components/schemas/UnixTimestamp"
+        midi_profile:
+          $ref: "#/components/schemas/MIDIProfile"
+
+    MIDIProfile:
+      type: object
+      additionalProperties: false
+      required: [channels, melodic_channels, multi_channel]
+      properties:
+        channels:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 16
+          uniqueItems: true
+        melodic_channels:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 16
+          uniqueItems: true
+        multi_channel:
+          type: boolean
 
     ConvertedFile:
       type: object

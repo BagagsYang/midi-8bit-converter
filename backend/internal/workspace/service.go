@@ -88,10 +88,11 @@ type LimitsPayload struct {
 }
 
 type UploadPayload struct {
-	FileID    string  `json:"file_id"`
-	Name      string  `json:"name"`
-	Size      int64   `json:"size"`
-	CreatedAt float64 `json:"created_at"`
+	FileID      string       `json:"file_id"`
+	Name        string       `json:"name"`
+	Size        int64        `json:"size"`
+	CreatedAt   float64      `json:"created_at"`
+	MIDIProfile midi.Profile `json:"midi_profile"`
 }
 
 type ConvertedPayload struct {
@@ -321,14 +322,20 @@ func (s *Service) CreateUploadFromTemp(ctx context.Context, workspace Context, s
 	if name == "." || name == string(filepath.Separator) || name == "" {
 		name = "upload.mid"
 	}
+	midiProfile, _ := midi.ReadProfile(sourcePath)
+	midiProfileJSON, err := json.Marshal(midiProfile)
+	if err != nil {
+		return UploadPayload{}, err
+	}
 
 	if _, err := s.store.InsertUpload(ctx, storage.Upload{
-		WorkspaceID:   workspace.ID,
-		FileID:        fileID,
-		OriginalName:  name,
-		SizeBytes:     info.Size(),
-		QueuePosition: position,
-		CreatedAt:     now,
+		WorkspaceID:     workspace.ID,
+		FileID:          fileID,
+		OriginalName:    name,
+		SizeBytes:       info.Size(),
+		QueuePosition:   position,
+		CreatedAt:       now,
+		MIDIProfileJSON: string(midiProfileJSON),
 	}); err != nil {
 		return UploadPayload{}, err
 	}
@@ -732,14 +739,14 @@ func (s *Service) nextUploadQueuePosition(ctx context.Context, workspaceID int64
 func (s *Service) getUpload(ctx context.Context, workspaceID int64, fileID string) (storage.Upload, bool, error) {
 	row := s.store.DB().QueryRowContext(
 		ctx,
-		`SELECT id, workspace_id, file_id, original_name, size_bytes, queue_position, created_at
+		`SELECT id, workspace_id, file_id, original_name, size_bytes, queue_position, created_at, midi_profile_json
 		 FROM uploads
 		 WHERE workspace_id = ? AND file_id = ?`,
 		workspaceID,
 		fileID,
 	)
 	var upload storage.Upload
-	err := row.Scan(&upload.ID, &upload.WorkspaceID, &upload.FileID, &upload.OriginalName, &upload.SizeBytes, &upload.QueuePosition, &upload.CreatedAt)
+	err := row.Scan(&upload.ID, &upload.WorkspaceID, &upload.FileID, &upload.OriginalName, &upload.SizeBytes, &upload.QueuePosition, &upload.CreatedAt, &upload.MIDIProfileJSON)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return storage.Upload{}, false, nil
@@ -752,7 +759,7 @@ func (s *Service) getUpload(ctx context.Context, workspaceID int64, fileID strin
 func (s *Service) listUploads(ctx context.Context, workspaceID int64) ([]storage.Upload, error) {
 	rows, err := s.store.DB().QueryContext(
 		ctx,
-		`SELECT id, workspace_id, file_id, original_name, size_bytes, queue_position, created_at
+		`SELECT id, workspace_id, file_id, original_name, size_bytes, queue_position, created_at, midi_profile_json
 		 FROM uploads
 		 WHERE workspace_id = ?
 		 ORDER BY queue_position ASC, created_at ASC`,
@@ -766,7 +773,7 @@ func (s *Service) listUploads(ctx context.Context, workspaceID int64) ([]storage
 	var uploads []storage.Upload
 	for rows.Next() {
 		var upload storage.Upload
-		if err := rows.Scan(&upload.ID, &upload.WorkspaceID, &upload.FileID, &upload.OriginalName, &upload.SizeBytes, &upload.QueuePosition, &upload.CreatedAt); err != nil {
+		if err := rows.Scan(&upload.ID, &upload.WorkspaceID, &upload.FileID, &upload.OriginalName, &upload.SizeBytes, &upload.QueuePosition, &upload.CreatedAt, &upload.MIDIProfileJSON); err != nil {
 			return nil, err
 		}
 		uploads = append(uploads, upload)
@@ -895,11 +902,16 @@ func uploadPayloads(rows []storage.Upload) []UploadPayload {
 }
 
 func uploadPayload(row storage.Upload) UploadPayload {
+	var profile midi.Profile
+	if row.MIDIProfileJSON != "" {
+		_ = json.Unmarshal([]byte(row.MIDIProfileJSON), &profile)
+	}
 	return UploadPayload{
-		FileID:    row.FileID,
-		Name:      row.OriginalName,
-		Size:      row.SizeBytes,
-		CreatedAt: row.CreatedAt,
+		FileID:      row.FileID,
+		Name:        row.OriginalName,
+		Size:        row.SizeBytes,
+		CreatedAt:   row.CreatedAt,
+		MIDIProfile: profile,
 	}
 }
 
