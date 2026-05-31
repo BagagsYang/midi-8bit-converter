@@ -76,8 +76,8 @@ jobs:
           Agreement. Please:
 
           1. Read [CLA.md](https://github.com/${REPO}/blob/main/CLA.md)
-          2. Fill in the signature table at the bottom
-          3. Submit the signed CLA to the project maintainer
+          2. Create `CLA-signatures/${AUTHOR}.json` with your info
+          3. Open a pull request with this file — the PR itself is your signature
 
           Once your signed CLA is recorded, this label will be removed and the
           PR can proceed.

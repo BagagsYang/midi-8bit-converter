@@ -1,17 +1,18 @@
 # CLA Signatures
 
-Each file in this directory records a signed Contributor License Agreement.
-Files are named `<github-username>.json`.
+Each file in this directory records a signed Contributor License Agreement
+(see [CLA.md](../CLA.md)).
 
-## Format
+## For contributors
+
+To sign the CLA, create a file named `<your-github-username>.json` in this
+directory and open a pull request. The act of opening the PR is your
+electronic signature.
 
 ```json
 {
-  "name": "Full Name",
-  "github_username": "github-username",
+  "name": "Your Full Name",
+  "github_username": "your-github-username",
   "date": "YYYY-MM-DD"
 }
 ```
-
-Do not create a file here manually — signature records are added by the
-project maintainer after the contributor has submitted a signed CLA.md.
