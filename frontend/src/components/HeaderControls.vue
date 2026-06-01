@@ -31,10 +31,10 @@ const themeIcon = computed(() => {
       <div class="logo-mark" aria-hidden="true">
         <img
           class="logo-image"
-          src="/octabit-icon-34.png"
-          srcset="/octabit-icon-34.png 1x, /octabit-icon-68.png 2x, /octabit-icon-102.png 3x"
-          width="34"
-          height="34"
+          src="/android-chrome-192x192.png"
+          srcset="/android-chrome-192x192.png 1x, /android-chrome-512x512.png 2x"
+          width="40"
+          height="40"
           alt=""
           decoding="async"
         >
