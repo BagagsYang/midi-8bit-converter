@@ -4,8 +4,9 @@ import es from '../i18n/es.json';
 import fr from '../i18n/fr.json';
 import ja from '../i18n/ja.json';
 import zhCn from '../i18n/zh-CN.json';
+import zhTw from '../i18n/zh-TW.json';
 
-type Locale = 'en' | 'es' | 'fr' | 'ja' | 'zh-CN';
+type Locale = 'en' | 'es' | 'fr' | 'ja' | 'zh-CN' | 'zh-TW';
 
 const translationsByLocale: Record<Locale, Record<string, string>> = {
   en,
@@ -13,8 +14,9 @@ const translationsByLocale: Record<Locale, Record<string, string>> = {
   fr,
   ja,
   'zh-CN': zhCn,
+  'zh-TW': zhTw,
 };
-const supportedLocales: Locale[] = ['en', 'es', 'fr', 'ja', 'zh-CN'];
+const supportedLocales: Locale[] = ['en', 'es', 'fr', 'ja', 'zh-CN', 'zh-TW'];
 const defaultLocale: Locale = 'en';
 const localeCookieName = 'web_locale';
 

@@ -4,6 +4,7 @@ import es from '../../i18n/es.json';
 import fr from '../../i18n/fr.json';
 import ja from '../../i18n/ja.json';
 import zhCn from '../../i18n/zh-CN.json';
+import zhTw from '../../i18n/zh-TW.json';
 import { useLocale } from '../useLocale';
 
 describe('useLocale', () => {
@@ -88,7 +89,7 @@ describe('useLocale', () => {
 
   it('keeps frontend catalog key sets aligned', () => {
     const expectedKeys = Object.keys(en).sort();
-    for (const catalog of [es, fr, ja, zhCn]) {
+    for (const catalog of [es, fr, ja, zhCn, zhTw]) {
       expect(Object.keys(catalog).sort()).toEqual(expectedKeys);
     }
   });
