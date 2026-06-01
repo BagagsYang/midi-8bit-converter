@@ -9,7 +9,8 @@ agent. It is intentionally maintained in English only.
 
 - Production UI localisation lives in `frontend/src/i18n/`.
 - Repository product documentation is maintained in English and Simplified
-  Chinese, but agent instruction docs such as this file are English-only.
+  Chinese. Simplified Chinese markdown variants use the `.zh-Hans.md` suffix,
+  but agent instruction docs such as this file are English-only.
 - Legacy Flask UI catalogues live in `legacy/web-flask/i18n/` and should only
   change when a task explicitly targets the legacy fallback.
 - Paused native macOS and Windows app localisation is out of scope unless those
@@ -21,7 +22,8 @@ Follow this checklist for every new production UI language. Do not skip steps
 because the deploy script derives its locale checks from the catalog files.
 
 1. Choose a stable locale code. Prefer a generic language code such as `es` or
-   `fr` unless the requested locale needs a region, such as `zh-CN`.
+   `fr` unless the requested locale needs a script distinction, such as
+   `zh-Hans` or `zh-Hant`.
 2. Add `frontend/src/i18n/<locale>.json` with the same keys as `en.json`.
 3. Add `toolbar.language_option.<locale>` to every production frontend catalog.
    Use the language's native display name, for example `Español`.
@@ -46,13 +48,13 @@ When the set of production UI languages changes, update existing English and
 Simplified Chinese docs that list frontend catalog coverage. At minimum check:
 
 - `README.md`
-- `README.zh-CN.md`
+- `README.zh-Hans.md`
 - `docs/repository-layout.md`
-- `docs/repository-layout.zh-CN.md`
+- `docs/repository-layout.zh-Hans.md`
 - `AGENTS.md`
 - `CLAUDE.md`
 - `legacy/web-flask/i18n/README.md`
-- `legacy/web-flask/i18n/README.zh-CN.md`
+- `legacy/web-flask/i18n/README.zh-Hans.md`
 
 Keep documentation language coverage separate from UI language coverage. The
 repository docs remain English and Simplified Chinese even when the production

@@ -2,7 +2,7 @@
     <img src="./assets/readme/octabit-readme-header.png" alt="OctaBit" width="900">
 </p>
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 OctaBit is a browser-based tool for converting MIDI files into 8-bit style WAV audio. The public service is <https://octabit.cc>.
 
@@ -140,7 +140,7 @@ The hash is derived from the sanitised layer payload, so different curve setting
 
 ## Localisation
 
-The production Vue UI keeps JSON catalog files under `frontend/src/i18n/` for English, Spanish, French, Japanese, and Simplified Chinese. The legacy Flask-rendered UI keeps its catalogs under `legacy/web-flask/i18n/`. Keep `en.json`, `es.json`, `fr.json`, `ja.json`, and `zh-CN.json` key sets aligned in the production frontend catalogs. English is the fallback locale. Repository documentation remains English and Simplified Chinese. Follow the standard process in [docs/localisation.md](./docs/localisation.md).
+The production Vue UI keeps JSON catalog files under `frontend/src/i18n/` for English, Spanish, French, Japanese, Simplified Chinese (`zh-Hans`), and Traditional Chinese (`zh-Hant`). The legacy Flask-rendered UI keeps its catalogs under `legacy/web-flask/i18n/`. Keep `en.json`, `es.json`, `fr.json`, `ja.json`, `zh-Hans.json`, and `zh-Hant.json` key sets aligned in the production frontend catalogs. English is the fallback locale. Repository documentation remains English and Simplified Chinese. Follow the standard process in [docs/localisation.md](./docs/localisation.md).
 
 User-facing web strings should go through the catalog rather than being hardcoded in templates or JavaScript. Native macOS and Windows localisation work is out of scope while those apps remain paused.
 

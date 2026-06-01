@@ -1,6 +1,6 @@
 # Web Flask app
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 This folder contains the Flask backend for OctaBit and the legacy Flask-rendered
 frontend fallback. The public production frontend is now the Vue app in

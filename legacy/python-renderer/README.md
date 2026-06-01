@@ -1,6 +1,6 @@
 # Python renderer
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 This folder contains the canonical Python MIDI-to-WAV renderer used directly by the Flask app and retained macOS helper build, and indirectly by the retained Windows parity tests.
 

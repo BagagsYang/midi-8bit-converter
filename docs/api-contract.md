@@ -1,6 +1,6 @@
 # Web API contract
 
-Language/语言: English | [简体中文](./api-contract.zh-CN.md)
+Language/语言: English | [简体中文](./api-contract.zh-Hans.md)
 
 This document describes the browser-facing API boundary for the Go OctaBit
 backend. The production web frontend is the Vue app in `frontend/`, served by

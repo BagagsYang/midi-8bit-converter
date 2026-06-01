@@ -1,6 +1,6 @@
 # macOS app
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 This folder contains the native macOS app packaging and build notes.
 

@@ -1,6 +1,6 @@
 # Repository layout
 
-Language/语言: English | [简体中文](./repository-layout.zh-CN.md)
+Language/语言: English | [简体中文](./repository-layout.zh-Hans.md)
 
 This repository is a monorepo for OctaBit, a simple web tool for converting
 MIDI files into 8-bit style music. The current production web frontend is the
@@ -17,7 +17,7 @@ or possible future revival.
 | Path | Purpose |
 | --- | --- |
 | `AGENTS.md` | Repository instructions for coding agents and local workflows. |
-| `README.md`, `README.zh-CN.md` | Root project overview, setup notes, app entry points, and repository licence summary. |
+| `README.md`, `README.zh-Hans.md` | Root project overview, setup notes, app entry points, and repository licence summary. |
 | `LICENSE.md` | Repository AGPL licence text. |
 | `frontend/` | Production Vue/Vite frontend. |
 | `backend/` | Primary Go backend module and frozen Python baseline fixtures. |
@@ -89,7 +89,7 @@ Production Vue/Vite frontend for the public browser experience.
 - `src/api/`: typed client for the backend `/api/*` routes.
 - `src/components/`: upload queue, layer editor, output controls, header
   controls, converted files, and curve editor components.
-- `src/i18n/`: English, Spanish, French, Japanese, and Simplified Chinese frontend catalogs.
+- `src/i18n/`: English, Spanish, French, Japanese, Simplified Chinese, and Traditional Chinese frontend catalogs.
 - `src/styles/app.css`: current OctaBit visual system reused from the Flask UI.
 - `vite.config.ts`: development proxy for `/api` and `/static/previews` to
   `http://127.0.0.1:8000`.
@@ -115,7 +115,7 @@ regeneration and fallback reference.
 - `requirements.txt`: web runtime dependencies; it includes the shared renderer
   requirements.
 - `Launch_Synthesiser.command` and `Launch_Synthesiser.bat`: local launchers.
-- `README.md`, `README.zh-CN.md`, `User_Guide.txt`: web app documentation.
+- `README.md`, `README.zh-Hans.md`, `User_Guide.txt`: web app documentation.
 
 The Flask backend delegates synthesis to `legacy/python-renderer/midi_to_wave.py`
 and serves preview audio from `assets/previews/`; normal production runtime
@@ -134,7 +134,7 @@ revival while the project focuses on the web service.
   Python renderer into a helper binary and copies preview WAV assets into the
   app bundle.
 - `requirements-build.txt`: Python build dependencies for the helper.
-- `macos/README.md`, `macos/README.zh-CN.md`: macOS build and usage notes.
+- `macos/README.md`, `macos/README.zh-Hans.md`: macOS build and usage notes.
 
 The macOS app does not run the Flask server. It launches the bundled Python
 helper for each queued MIDI file.
@@ -158,7 +158,7 @@ the web service.
 - `installer/RuntimeNotice.txt`: installer pre-install runtime notice.
 - `scripts/create_review_bundle.sh`: script for preparing a Windows review
   bundle.
-- `README.md`, `README.zh-CN.md`, `REVIEWING.md`: Windows build and review
+- `README.md`, `README.zh-Hans.md`, `REVIEWING.md`: Windows build and review
   documentation.
 
 The retained Windows app has its own C# renderer and validates it against the
@@ -192,10 +192,10 @@ provenance.
 
 ## Documentation and generated artefacts
 
-- `docs/api-contract.md`, `docs/api-contract.zh-CN.md`, and
+- `docs/api-contract.md`, `docs/api-contract.zh-Hans.md`, and
   `docs/openapi.yaml`: current web API contract, compatibility route notes, job
   payloads, and public-demo safeguards.
-- `docs/repository-layout.md` and `docs/repository-layout.zh-CN.md`: current
+- `docs/repository-layout.md` and `docs/repository-layout.zh-Hans.md`: current
   repository layout in English and Simplified Chinese.
 - `docs/localisation.md`: English-only agent procedure for production UI
   localisation and related documentation updates.

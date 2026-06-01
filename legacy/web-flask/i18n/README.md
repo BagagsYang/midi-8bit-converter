@@ -1,11 +1,11 @@
 # Web UI i18n
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 The legacy Flask-rendered frontend uses the JSON catalogs in this directory for
 Flask-rendered HTML and the inline browser UI in `templates/index.html`. The
 production Vue frontend keeps its catalogs in `frontend/src/i18n/` for English,
-Spanish, French, Japanese, and Simplified Chinese. Keep the legacy Flask catalog keys
+Spanish, French, Japanese, Simplified Chinese (`zh-Hans`), and Traditional Chinese (`zh-Hant`). Keep the legacy Flask catalog keys
 aligned across `en.json`, `fr.json`, and `zh-CN.json`; English remains the
 fallback locale.
 

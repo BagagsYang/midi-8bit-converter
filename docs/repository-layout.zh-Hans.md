@@ -11,7 +11,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 | 路径 | 用途 |
 | --- | --- |
 | `AGENTS.md` | 面向编码代理和本地工作流的仓库说明。 |
-| `README.md`, `README.zh-CN.md` | 根项目概览、设置说明、应用入口和仓库许可证摘要。 |
+| `README.md`, `README.zh-Hans.md` | 根项目概览、设置说明、应用入口和仓库许可证摘要。 |
 | `LICENSE.md` | 仓库 AGPL 许可证文本。 |
 | `frontend/` | 生产 Vue/Vite 前端。 |
 | `backend/` | 主 Go 后端模块和冻结 Python baseline fixtures。 |
@@ -58,7 +58,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 - `src/App.vue`：顶层 Vue 工作流和状态编排。
 - `src/api/`：后端 `/api/*` 路由的类型化客户端。
 - `src/components/`：上传队列、声音层编辑器、输出控制、头部控制、已转换文件和曲线编辑器组件。
-- `src/i18n/`：英文、西班牙文、法文、日文和简体中文前端 catalog。
+- `src/i18n/`：英文、西班牙文、法文、日文、简体中文和繁体中文前端 catalog。
 - `src/styles/app.css`：从 Flask UI 复用的当前 OctaBit 视觉系统。
 - `vite.config.ts`：开发环境中把 `/api` 和 `/static/previews` 代理到
   `http://127.0.0.1:8000`。
@@ -78,7 +78,7 @@ Web 前端是 `frontend/` 中的 Vue 应用，并从 Vite `dist` 构建产物为
 - `tests/`：Flask 和渲染路径测试。
 - `requirements.txt`：Web 运行时依赖；它包含共享渲染器依赖。
 - `Launch_Synthesiser.command` 和 `Launch_Synthesiser.bat`：本地启动器。
-- `README.md`、`README.zh-CN.md`、`User_Guide.txt`：Web 应用文档。
+- `README.md`、`README.zh-Hans.md`、`User_Guide.txt`：Web 应用文档。
 
 Flask 后端将合成交给 `legacy/python-renderer/midi_to_wave.py`，并从
 `assets/previews/` 提供预览音频；常规生产运行时使用 Go 后端。
@@ -93,7 +93,7 @@ Web 服务期间，它保留用于参考或未来可能的恢复。
 - `MIDI8BitSynthesiserTests/`：用于模型和文件名逻辑的 XCTest 目标。
 - `macos/build_desktop_resources.sh`：Xcode 构建阶段脚本，用于将 Python 渲染器冻结为辅助二进制文件，并把预览 WAV 资源复制进应用包。
 - `requirements-build.txt`：辅助程序的 Python 构建依赖。
-- `macos/README.md`、`macos/README.zh-CN.md`：macOS 构建和使用说明。
+- `macos/README.md`、`macos/README.zh-Hans.md`：macOS 构建和使用说明。
 
 macOS 应用不运行 Flask 服务器。它会为每个队列中的 MIDI 文件启动随包附带的 Python
 辅助程序。
@@ -111,7 +111,7 @@ Web 服务期间，它保留用于参考或未来可能的恢复。
 - `installer/Midi8BitSynthesiser.iss`：Inno Setup 安装程序脚本。
 - `installer/RuntimeNotice.txt`：安装前运行时提示。
 - `scripts/create_review_bundle.sh`：准备 Windows 评审包的脚本。
-- `README.md`、`README.zh-CN.md`、`REVIEWING.md`：Windows 构建和评审文档。
+- `README.md`、`README.zh-Hans.md`、`REVIEWING.md`：Windows 构建和评审文档。
 
 保留的 Windows 应用有自己的 C# 渲染器，并在对齐测试中用 Python 参考渲染器进行校验。应用工程会从规范
 `assets/previews/` 目录链接预览 WAV 文件，用于构建和发布输出。
@@ -138,8 +138,8 @@ Web 前端/后端路径和保留的原生应用路径使用的规范预览 WAV �
 
 ## 文档和生成产物
 
-- `docs/api-contract.md`、`docs/api-contract.zh-CN.md` 和 `docs/openapi.yaml`：当前 Web API 契约、兼容路由说明、任务载荷和公开演示安全边界。
-- `docs/repository-layout.md` 和 `docs/repository-layout.zh-CN.md`：当前仓库结构的英文和简体中文说明。
+- `docs/api-contract.md`、`docs/api-contract.zh-Hans.md` 和 `docs/openapi.yaml`：当前 Web API 契约、兼容路由说明、任务载荷和公开演示安全边界。
+- `docs/repository-layout.md` 和 `docs/repository-layout.zh-Hans.md`：当前仓库结构的英文和简体中文说明。
 - `docs/localisation.md`：面向 agent 的英文生产 UI 本地化及相关文档更新标准流程。
 - `docs/licensing-audit.md`：面向仓库和发布规划的许可证与署名审计。
 - `docs/reviews/windows-app-review.md`：Windows 评审记录。
@@ -215,7 +215,7 @@ npm run build
 ```
 
 当前非 Docker 生产路径私有运行 Go 后端于 `127.0.0.1:8000`，systemd 管理服务，Caddy 提供
-`frontend/dist`，并将 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到该私有监听地址。工作区/任务目录、任务 TTL、最大上传大小和渲染 worker 设置应与当前合成任务行为保持一致。Caddy 生产和回滚示例见 `deploy/production/README.zh-CN.md`。
+`frontend/dist`，并将 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到该私有监听地址。工作区/任务目录、任务 TTL、最大上传大小和渲染 worker 设置应与当前合成任务行为保持一致。Caddy 生产和回滚示例见 `deploy/production/README.zh-Hans.md`。
 
 Docker 部署仍保留为旧 Flask 回退的另一种路径：
 

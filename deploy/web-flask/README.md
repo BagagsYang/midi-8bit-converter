@@ -1,6 +1,6 @@
 # Flask Backend Docker Deployment
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 This Docker path packages the Flask backend and legacy Flask-rendered frontend
 fallback. The intended production path is non-Docker: Caddy serves

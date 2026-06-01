@@ -4,7 +4,7 @@ Language/语言: [English](./README.md) | 简体中文
 
 此 Docker 路径打包 Flask 后端和旧 Flask 渲染前端回退。预期的生产路径不使用 Docker：Caddy
 从 `frontend/dist` 提供 Vue 构建产物，并将 API、预览和旧兼容路由反向代理到
-`127.0.0.1:8000` 上的 Flask/Gunicorn。见 `../production/README.zh-CN.md`。
+`127.0.0.1:8000` 上的 Flask/Gunicorn。见 `../production/README.zh-Hans.md`。
 
 镜像包含 `legacy/web-flask/`、`legacy/python-renderer/` 中的共享渲染器入口、`assets/previews/`
 中的共享预览 WAV 文件，以及项目许可证。它不会打包 Vue 前端、macOS 应用或 Windows 桌面应用。

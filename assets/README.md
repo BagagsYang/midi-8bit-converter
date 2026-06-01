@@ -1,6 +1,6 @@
 # Shared assets
 
-Language/语言: English | [简体中文](./README.zh-CN.md)
+Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 `assets/previews/` is the canonical source of waveform preview WAV files.
 

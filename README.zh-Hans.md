@@ -139,7 +139,7 @@ Web 应用会在临时工作区中保存采样率和声音层设置。合成支�
 
 ## 本地化
 
-生产 Vue UI 使用 `frontend/src/i18n/` 中的 JSON catalog 文件，覆盖英文、西班牙文、法文、日文和简体中文。旧 Flask 渲染 UI 使用 `legacy/web-flask/i18n/` 中的 catalog。修改生产前端 catalog 时，请保持 `en.json`、`es.json`、`fr.json`、`ja.json` 和 `zh-CN.json` 的键集合一致。英文是回退语言。仓库文档仍保持英文和简体中文两种语言。面向 agent 的标准流程见 [docs/localisation.md](./docs/localisation.md)。
+生产 Vue UI 使用 `frontend/src/i18n/` 中的 JSON catalog 文件，覆盖英文、西班牙文、法文、日文、简体中文（`zh-Hans`）和繁体中文（`zh-Hant`）。旧 Flask 渲染 UI 使用 `legacy/web-flask/i18n/` 中的 catalog。修改生产前端 catalog 时，请保持 `en.json`、`es.json`、`fr.json`、`ja.json`、`zh-Hans.json` 和 `zh-Hant.json` 的键集合一致。英文是回退语言。仓库文档仍保持英文和简体中文两种语言。面向 agent 的标准流程见 [docs/localisation.md](./docs/localisation.md)。
 
 面向用户的 Web 字符串应进入 catalog，不应硬编码在模板或 JavaScript 中。只要原生 macOS 和 Windows 应用仍处于暂停状态，它们的本地化工作就不在当前范围内。
 
@@ -153,7 +153,7 @@ PORT=8000 WEB_SYNTHESISE_JOB_ROOT=/var/lib/octabit ./octabit-server
 cd frontend && npm ci && npm run build
 ```
 
-公开部署时，应让 Go 后端私有监听 `127.0.0.1:8000`。Caddy 将 `frontend/dist` 作为公开前端，并把 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到 Go。生产部署说明、Caddy 示例、smoke 检查和回滚步骤位于 `deploy/production/README.zh-CN.md`。
+公开部署时，应让 Go 后端私有监听 `127.0.0.1:8000`。Caddy 将 `frontend/dist` 作为公开前端，并把 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到 Go。生产部署说明、Caddy 示例、smoke 检查和回滚步骤位于 `deploy/production/README.zh-Hans.md`。
 
 `deploy/web-flask/` 中的 Docker 镜像仍可用于 Flask 后端或旧 Flask 渲染前端回退路径。它通过摘要固定 Python 基础镜像，并从带哈希锁定的 requirements 文件安装依赖。
 

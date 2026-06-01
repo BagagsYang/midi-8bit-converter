@@ -18,7 +18,7 @@ reference or possible future revival.
 
 Reviewed repository areas:
 
-- Root documentation and licence files: `README.md`, `README.zh-CN.md`,
+- Root documentation and licence files: `README.md`, `README.zh-Hans.md`,
   `LICENSE.md`, `AGENTS.md`, `.gitattributes`, `.gitignore`, `.dockerignore`.
 - Current app target and retained app code: `frontend/`, `backend/`, `legacy/web-flask/`,
   `legacy/native/macos/` and `legacy/native/windows/`.
@@ -71,7 +71,7 @@ deployment.
 Confirmed facts:
 
 - `LICENSE.md` contains the GNU Affero General Public License v3 text.
-- `README.md` and `README.zh-CN.md` state that the project is licensed under
+- `README.md` and `README.zh-Hans.md` state that the project is licensed under
   `AGPL-3.0-or-later`.
 - `legacy/python-renderer/midi_to_wave.py` and
   `legacy/python-renderer/tests/test_midi_to_wave.py` include copyright and SPDX

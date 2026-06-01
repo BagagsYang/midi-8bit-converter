@@ -49,7 +49,7 @@ legacy\web-flask\Launch_Synthesiser.bat
 
 生产 Vue 前端和旧 Flask 渲染回退都使用基于 cookie 的匿名临时工作区。上传的 MIDI 文件、声音配置和已转换
 WAV 链接会在刷新后通过 `/api/workspace` 恢复。完整契约位于
-`../../docs/api-contract.zh-CN.md`。
+`../../docs/api-contract.zh-Hans.md`。
 
 当前 API 路由：
 
@@ -102,7 +102,7 @@ Gunicorn 命令形态示例：
 
 `../../deploy/web-flask/` 下的 Docker 文件和 `../../compose.web.yml`
 仍保留为旧 Flask 渲染前端回退的另一种部署路径。当前 Go 生产路径记录在
-`../../deploy/production/README.zh-CN.md`。
+`../../deploy/production/README.zh-Hans.md`。
 
 ## 输出命名
 
