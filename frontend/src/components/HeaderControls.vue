@@ -29,12 +29,15 @@ const themeIcon = computed(() => {
   <header class="control-header">
     <div class="brand-lockup">
       <div class="logo-mark" aria-hidden="true">
-        <div class="logo-bars">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+        <img
+          class="logo-image"
+          src="/octabit-icon-34.png"
+          srcset="/octabit-icon-34.png 1x, /octabit-icon-68.png 2x, /octabit-icon-102.png 3x"
+          width="34"
+          height="34"
+          alt=""
+          decoding="async"
+        >
       </div>
       <div>
         <h1 class="brand-title">{{ t('meta.page_title') }}</h1>
