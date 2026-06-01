@@ -3,20 +3,20 @@ import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 import fr from '../i18n/fr.json';
 import ja from '../i18n/ja.json';
-import zhCn from '../i18n/zh-CN.json';
-import zhTw from '../i18n/zh-TW.json';
+import zhHans from '../i18n/zh-Hans.json';
+import zhHant from '../i18n/zh-Hant.json';
 
-type Locale = 'en' | 'es' | 'fr' | 'ja' | 'zh-CN' | 'zh-TW';
+type Locale = 'en' | 'es' | 'fr' | 'ja' | 'zh-Hans' | 'zh-Hant';
 
 const translationsByLocale: Record<Locale, Record<string, string>> = {
   en,
   es,
   fr,
   ja,
-  'zh-CN': zhCn,
-  'zh-TW': zhTw,
+  'zh-Hans': zhHans,
+  'zh-Hant': zhHant,
 };
-const supportedLocales: Locale[] = ['en', 'es', 'fr', 'ja', 'zh-CN', 'zh-TW'];
+const supportedLocales: Locale[] = ['en', 'es', 'fr', 'ja', 'zh-Hans', 'zh-Hant'];
 const defaultLocale: Locale = 'en';
 const localeCookieName = 'web_locale';
 

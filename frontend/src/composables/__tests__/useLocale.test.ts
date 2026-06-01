@@ -3,8 +3,8 @@ import en from '../../i18n/en.json';
 import es from '../../i18n/es.json';
 import fr from '../../i18n/fr.json';
 import ja from '../../i18n/ja.json';
-import zhCn from '../../i18n/zh-CN.json';
-import zhTw from '../../i18n/zh-TW.json';
+import zhHans from '../../i18n/zh-Hans.json';
+import zhHant from '../../i18n/zh-Hant.json';
 import { useLocale } from '../useLocale';
 
 describe('useLocale', () => {
@@ -52,9 +52,9 @@ describe('useLocale', () => {
 
   it('updateLocale changes locale and updates document', () => {
     const { locale, updateLocale } = useLocale();
-    updateLocale('zh-CN');
-    expect(locale.value).toBe('zh-CN');
-    expect(document.documentElement.lang).toBe('zh-CN');
+    updateLocale('zh-Hans');
+    expect(locale.value).toBe('zh-Hans');
+    expect(document.documentElement.lang).toBe('zh-Hans');
   });
 
   it('updateLocale persists Spanish locale in document, cookie, and URL', () => {
@@ -89,7 +89,7 @@ describe('useLocale', () => {
 
   it('keeps frontend catalog key sets aligned', () => {
     const expectedKeys = Object.keys(en).sort();
-    for (const catalog of [es, fr, ja, zhCn, zhTw]) {
+    for (const catalog of [es, fr, ja, zhHans, zhHant]) {
       expect(Object.keys(catalog).sort()).toEqual(expectedKeys);
     }
   });
