@@ -22,24 +22,23 @@ jobs:
           echo "PR author: $AUTHOR"
           echo "Repo owner: $OWNER"
 
-          if [ "$AUTHOR" = "$OWNER" ]; then
-            echo "Author is the repo owner. Skipping."
+          # Allow repo owner, Dependabot, and other trusted bots
+          case "$AUTHOR" in
+            "$OWNER"|"dependabot[bot]"|"renovate[bot]")
+              echo "Author ($AUTHOR) is trusted. Skipping."
+              echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          # Check if author is a repository collaborator
+          # gh api exits 0 on success (204 = is collaborator), non-zero on error (404 = not)
+          if gh api "repos/${REPO}/collaborators/${AUTHOR}" --silent 2>/dev/null; then
+            echo "Author is a collaborator. Skipping."
             echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
           else
-            HTTP_CODE=$(gh api "repos/${REPO}/collaborators/${AUTHOR}" \
-              --silent \
-              --jq '.login // empty' \
-              -H "Accept: application/vnd.github+json" \
-              -w '%{http_code}' \
-              -o /dev/null 2>&1 || echo "404")
-
-            if [ "$HTTP_CODE" = "204" ]; then
-              echo "Author is a collaborator. Skipping."
-              echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "Author is not a collaborator (HTTP $HTTP_CODE)."
-              echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
-            fi
+            echo "Author is not a collaborator."
+            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Close unsolicited PR

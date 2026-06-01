@@ -18,7 +18,7 @@ jobs:
           DEADLINE=$((SECONDS + 1800))  # 30 min timeout
           while [ $SECONDS -lt $DEADLINE ]; do
             OUTPUT=$(gh pr checks "$PR_NUMBER" --json state 2>/dev/null || echo '')
-            PENDING=$(echo "$OUTPUT" | grep -c '"state":"PENDING"\|"state":"IN_PROGRESS\|"state":"QUEUED"' || true)
+            PENDING=$(echo "$OUTPUT" | grep -c '"state":"PENDING"\|"state":"IN_PROGRESS"\|"state":"QUEUED"' || true)
             FAILURE=$(echo "$OUTPUT" | grep -c '"state":"FAILURE"' || true)
             if [ "$PENDING" -eq 0 ] && [ -n "$OUTPUT" ]; then
               if [ "$FAILURE" -eq 0 ]; then
