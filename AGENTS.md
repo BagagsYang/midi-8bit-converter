@@ -17,38 +17,24 @@ OctaBit is a monorepo focused on the web app. Work from the repository root unle
 
 ## Build, Test, and Development Commands
 
-Create a local Python environment:
+[CLAUDE.md](./CLAUDE.md) is the authoritative command reference — use it for the full set (test invocation, parity fixtures, Docker, legacy fallback). The essentials:
 
 ```bash
 python3 -m venv .venv
-```
-
-Install only the dependencies for the area you touch:
-
-```bash
 ./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
 ./.venv/bin/python3 -m pip install -r legacy/python-renderer/requirements.txt
-```
 
-Run the Go backend:
+cd backend && PORT=8000 go run ./cmd/server
+cd backend && go test ./...
 
-```bash
-cd backend
-PORT=8000 go run ./cmd/server
-```
-
-Run the Vue frontend:
-
-```bash
-cd frontend
-npm ci
-npm run dev
-npm run build
+cd frontend && npm ci
+cd frontend && npm run dev
+cd frontend && npm run build
 ```
 
 ## Coding Style & Naming Conventions
 
-Prefer small, localized changes. Keep runtime synthesis behavior in `backend/internal/renderer/` and parity reference behavior in `legacy/python-renderer/`. For production Vue UI strings, use `frontend/src/i18n/*.json`; for legacy Flask-rendered UI strings, use `legacy/web-flask/i18n/*.json`. Keep English as fallback and align `en.json`, `es.json`, `fr.json`, `ja.json`, `zh-Hans.json`, and `zh-Hant.json` keys in production frontend catalogs you touch. Use descriptive Go/Python names, TypeScript component names in PascalCase, and existing file naming patterns.
+Prefer small, localized changes. Keep runtime synthesis behavior in `backend/internal/renderer/` and parity reference behavior in `legacy/python-renderer/`. For production Vue UI strings, use `frontend/src/i18n/*.json`; for legacy Flask-rendered UI strings, use `legacy/web-flask/i18n/*.json`. Keep English as the fallback and align keys across all catalogs you touch (locale list is maintained in [CLAUDE.md](./CLAUDE.md)). Use descriptive Go/Python names, TypeScript component names in PascalCase, and existing file naming patterns.
 
 ## Testing Guidelines
 
