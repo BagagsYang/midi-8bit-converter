@@ -44,6 +44,29 @@ OSS_REMOTE_URL=/Users/yangyi/Programming/octabit SYNC_DRY_RUN=1 SYNC_KEEP_WORKDI
 
 The public mirror is generated from an allowlist. New public files must be added to `scripts/pro/sync-oss.sh`; new private files must stay under private paths or be explicitly excluded.
 
+## Tagging Convention
+
+| Prefix | Product | Synced to `bagags/octabit`? |
+|--------|---------|---------------------------|
+| `v*` | OctaBit OSS | Yes — `sync-oss.sh` pushes tags to public mirror |
+| `pro-v*` | OctaBit Pro | No — stays in private monorepo |
+
+Tags are created on the monorepo and follow [Semantic Versioning](https://semver.org/).
+When a `v*` tag is pushed (or the commit that carries it reaches `main`), the sync workflow
+creates the matching tag in `bagags/octabit`. GitHub Releases on the public repo are created
+separately via `gh release create` or the GitHub UI.
+
+To tag a release:
+```bash
+# OSS release — tag will be synced to public mirror
+git tag -a v2.4.0 -m "v2.4.0"
+git push origin v2.4.0
+
+# Pro release — tag stays private
+git tag -a pro-v1.0.0 -m "pro-v1.0.0"
+git push origin pro-v1.0.0
+```
+
 ## Public Mirror Action
 
 `Sync OSS Mirror` runs after `CI` succeeds on `main`. It requires an `OSS_SYNC_TOKEN` repository secret in `bagags/octabit-pro` with access to push to `bagags/octabit`.

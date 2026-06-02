@@ -75,7 +75,21 @@ copy_path "$ROOT/scripts/generate_python_parity_fixtures.py" "$MIRROR_DIR/script
 
 rsync -a --delete --exclude='.git/' "$MIRROR_DIR"/ "$PUBLIC_CLONE"/
 
+has_code_changes=1
 if git -C "$PUBLIC_CLONE" diff --quiet && git -C "$PUBLIC_CLONE" diff --cached --quiet && [ -z "$(git -C "$PUBLIC_CLONE" status --short)" ]; then
+	has_code_changes=0
+fi
+
+# Check for new OSS tags to sync (v* prefix only; pro-v* stays private)
+need_tag_sync=0
+for tag in $(git -C "$ROOT" tag --points-at HEAD --list 'v*' 2>/dev/null); do
+	if ! git -C "$PUBLIC_CLONE" rev-parse "$tag" >/dev/null 2>&1; then
+		need_tag_sync=1
+		break
+	fi
+done
+
+if [ "$has_code_changes" = "0" ] && [ "$need_tag_sync" = "0" ]; then
 	echo "Public mirror is already up to date."
 	if [ "$SYNC_KEEP_WORKDIR" = "1" ]; then
 		echo "Kept workdir: $WORK_DIR"
@@ -83,18 +97,32 @@ if git -C "$PUBLIC_CLONE" diff --quiet && git -C "$PUBLIC_CLONE" diff --cached -
 	exit 0
 fi
 
-git -C "$PUBLIC_CLONE" status --short
+if [ "$has_code_changes" = "1" ]; then
+	git -C "$PUBLIC_CLONE" status --short
 
-if [ "$SYNC_DRY_RUN" = "1" ]; then
-	echo "Dry run only; not committing or pushing."
-	if [ "$SYNC_KEEP_WORKDIR" = "1" ]; then
-		echo "Kept workdir: $WORK_DIR"
+	if [ "$SYNC_DRY_RUN" = "1" ]; then
+		echo "Dry run only; not committing or pushing."
+		if [ "$SYNC_KEEP_WORKDIR" = "1" ]; then
+			echo "Kept workdir: $WORK_DIR"
+		fi
+		exit 0
 	fi
-	exit 0
+
+	git -C "$PUBLIC_CLONE" config user.name "${OSS_SYNC_GIT_USER_NAME:-octabit-pro sync}"
+	git -C "$PUBLIC_CLONE" config user.email "${OSS_SYNC_GIT_USER_EMAIL:-octabit-pro-sync@users.noreply.github.com}"
+	git -C "$PUBLIC_CLONE" add -A
+	git -C "$PUBLIC_CLONE" commit -m "$SYNC_COMMIT_MESSAGE"
+	git -C "$PUBLIC_CLONE" push origin "HEAD:$OSS_BRANCH"
 fi
 
-git -C "$PUBLIC_CLONE" config user.name "${OSS_SYNC_GIT_USER_NAME:-octabit-pro sync}"
-git -C "$PUBLIC_CLONE" config user.email "${OSS_SYNC_GIT_USER_EMAIL:-octabit-pro-sync@users.noreply.github.com}"
-git -C "$PUBLIC_CLONE" add -A
-git -C "$PUBLIC_CLONE" commit -m "$SYNC_COMMIT_MESSAGE"
-git -C "$PUBLIC_CLONE" push origin "HEAD:$OSS_BRANCH"
+# Sync OSS tags (v* prefix; pro-v* tags stay private)
+if [ "$need_tag_sync" = "1" ]; then
+	for tag in $(git -C "$ROOT" tag --points-at HEAD --list 'v*' 2>/dev/null); do
+		if ! git -C "$PUBLIC_CLONE" rev-parse "$tag" >/dev/null 2>&1; then
+			echo "Creating OSS tag $tag in public mirror"
+			git -C "$PUBLIC_CLONE" tag "$tag" -m "$tag"
+		fi
+	done
+	git -C "$PUBLIC_CLONE" push origin --tags
+	echo "OSS tags synced."
+fi
