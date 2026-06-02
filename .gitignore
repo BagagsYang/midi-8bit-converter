@@ -2,9 +2,18 @@
 __pycache__/
 *.pyc
 .env
+.env.*.local
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
+*.swp
+*~
+*.log
+.cache/
+coverage/
+node_modules/
+frontend/.npm-cache
 dist/
 build/
 backend/octabit-server
@@ -14,5 +23,6 @@ windows-review-bundle/
 windows-review-bundle.zip
 **/.xcodebuild/
 **/xcuserdata/
-.codex/config.toml
+.codex/
+.agents/
 .playwright-mcp/
