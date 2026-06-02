@@ -17,6 +17,7 @@ const labels: Record<string, string> = {
   'layer.enable_curve': 'frequency-gain curve',
   'pro.channel': 'Channel 1',
   'pro.midi_channels': 'MIDI Channels',
+  'pro.detune': 'Detune',
   'pro.octave_shift': 'Octave Shift',
   'pro.octave_down': '-1 Oct',
   'pro.octave_up': '+1 Oct',

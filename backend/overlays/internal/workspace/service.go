@@ -180,8 +180,11 @@ func NewService(store *storage.Store, cfg config.Config, options Options) *Servi
 
 func DefaultConfig() Config {
 	return Config{
-		Schema:     ConfigSchema,
-		SampleRate: 48000,
+		Schema:           ConfigSchema,
+		SampleRate:       48000,
+		MasterGainDB:     0,
+		LimiterEnabled:   true,
+		NormaliseEnabled: false,
 		Layers: []LayerConfig{{
 			Type:         "pulse",
 			Duty:         0.5,
@@ -676,7 +679,7 @@ func renderWAV(inputPath, outputPath, sourceName string, workspaceConfig Config)
 	if err != nil {
 		return "", 0, err
 	}
-	wavData, err := renderer.RenderNotesWAV(notes, workspaceConfig.SampleRate, runtimeLayers)
+	wavData, err := renderer.RenderNotesWAVWithOptions(notes, workspaceConfig.SampleRate, runtimeLayers, RenderOptions(workspaceConfig))
 	if err != nil {
 		return "", 0, err
 	}
@@ -707,6 +710,7 @@ func RuntimeLayers(workspaceConfig Config) []renderer.Layer {
 			Volume:            layer.Volume,
 			FrequencyCurve:    frequencyCurve,
 			MIDIChannels:      pro.MIDIChannels,
+			DetuneCents:       pro.DetuneCents,
 			VibratoDepthCents: pro.VibratoDepthCents,
 			VibratoRateHz:     pro.VibratoRateHz,
 			OctaveShift:       pro.OctaveShift,
@@ -715,9 +719,29 @@ func RuntimeLayers(workspaceConfig Config) []renderer.Layer {
 	return runtimeLayers
 }
 
+func RenderOptions(workspaceConfig Config) renderer.RenderOptions {
+	channelBuses := make([]renderer.ChannelBus, 0, len(workspaceConfig.ChannelBuses))
+	for _, bus := range workspaceConfig.ChannelBuses {
+		channelBuses = append(channelBuses, renderer.ChannelBus{
+			Channel: bus.Channel,
+			Volume:  bus.Volume,
+			Mute:    bus.Mute,
+			Solo:    bus.Solo,
+		})
+	}
+	return renderer.RenderOptions{
+		ChannelBuses: channelBuses,
+		Output: renderer.OutputOptions{
+			MasterGainDB:     workspaceConfig.MasterGainDB,
+			LimiterEnabled:   workspaceConfig.LimiterEnabled,
+			NormaliseEnabled: workspaceConfig.NormaliseEnabled,
+		},
+	}
+}
+
 func requiresMultiChannel(layers []renderer.Layer) bool {
 	for _, layer := range layers {
-		if layer.Type == "noise" || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0 {
+		if layer.Type == "noise" || layer.DetuneCents != 0 || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0 {
 			return true
 		}
 	}
@@ -1072,9 +1096,48 @@ func canonicalConfigJSON(config Config) string {
 		builder.Write(typeJSON)
 		builder.WriteString(`,"volume":`)
 		builder.WriteString(formatPythonFloat(layer.Volume))
+		if layer.Pro != nil {
+			builder.WriteString(`,"pro":{"detune_cents":`)
+			builder.WriteString(formatPythonFloat(layer.Pro.DetuneCents))
+			builder.WriteString(`,"midi_channels":[`)
+			for channelIndex, channel := range layer.Pro.MIDIChannels {
+				if channelIndex > 0 {
+					builder.WriteByte(',')
+				}
+				builder.WriteString(strconv.Itoa(channel))
+			}
+			builder.WriteString(`],"octave_shift":`)
+			builder.WriteString(strconv.Itoa(layer.Pro.OctaveShift))
+			builder.WriteString(`,"vibrato_depth_cents":`)
+			builder.WriteString(formatPythonFloat(layer.Pro.VibratoDepthCents))
+			builder.WriteString(`,"vibrato_rate_hz":`)
+			builder.WriteString(formatPythonFloat(layer.Pro.VibratoRateHz))
+			builder.WriteByte('}')
+		}
 		builder.WriteByte('}')
 	}
-	builder.WriteString(`],"sample_rate":`)
+	builder.WriteString(`],"channel_buses":[`)
+	for index, bus := range config.ChannelBuses {
+		if index > 0 {
+			builder.WriteByte(',')
+		}
+		builder.WriteString(`{"channel":`)
+		builder.WriteString(strconv.Itoa(bus.Channel))
+		builder.WriteString(`,"mute":`)
+		builder.WriteString(strconv.FormatBool(bus.Mute))
+		builder.WriteString(`,"solo":`)
+		builder.WriteString(strconv.FormatBool(bus.Solo))
+		builder.WriteString(`,"volume":`)
+		builder.WriteString(formatPythonFloat(bus.Volume))
+		builder.WriteByte('}')
+	}
+	builder.WriteString(`],"limiter_enabled":`)
+	builder.WriteString(strconv.FormatBool(config.LimiterEnabled))
+	builder.WriteString(`,"master_gain_db":`)
+	builder.WriteString(formatPythonFloat(config.MasterGainDB))
+	builder.WriteString(`,"normalise_enabled":`)
+	builder.WriteString(strconv.FormatBool(config.NormaliseEnabled))
+	builder.WriteString(`,"sample_rate":`)
 	builder.WriteString(strconv.Itoa(config.SampleRate))
 	builder.WriteString(`,"schema":`)
 	schemaJSON, _ := json.Marshal(config.Schema)

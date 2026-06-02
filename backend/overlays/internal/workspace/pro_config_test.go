@@ -28,6 +28,40 @@ func TestProOctaveShiftNormalisesAndReachesRuntimeLayer(t *testing.T) {
 	}
 }
 
+func TestProDetuneAndOutputConfigNormalise(t *testing.T) {
+	rawConfig := proOctaveRawConfig(float64(0))
+	rawConfig["master_gain_db"] = float64(3.5)
+	rawConfig["limiter_enabled"] = true
+	rawConfig["normalise_enabled"] = false
+	rawConfig["channel_buses"] = []any{
+		map[string]any{"channel": float64(2), "volume": float64(0.75), "mute": true, "solo": false},
+	}
+	rawConfig["layers"].([]any)[0].(map[string]any)["pro"].(map[string]any)["detune_cents"] = float64(12.5)
+
+	config, err := NormaliseConfig(rawConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Layers[0].Pro == nil || config.Layers[0].Pro.DetuneCents != 12.5 {
+		t.Fatalf("detune = %#v, want 12.5", config.Layers[0].Pro)
+	}
+	if len(config.ChannelBuses) != 1 || config.ChannelBuses[0].Channel != 2 || config.ChannelBuses[0].Volume != 0.75 || !config.ChannelBuses[0].Mute {
+		t.Fatalf("channel buses = %#v", config.ChannelBuses)
+	}
+	if config.MasterGainDB != 3.5 || !config.LimiterEnabled || config.NormaliseEnabled {
+		t.Fatalf("output config = gain %.1f limiter %v normalise %v", config.MasterGainDB, config.LimiterEnabled, config.NormaliseEnabled)
+	}
+
+	runtimeLayers := RuntimeLayers(config)
+	if runtimeLayers[0].DetuneCents != 12.5 {
+		t.Fatalf("runtime detune = %.1f, want 12.5", runtimeLayers[0].DetuneCents)
+	}
+	renderOptions := RenderOptions(config)
+	if len(renderOptions.ChannelBuses) != 1 || renderOptions.Output.MasterGainDB != 3.5 || !renderOptions.Output.LimiterEnabled {
+		t.Fatalf("render options = %#v", renderOptions)
+	}
+}
+
 func TestProOctaveShiftDefaultsToZero(t *testing.T) {
 	rawConfig := proOctaveRawConfig(nil)
 	delete(rawConfig["layers"].([]any)[0].(map[string]any), "pro")
@@ -69,6 +103,16 @@ func TestProOctaveShiftRejectsInvalidValues(t *testing.T) {
 	}
 }
 
+func TestProDetuneRejectsInvalidValues(t *testing.T) {
+	rawConfig := proOctaveRawConfig(float64(0))
+	rawConfig["layers"].([]any)[0].(map[string]any)["pro"].(map[string]any)["detune_cents"] = float64(101)
+
+	_, err := NormaliseConfig(rawConfig)
+	if err == nil || !strings.Contains(err.Error(), "Layer 1 detune_cents must be between -100 and 100.") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
 func TestProWorkspaceConfigAcceptsTenLayers(t *testing.T) {
 	rawConfig := proOctaveRawConfig(nil)
 	layer := rawConfig["layers"].([]any)[0]
@@ -96,6 +140,7 @@ func TestProWorkspaceConfigAcceptsTenLayers(t *testing.T) {
 func proOctaveRawConfig(octaveShift any) map[string]any {
 	pro := map[string]any{
 		"midi_channels":       []any{},
+		"detune_cents":        float64(0),
 		"vibrato_depth_cents": float64(0),
 		"vibrato_rate_hz":     float64(5),
 		"octave_shift":        octaveShift,

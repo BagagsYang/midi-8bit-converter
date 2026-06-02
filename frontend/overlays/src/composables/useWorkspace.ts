@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import {
   createSynthesisJob,
   deleteSynthesisJob,
@@ -25,15 +25,17 @@ import {
   maxCurveFrequencyHz,
   maxCurveGainDb,
   maxLayers,
+  maxMasterGainDb,
   minCurveFrequencyHz,
   minCurveGainDb,
+  minMasterGainDb,
   nextLayerOctaveShift,
   sampleRates,
   waveTypeOptions,
 } from '../lib';
 import { proMode } from '../pro';
 import type { SampleRate, SynthesisJobResponse, WaveType, WorkspaceConfigV1, WorkspaceUpload } from '../types/api';
-import type { ConvertedItem, LayerState, QueuedFile } from '../types/ui';
+import type { ChannelBusState, ConvertedItem, LayerState, QueuedFile } from '../types/ui';
 
 const workspaceConfigSaveDelayMs = 400;
 
@@ -73,6 +75,10 @@ export function useWorkspace(t: Translate) {
   const sampleRate = ref<SampleRate>(48000);
   const layerCount = ref(1);
   const layers = ref<LayerState[]>(createDefaultLayers());
+  const channelBuses = ref<ChannelBusState[]>([]);
+  const masterGainDb = ref(0);
+  const limiterEnabled = ref(true);
+  const normaliseEnabled = ref(false);
   const isRestoringWorkspace = ref(false);
   const isProcessing = ref(false);
   const processingStatus = ref('');
@@ -95,6 +101,21 @@ export function useWorkspace(t: Translate) {
       nextLayers[index] = layerFromConfig(configLayer, index);
     });
     layers.value = nextLayers;
+    channelBuses.value = Array.isArray(config.channel_buses)
+      ? config.channel_buses
+        .map((bus) => ({
+          channel: Number(bus.channel),
+          volume: Number.isFinite(Number(bus.volume)) ? clamp(Number(bus.volume), 0, 2) : 1,
+          mute: Boolean(bus.mute),
+          solo: Boolean(bus.solo),
+        }))
+        .filter((bus) => Number.isInteger(bus.channel) && bus.channel >= 1 && bus.channel <= 16)
+      : [];
+    masterGainDb.value = Number.isFinite(Number(config.master_gain_db))
+      ? clamp(Number(config.master_gain_db), minMasterGainDb, maxMasterGainDb)
+      : 0;
+    limiterEnabled.value = config.limiter_enabled !== false;
+    normaliseEnabled.value = Boolean(config.normalise_enabled);
   }
 
   async function restoreWorkspace() {
@@ -112,7 +133,15 @@ export function useWorkspace(t: Translate) {
   }
 
   function configPayload(): WorkspaceConfigV1 {
-    return currentWorkspaceConfig(sampleRate.value, layers.value, layerCount.value);
+    return currentWorkspaceConfig(
+      sampleRate.value,
+      layersForConfig(),
+      layerCount.value,
+      activeChannelBuses(),
+      masterGainDb.value,
+      limiterEnabled.value,
+      normaliseEnabled.value,
+    );
   }
 
   function scheduleWorkspaceConfigSave() {
@@ -196,6 +225,77 @@ export function useWorkspace(t: Translate) {
     scheduleWorkspaceConfigSave();
   }
 
+  const availableChannels = computed(() => notePresentChannels(queue.value));
+
+  function activeChannelBuses(): ChannelBusState[] {
+    const available = new Set(availableChannels.value);
+    return channelBuses.value.filter((bus) => available.has(bus.channel));
+  }
+
+  function layersForConfig(): LayerState[] {
+    const available = new Set(availableChannels.value);
+    return layers.value.map((layer) => ({
+      ...layer,
+      midiChannels: layer.midiChannels.filter((channel) => available.has(channel)),
+    }));
+  }
+
+  function notePresentChannels(files: QueuedFile[]): number[] {
+    const channels = new Set<number>();
+    files.forEach((file) => {
+      const sourceChannels = file.midiProfile?.melodic_channels?.length
+        ? file.midiProfile.melodic_channels
+        : file.midiProfile?.channels || [];
+      sourceChannels
+        .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
+        .forEach((channel) => channels.add(channel));
+    });
+    return Array.from(channels).sort((left, right) => left - right);
+  }
+
+  function upsertChannelBus(channel: number, updater: (bus: ChannelBusState) => ChannelBusState) {
+    if (!Number.isInteger(channel) || channel < 1 || channel > 16) return;
+    const index = channelBuses.value.findIndex((bus) => bus.channel === channel);
+    const existing = index >= 0
+      ? channelBuses.value[index]
+      : { channel, volume: 1, mute: false, solo: false };
+    const nextBus = updater(existing);
+    if (index >= 0) {
+      channelBuses.value[index] = nextBus;
+    } else {
+      channelBuses.value.push(nextBus);
+    }
+    channelBuses.value.sort((left, right) => left.channel - right.channel);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateChannelBusVolume(channel: number, value: number) {
+    upsertChannelBus(channel, (bus) => ({ ...bus, volume: clamp(value, 0, 2) }));
+  }
+
+  function updateChannelBusMute(channel: number, value: boolean) {
+    upsertChannelBus(channel, (bus) => ({ ...bus, mute: value }));
+  }
+
+  function updateChannelBusSolo(channel: number, value: boolean) {
+    upsertChannelBus(channel, (bus) => ({ ...bus, solo: value }));
+  }
+
+  function setMasterGainDb(value: number) {
+    masterGainDb.value = clamp(value, minMasterGainDb, maxMasterGainDb);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function setLimiterEnabled(value: boolean) {
+    limiterEnabled.value = value;
+    scheduleWorkspaceConfigSave();
+  }
+
+  function setNormaliseEnabled(value: boolean) {
+    normaliseEnabled.value = value;
+    scheduleWorkspaceConfigSave();
+  }
+
   function activeLayerTypes(excludedLayerIndex: number | null = null): Set<WaveType> {
     return new Set(layers.value.slice(0, layerCount.value)
       .filter((_layer, index) => index !== excludedLayerIndex)
@@ -228,9 +328,15 @@ export function useWorkspace(t: Translate) {
   }
 
   function updateLayerMidiChannels(layerIndex: number, channels: number[]) {
+    const available = new Set(availableChannels.value);
     layers.value[layerIndex].midiChannels = [...new Set(channels)]
-      .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
+      .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16 && available.has(channel))
       .sort((left, right) => left - right);
+    scheduleWorkspaceConfigSave();
+  }
+
+  function updateLayerDetune(layerIndex: number, value: number) {
+    layers.value[layerIndex].detuneCents = clamp(value, -100, 100);
     scheduleWorkspaceConfigSave();
   }
 
@@ -515,6 +621,10 @@ export function useWorkspace(t: Translate) {
     sampleRate,
     layerCount,
     layers,
+    channelBuses,
+    masterGainDb,
+    limiterEnabled,
+    normaliseEnabled,
     isRestoringWorkspace,
     isProcessing,
     processingStatus,
@@ -525,10 +635,17 @@ export function useWorkspace(t: Translate) {
     reorderQueue,
     setKeepQueue,
     setSampleRate,
+    updateChannelBusVolume,
+    updateChannelBusMute,
+    updateChannelBusSolo,
+    setMasterGainDb,
+    setLimiterEnabled,
+    setNormaliseEnabled,
     updateLayerType,
     updateLayerDuty,
     updateLayerVolume,
     updateLayerMidiChannels,
+    updateLayerDetune,
     updateLayerVibratoDepth,
     updateLayerVibratoRate,
     updateLayerOctaveShift,

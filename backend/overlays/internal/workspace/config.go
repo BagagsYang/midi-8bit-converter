@@ -19,9 +19,13 @@ var allowedSampleRates = map[int]struct{}{
 }
 
 type Config struct {
-	Schema     string        `json:"schema"`
-	SampleRate int           `json:"sample_rate"`
-	Layers     []LayerConfig `json:"layers"`
+	Schema           string             `json:"schema"`
+	SampleRate       int                `json:"sample_rate"`
+	Layers           []LayerConfig      `json:"layers"`
+	ChannelBuses     []ChannelBusConfig `json:"channel_buses,omitempty"`
+	MasterGainDB     float64            `json:"master_gain_db"`
+	LimiterEnabled   bool               `json:"limiter_enabled"`
+	NormaliseEnabled bool               `json:"normalise_enabled"`
 }
 
 type LayerConfig struct {
@@ -35,9 +39,17 @@ type LayerConfig struct {
 
 type LayerProConfig struct {
 	MIDIChannels      []int   `json:"midi_channels"`
+	DetuneCents       float64 `json:"detune_cents"`
 	VibratoDepthCents float64 `json:"vibrato_depth_cents"`
 	VibratoRateHz     float64 `json:"vibrato_rate_hz"`
 	OctaveShift       int     `json:"octave_shift"`
+}
+
+type ChannelBusConfig struct {
+	Channel int     `json:"channel"`
+	Volume  float64 `json:"volume"`
+	Mute    bool    `json:"mute"`
+	Solo    bool    `json:"solo"`
 }
 
 type FormPayload struct {
@@ -112,6 +124,25 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 	if len(rawLayers) < 1 || len(rawLayers) > renderer.MaxProRenderLayers {
 		return Config{}, fmt.Errorf("Workspace config supports between 1 and %d layers.", renderer.MaxProRenderLayers)
 	}
+	channelBuses, err := normaliseChannelBuses(raw["channel_buses"])
+	if err != nil {
+		return Config{}, err
+	}
+	masterGainDB, err := parseOptionalConfigNumber(raw, "master_gain_db", 0)
+	if err != nil {
+		return Config{}, err
+	}
+	if masterGainDB < renderer.MinMasterGainDB || masterGainDB > renderer.MaxMasterGainDB {
+		return Config{}, fmt.Errorf("Workspace config master_gain_db must be between %.1f and %.1f.", renderer.MinMasterGainDB, renderer.MaxMasterGainDB)
+	}
+	limiterEnabled, err := parseOptionalConfigBool(raw, "limiter_enabled", true)
+	if err != nil {
+		return Config{}, err
+	}
+	normaliseEnabled, err := parseOptionalConfigBool(raw, "normalise_enabled", false)
+	if err != nil {
+		return Config{}, err
+	}
 
 	normalisedLayers := make([]LayerConfig, 0, len(rawLayers))
 	rendererValidationLayers := make([]renderer.Layer, 0, len(rawLayers))
@@ -135,6 +166,7 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 			"volume":              rawLayer["volume"],
 			"frequency_curve":     rawLayer["frequency_curve"],
 			"midi_channels":       rawProValue(rawLayer["pro"], "midi_channels"),
+			"detune_cents":        rawProValue(rawLayer["pro"], "detune_cents"),
 			"vibrato_depth_cents": rawProValue(rawLayer["pro"], "vibrato_depth_cents"),
 			"vibrato_rate_hz":     rawProValue(rawLayer["pro"], "vibrato_rate_hz"),
 			"octave_shift":        rawProValue(rawLayer["pro"], "octave_shift"),
@@ -148,6 +180,7 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 
 		normalisedPro := LayerProConfig{
 			MIDIChannels:      rendererLayer.MIDIChannels,
+			DetuneCents:       roundConfigNumber(rendererLayer.DetuneCents, 2),
 			VibratoDepthCents: roundConfigNumber(rendererLayer.VibratoDepthCents, 2),
 			VibratoRateHz:     roundConfigNumber(rendererLayer.VibratoRateHz, 2),
 			OctaveShift:       rendererLayer.OctaveShift,
@@ -173,6 +206,7 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 			Volume:            normalisedLayer.Volume,
 			FrequencyCurve:    normalisedLayer.FrequencyCurve,
 			MIDIChannels:      layerPro.MIDIChannels,
+			DetuneCents:       layerPro.DetuneCents,
 			VibratoDepthCents: layerPro.VibratoDepthCents,
 			VibratoRateHz:     layerPro.VibratoRateHz,
 			OctaveShift:       layerPro.OctaveShift,
@@ -183,9 +217,13 @@ func NormaliseConfig(raw map[string]any) (Config, error) {
 	}
 
 	return Config{
-		Schema:     ConfigSchema,
-		SampleRate: sampleRate,
-		Layers:     normalisedLayers,
+		Schema:           ConfigSchema,
+		SampleRate:       sampleRate,
+		Layers:           normalisedLayers,
+		ChannelBuses:     channelBuses,
+		MasterGainDB:     roundConfigNumber(masterGainDB, 2),
+		LimiterEnabled:   limiterEnabled,
+		NormaliseEnabled: normaliseEnabled,
 	}, nil
 }
 
@@ -204,7 +242,7 @@ func shouldIncludeProConfig(rawPro any, layer renderer.Layer) bool {
 	if _, ok := rawPro.(map[string]any); ok {
 		return true
 	}
-	return len(layer.MIDIChannels) > 0 || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0
+	return len(layer.MIDIChannels) > 0 || layer.DetuneCents != 0 || layer.VibratoDepthCents > 0 || layer.OctaveShift != 0
 }
 
 func layerProConfig(layer LayerConfig) LayerProConfig {
@@ -269,6 +307,111 @@ func parseSampleRate(value any) (int, error) {
 		return 0, unsupportedSampleRateError()
 	}
 	return sampleRate, nil
+}
+
+func normaliseChannelBuses(rawValue any) ([]ChannelBusConfig, error) {
+	if rawValue == nil {
+		return []ChannelBusConfig{}, nil
+	}
+	rawItems, ok := rawValue.([]any)
+	if !ok {
+		return nil, fmt.Errorf("Workspace config channel_buses must be an array.")
+	}
+	buses := make([]ChannelBusConfig, 0, len(rawItems))
+	seen := map[int]struct{}{}
+	for index, rawItem := range rawItems {
+		rawBus, ok := rawItem.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("Channel bus %d must be an object.", index+1)
+		}
+		channelFloat, err := parseConfigFiniteNumber(rawBus["channel"], fmt.Sprintf("Channel bus %d channel", index+1))
+		if err != nil {
+			return nil, err
+		}
+		channel := int(channelFloat)
+		if channelFloat != float64(channel) {
+			return nil, fmt.Errorf("Channel bus %d channel must be an integer.", index+1)
+		}
+		if channel < 1 || channel > 16 {
+			return nil, fmt.Errorf("Channel bus %d channel must be between 1 and 16.", index+1)
+		}
+		volume, err := parseOptionalConfigNumber(rawBus, "volume", 1)
+		if err != nil {
+			return nil, fmt.Errorf("Channel bus %d %s", index+1, err.Error())
+		}
+		if volume < renderer.MinBusVolume || volume > renderer.MaxBusVolume {
+			return nil, fmt.Errorf("Channel bus %d volume must be between %.1f and %.1f.", index+1, renderer.MinBusVolume, renderer.MaxBusVolume)
+		}
+		mute, err := parseOptionalConfigBool(rawBus, "mute", false)
+		if err != nil {
+			return nil, fmt.Errorf("Channel bus %d %s", index+1, err.Error())
+		}
+		solo, err := parseOptionalConfigBool(rawBus, "solo", false)
+		if err != nil {
+			return nil, fmt.Errorf("Channel bus %d %s", index+1, err.Error())
+		}
+		if _, exists := seen[channel]; exists {
+			continue
+		}
+		seen[channel] = struct{}{}
+		buses = append(buses, ChannelBusConfig{
+			Channel: channel,
+			Volume:  roundConfigNumber(volume, 4),
+			Mute:    mute,
+			Solo:    solo,
+		})
+	}
+	return buses, nil
+}
+
+func parseOptionalConfigNumber(raw map[string]any, key string, defaultValue float64) (float64, error) {
+	rawValue, exists := raw[key]
+	if !exists || rawValue == nil {
+		return defaultValue, nil
+	}
+	value, err := parseConfigFiniteNumber(rawValue, key)
+	if err != nil {
+		return 0, err
+	}
+	return value, nil
+}
+
+func parseConfigFiniteNumber(rawValue any, fieldLabel string) (float64, error) {
+	var value float64
+	switch typedValue := rawValue.(type) {
+	case float64:
+		value = typedValue
+	case float32:
+		value = float64(typedValue)
+	case int:
+		value = float64(typedValue)
+	case int64:
+		value = float64(typedValue)
+	case json.Number:
+		parsedValue, err := typedValue.Float64()
+		if err != nil {
+			return 0, fmt.Errorf("%s must be a number.", fieldLabel)
+		}
+		value = parsedValue
+	default:
+		return 0, fmt.Errorf("%s must be a number.", fieldLabel)
+	}
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return 0, fmt.Errorf("%s must be finite.", fieldLabel)
+	}
+	return value, nil
+}
+
+func parseOptionalConfigBool(raw map[string]any, key string, defaultValue bool) (bool, error) {
+	rawValue, exists := raw[key]
+	if !exists || rawValue == nil {
+		return defaultValue, nil
+	}
+	value, ok := rawValue.(bool)
+	if !ok {
+		return false, fmt.Errorf("%s must be a boolean.", key)
+	}
+	return value, nil
 }
 
 func unsupportedSampleRateError() error {

@@ -21,7 +21,31 @@ type Note struct {
 }
 
 func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error) {
+	return renderNotesWAV(notes, sampleRate, layers, RenderOptions{
+		Output: OutputOptions{NormaliseEnabled: true},
+	}, false)
+}
+
+func DefaultRenderOptions() RenderOptions {
+	return RenderOptions{
+		Output: OutputOptions{
+			MasterGainDB:     0,
+			LimiterEnabled:   true,
+			NormaliseEnabled: false,
+		},
+	}
+}
+
+func RenderNotesWAVWithOptions(notes []Note, sampleRate int, layers []Layer, options RenderOptions) ([]byte, error) {
+	return renderNotesWAV(notes, sampleRate, layers, options, true)
+}
+
+func renderNotesWAV(notes []Note, sampleRate int, layers []Layer, options RenderOptions, usePolyBLEP bool) ([]byte, error) {
 	runtimeLayers, err := NormaliseRuntimeLayers(layers)
+	if err != nil {
+		return nil, err
+	}
+	renderOptions, err := normaliseRenderOptions(options)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +55,7 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 		return nil, err
 	}
 
-	audioBuffer := make([]float32, totalSamples)
+	channelBuffers := map[int][]float32{}
 	for _, note := range notes {
 		startSample := int(note.Start * float64(sampleRate))
 		endSample := int(math.Ceil(note.End * float64(sampleRate)))
@@ -48,36 +72,42 @@ func RenderNotesWAV(notes []Note, sampleRate int, layers []Layer) ([]byte, error
 			if !layerAllowsChannel(layer, note.Channel, channelRoutingActive) {
 				continue
 			}
-			layerFrequency := frequency * math.Pow(2, float64(layer.OctaveShift))
+			layerFrequency := frequency * math.Pow(2, float64(layer.OctaveShift)) * math.Pow(2, layer.DetuneCents/1200.0)
 			curveGainDB := EvaluateFrequencyCurveGainDB(layer.FrequencyCurve, layerFrequency)
 			effectiveVolume := float32(layer.Volume * dbToLinearGain(curveGainDB))
 			if effectiveVolume <= 0 {
 				continue
 			}
-			layerWave := generateWaveform(layerFrequency, sampleRate, noteSampleLength, layer)
+			layerWave := generateWaveformWithQuality(layerFrequency, sampleRate, noteSampleLength, layer, usePolyBLEP)
 			for index := range mixedNoteWaveform {
 				mixedNoteWaveform[index] += layerWave[index] * effectiveVolume
 			}
 		}
 
 		applyEnvelope(mixedNoteWaveform, sampleRate)
+		channelBuffer := channelBuffers[note.Channel]
+		if channelBuffer == nil {
+			channelBuffer = make([]float32, totalSamples)
+			channelBuffers[note.Channel] = channelBuffer
+		}
 		endSample = startSample + len(mixedNoteWaveform)
-		if endSample > len(audioBuffer) {
-			actualLength := len(audioBuffer) - startSample
+		if endSample > len(channelBuffer) {
+			actualLength := len(channelBuffer) - startSample
 			if actualLength <= 0 {
 				continue
 			}
 			for index := 0; index < actualLength; index++ {
-				audioBuffer[startSample+index] += mixedNoteWaveform[index] * noteVolume
+				channelBuffer[startSample+index] += mixedNoteWaveform[index] * noteVolume
 			}
 			continue
 		}
 		for index := range mixedNoteWaveform {
-			audioBuffer[startSample+index] += mixedNoteWaveform[index] * noteVolume
+			channelBuffer[startSample+index] += mixedNoteWaveform[index] * noteVolume
 		}
 	}
 
-	normaliseAndScale(audioBuffer)
+	audioBuffer := mixChannelBuffers(channelBuffers, totalSamples, renderOptions.ChannelBuses)
+	applyOutputProcessing(audioBuffer, renderOptions.Output)
 	samples := make([]int16, len(audioBuffer))
 	for index, sample := range audioBuffer {
 		samples[index] = int16(sample)
@@ -155,9 +185,13 @@ func layerAllowsChannel(layer Layer, noteChannel int, channelRoutingActive bool)
 }
 
 func generateWaveform(frequency float64, sampleRate int, sampleCount int, layer Layer) []float32 {
+	return generateWaveformWithQuality(frequency, sampleRate, sampleCount, layer, true)
+}
+
+func generateWaveformWithQuality(frequency float64, sampleRate int, sampleCount int, layer Layer, usePolyBLEP bool) []float32 {
 	waveform := make([]float32, sampleCount)
 	if layer.VibratoDepthCents <= 0 && layer.Type != "noise" {
-		return generateStaticWaveform(frequency, sampleRate, sampleCount, layer.Type, layer.Duty)
+		return generateStaticWaveformWithQuality(frequency, sampleRate, sampleCount, layer.Type, layer.Duty, usePolyBLEP)
 	}
 	phase := 0.0
 	noiseValue := float32(1.0)
@@ -168,7 +202,9 @@ func generateWaveform(frequency float64, sampleRate int, sampleCount int, layer 
 		if layer.VibratoDepthCents > 0 {
 			frequencyMultiplier = math.Pow(2, (layer.VibratoDepthCents/1200.0)*math.Sin(2*math.Pi*layer.VibratoRateHz*t))
 		}
-		phase += frequency * frequencyMultiplier / float64(sampleRate)
+		phaseIncrement := frequency * frequencyMultiplier / float64(sampleRate)
+		waveform[index] = oscillatorSample(layer.Type, phase, phaseIncrement, layer.Duty, usePolyBLEP)
+		phase += phaseIncrement
 		for phase >= 1.0 {
 			phase -= 1.0
 			if layer.Type == "noise" {
@@ -180,22 +216,35 @@ func generateWaveform(frequency float64, sampleRate int, sampleCount int, layer 
 				}
 			}
 		}
+		if layer.Type == "noise" {
+			waveform[index] = noiseValue
+		}
+	}
+	return waveform
+}
+
+func generateStaticWaveform(frequency float64, sampleRate int, sampleCount int, waveType string, dutyCycle float64) []float32 {
+	return generateStaticWaveformWithQuality(frequency, sampleRate, sampleCount, waveType, dutyCycle, true)
+}
+
+func generateStaticWaveformWithQuality(frequency float64, sampleRate int, sampleCount int, waveType string, dutyCycle float64, usePolyBLEP bool) []float32 {
+	waveform := make([]float32, sampleCount)
+	floatSampleRate := float32(sampleRate)
+	floatFrequency := float32(frequency)
+	phaseIncrement := frequency / float64(sampleRate)
+	for index := range waveform {
+		t := float32(index) / floatSampleRate
+		phase := math.Mod(float64(t*floatFrequency), 1.0)
 		cyclePosition := float32(phase)
-		switch layer.Type {
+		switch waveType {
 		case "sine":
-			waveform[index] = float32(math.Sin(2 * math.Pi * phase))
+			waveform[index] = float32(math.Sin(float64(2 * math.Pi * floatFrequency * t)))
 		case "sawtooth":
-			waveform[index] = 2.0*cyclePosition - 1.0
+			waveform[index] = oscillatorSample(waveType, phase, phaseIncrement, dutyCycle, usePolyBLEP)
 		case "triangle":
 			waveform[index] = 2.0*float32(math.Abs(float64(2.0*cyclePosition-1.0))) - 1.0
 		case "pulse":
-			if cyclePosition < float32(layer.Duty) {
-				waveform[index] = 1.0
-			} else {
-				waveform[index] = -1.0
-			}
-		case "noise":
-			waveform[index] = noiseValue
+			waveform[index] = oscillatorSample(waveType, phase, phaseIncrement, dutyCycle, usePolyBLEP)
 		default:
 			waveform[index] = 0
 		}
@@ -203,31 +252,46 @@ func generateWaveform(frequency float64, sampleRate int, sampleCount int, layer 
 	return waveform
 }
 
-func generateStaticWaveform(frequency float64, sampleRate int, sampleCount int, waveType string, dutyCycle float64) []float32 {
-	waveform := make([]float32, sampleCount)
-	floatSampleRate := float32(sampleRate)
-	floatFrequency := float32(frequency)
-	for index := range waveform {
-		t := float32(index) / floatSampleRate
-		cyclePosition := float32(math.Mod(float64(t*floatFrequency), 1.0))
-		switch waveType {
-		case "sine":
-			waveform[index] = float32(math.Sin(float64(2 * math.Pi * floatFrequency * t)))
-		case "sawtooth":
-			waveform[index] = 2.0*cyclePosition - 1.0
-		case "triangle":
-			waveform[index] = 2.0*float32(math.Abs(float64(2.0*cyclePosition-1.0))) - 1.0
-		case "pulse":
-			if cyclePosition < float32(dutyCycle) {
-				waveform[index] = 1.0
-			} else {
-				waveform[index] = -1.0
-			}
-		default:
-			waveform[index] = 0
+func oscillatorSample(waveType string, phase float64, phaseIncrement float64, dutyCycle float64, usePolyBLEP bool) float32 {
+	switch waveType {
+	case "sine":
+		return float32(math.Sin(2 * math.Pi * phase))
+	case "sawtooth":
+		if !usePolyBLEP {
+			return float32(2.0*phase - 1.0)
 		}
+		return float32(2.0*phase - 1.0 - polyBLEP(phase, phaseIncrement))
+	case "triangle":
+		return 2.0*float32(math.Abs(2.0*phase-1.0)) - 1.0
+	case "pulse":
+		value := 1.0
+		if phase >= dutyCycle {
+			value = -1.0
+		}
+		if !usePolyBLEP {
+			return float32(value)
+		}
+		value += polyBLEP(phase, phaseIncrement)
+		value -= polyBLEP(math.Mod(phase-dutyCycle+1.0, 1.0), phaseIncrement)
+		return float32(value)
+	default:
+		return 0
 	}
-	return waveform
+}
+
+func polyBLEP(phase float64, phaseIncrement float64) float64 {
+	if phaseIncrement <= 0 {
+		return 0
+	}
+	if phase < phaseIncrement {
+		t := phase / phaseIncrement
+		return t + t - t*t - 1.0
+	}
+	if phase > 1.0-phaseIncrement {
+		t := (phase - 1.0) / phaseIncrement
+		return t*t + t + t + 1.0
+	}
+	return 0
 }
 
 func stepLFSR16(value uint16) uint16 {
@@ -294,6 +358,104 @@ func normaliseAndScale(audioBuffer []float32) {
 	for index := range audioBuffer {
 		audioBuffer[index] *= audioWorkingScale
 	}
+}
+
+func mixChannelBuffers(channelBuffers map[int][]float32, totalSamples int, buses []ChannelBus) []float32 {
+	audioBuffer := make([]float32, totalSamples)
+	if len(channelBuffers) == 0 {
+		return audioBuffer
+	}
+
+	busByChannel := map[int]ChannelBus{}
+	soloActive := false
+	for _, bus := range buses {
+		busByChannel[bus.Channel] = bus
+		if bus.Solo {
+			soloActive = true
+		}
+	}
+
+	for channel, channelBuffer := range channelBuffers {
+		bus, hasBus := busByChannel[channel]
+		if soloActive {
+			if !hasBus || !bus.Solo {
+				continue
+			}
+		} else if hasBus && bus.Mute {
+			continue
+		}
+
+		volume := float32(1.0)
+		if hasBus {
+			volume = float32(bus.Volume)
+		}
+		for index, sample := range channelBuffer {
+			audioBuffer[index] += sample * volume
+		}
+	}
+	return audioBuffer
+}
+
+func applyOutputProcessing(audioBuffer []float32, options OutputOptions) {
+	if len(audioBuffer) == 0 {
+		return
+	}
+	masterGain := float32(dbToLinearGain(options.MasterGainDB))
+	for index := range audioBuffer {
+		audioBuffer[index] *= masterGain
+	}
+	if options.NormaliseEnabled {
+		normaliseAndScale(audioBuffer)
+		return
+	}
+	if options.LimiterEnabled {
+		for index, sample := range audioBuffer {
+			audioBuffer[index] = float32(math.Tanh(float64(sample)))
+		}
+	}
+	for index := range audioBuffer {
+		audioBuffer[index] = clampPCMFloat(audioBuffer[index]) * audioWorkingScale
+	}
+}
+
+func clampPCMFloat(value float32) float32 {
+	if value > 1.0 {
+		return 1.0
+	}
+	if value < -1.0 {
+		return -1.0
+	}
+	return value
+}
+
+func normaliseRenderOptions(options RenderOptions) (RenderOptions, error) {
+	output := options.Output
+	if output.MasterGainDB < MinMasterGainDB || output.MasterGainDB > MaxMasterGainDB {
+		return RenderOptions{}, RenderLimitError{
+			Message: "Master gain must be between -24.0 and 12.0 dB.",
+		}
+	}
+
+	buses := make([]ChannelBus, 0, len(options.ChannelBuses))
+	seen := map[int]struct{}{}
+	for _, bus := range options.ChannelBuses {
+		if bus.Channel < 1 || bus.Channel > 16 {
+			return RenderOptions{}, RenderLimitError{
+				Message: "Channel bus values must be between 1 and 16.",
+			}
+		}
+		if bus.Volume < MinBusVolume || bus.Volume > MaxBusVolume {
+			return RenderOptions{}, RenderLimitError{
+				Message: "Channel bus volume must be between 0.0 and 2.0.",
+			}
+		}
+		if _, exists := seen[bus.Channel]; exists {
+			continue
+		}
+		seen[bus.Channel] = struct{}{}
+		buses = append(buses, bus)
+	}
+	return RenderOptions{ChannelBuses: buses, Output: output}, nil
 }
 
 func noteNumberToHz(noteNumber int) float64 {

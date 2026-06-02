@@ -24,9 +24,17 @@ export interface LayerState {
   frequencyCurve: FrequencyCurvePoint[];
   selectedPointIndex: number;
   midiChannels: number[];
+  detuneCents: number;
   vibratoDepthCents: number;
   vibratoRateHz: number;
   octaveShift: number;
+}
+
+export interface ChannelBusState {
+  channel: number;
+  volume: number;
+  mute: boolean;
+  solo: boolean;
 }
 
 export type Translate = (key: string, params?: Record<string, string | number>) => string;

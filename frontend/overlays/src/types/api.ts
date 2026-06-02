@@ -26,15 +26,27 @@ export interface WorkspaceLayerConfig {
 
 export interface WorkspaceLayerProConfig {
   midi_channels: number[];
+  detune_cents: number;
   vibrato_depth_cents: number;
   vibrato_rate_hz: number;
   octave_shift: number;
+}
+
+export interface WorkspaceChannelBusConfig {
+  channel: number;
+  volume: number;
+  mute: boolean;
+  solo: boolean;
 }
 
 export interface WorkspaceConfigV1 {
   schema: 'octabit.workspace_config.v1';
   sample_rate: SampleRate;
   layers: WorkspaceLayerConfig[];
+  channel_buses?: WorkspaceChannelBusConfig[];
+  master_gain_db?: number;
+  limiter_enabled?: boolean;
+  normalise_enabled?: boolean;
 }
 
 export interface WorkspaceInfo {

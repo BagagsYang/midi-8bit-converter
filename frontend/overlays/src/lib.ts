@@ -1,5 +1,5 @@
-import type { FrequencyCurvePoint, SampleRate, WaveType, WorkspaceConfigV1, WorkspaceLayerConfig } from './types/api';
-import type { LayerState } from './types/ui';
+import type { FrequencyCurvePoint, SampleRate, WaveType, WorkspaceChannelBusConfig, WorkspaceConfigV1, WorkspaceLayerConfig } from './types/api';
+import type { ChannelBusState, LayerState } from './types/ui';
 
 export const sampleRates: SampleRate[] = [44100, 48000, 96000];
 export const waveTypeOptions: Array<[WaveType, string]> = [
@@ -28,6 +28,10 @@ const layerPresets: Array<Pick<LayerState, 'type' | 'duty' | 'volume'>> = [
 export const maxLayers = layerPresets.length;
 export const minLayerOctaveShift = -2;
 export const maxLayerOctaveShift = 2;
+export const minLayerDetuneCents = -100;
+export const maxLayerDetuneCents = 100;
+export const minMasterGainDb = -24;
+export const maxMasterGainDb = 12;
 export const minCurveFrequencyHz = 8.175798915643707;
 export const maxCurveFrequencyHz = 12543.853951415975;
 export const minCurveGainDb = -36.0;
@@ -58,6 +62,7 @@ export function createDefaultLayer(index: number): LayerState {
     frequencyCurve: createDefaultCurve(),
     selectedPointIndex: 0,
     midiChannels: [],
+    detuneCents: 0,
     vibratoDepthCents: 0,
     vibratoRateHz: 5,
     octaveShift: 0,
@@ -110,6 +115,7 @@ export function layerToConfig(layer: LayerState): WorkspaceLayerConfig {
       midi_channels: [...new Set(layer.midiChannels)]
         .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
         .sort((left, right) => left - right),
+      detune_cents: Number(clamp(layer.detuneCents, minLayerDetuneCents, maxLayerDetuneCents).toFixed(2)),
       vibrato_depth_cents: Number(clamp(layer.vibratoDepthCents, 0, 200).toFixed(2)),
       vibrato_rate_hz: Number(clamp(layer.vibratoRateHz, 0.1, 20).toFixed(2)),
       octave_shift: nextLayerOctaveShift(layer.octaveShift, 0),
@@ -117,11 +123,32 @@ export function layerToConfig(layer: LayerState): WorkspaceLayerConfig {
   };
 }
 
-export function currentWorkspaceConfig(sampleRate: SampleRate, layers: LayerState[], layerCount: number): WorkspaceConfigV1 {
+export function busToConfig(bus: ChannelBusState): WorkspaceChannelBusConfig {
+  return {
+    channel: bus.channel,
+    volume: Number(clamp(bus.volume, 0, 2).toFixed(4)),
+    mute: Boolean(bus.mute),
+    solo: Boolean(bus.solo),
+  };
+}
+
+export function currentWorkspaceConfig(
+  sampleRate: SampleRate,
+  layers: LayerState[],
+  layerCount: number,
+  channelBuses: ChannelBusState[] = [],
+  masterGainDb = 0,
+  limiterEnabled = true,
+  normaliseEnabled = false,
+): WorkspaceConfigV1 {
   return {
     schema: 'octabit.workspace_config.v1',
     sample_rate: sampleRate,
     layers: layers.slice(0, layerCount).map(layerToConfig),
+    channel_buses: channelBuses.map(busToConfig),
+    master_gain_db: Number(clamp(masterGainDb, minMasterGainDb, maxMasterGainDb).toFixed(2)),
+    limiter_enabled: Boolean(limiterEnabled),
+    normalise_enabled: Boolean(normaliseEnabled),
   };
 }
 
@@ -146,6 +173,9 @@ export function layerFromConfig(configLayer: WorkspaceLayerConfig, index: number
         .filter((channel) => Number.isInteger(channel) && channel >= 1 && channel <= 16)
         .sort((left, right) => left - right)
       : [],
+    detuneCents: Number.isFinite(Number(configLayer.pro?.detune_cents))
+      ? clamp(Number(configLayer.pro?.detune_cents), minLayerDetuneCents, maxLayerDetuneCents)
+      : 0,
     vibratoDepthCents: Number.isFinite(Number(configLayer.pro?.vibrato_depth_cents))
       ? clamp(Number(configLayer.pro?.vibrato_depth_cents), 0, 200)
       : 0,

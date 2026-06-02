@@ -23,8 +23,14 @@ const (
 	MaxMIDINotes              = 20_000
 	MaxRenderLayers           = 4
 	MaxProRenderLayers        = 10
+	MinDetuneCents            = -100.0
+	MaxDetuneCents            = 100.0
 	MinOctaveShift            = -2
 	MaxOctaveShift            = 2
+	MinBusVolume              = 0.0
+	MaxBusVolume              = 2.0
+	MinMasterGainDB           = -24.0
+	MaxMasterGainDB           = 12.0
 	NormalisedPeak            = 0.89
 )
 
@@ -47,9 +53,28 @@ type Layer struct {
 	Volume            float64               `json:"volume"`
 	FrequencyCurve    []FrequencyCurvePoint `json:"frequency_curve"`
 	MIDIChannels      []int                 `json:"midi_channels,omitempty"`
+	DetuneCents       float64               `json:"detune_cents,omitempty"`
 	VibratoDepthCents float64               `json:"vibrato_depth_cents,omitempty"`
 	VibratoRateHz     float64               `json:"vibrato_rate_hz,omitempty"`
 	OctaveShift       int                   `json:"octave_shift,omitempty"`
+}
+
+type ChannelBus struct {
+	Channel int
+	Volume  float64
+	Mute    bool
+	Solo    bool
+}
+
+type OutputOptions struct {
+	MasterGainDB     float64
+	LimiterEnabled   bool
+	NormaliseEnabled bool
+}
+
+type RenderOptions struct {
+	ChannelBuses []ChannelBus
+	Output       OutputOptions
 }
 
 type RenderLimitError struct {
@@ -119,6 +144,13 @@ func SanitiseLayer(rawLayer map[string]any, layerIndex int) (Layer, error) {
 	if err != nil {
 		return Layer{}, err
 	}
+	detuneCents, err := parseLayerNumber(rawLayer, layerIndex, "detune_cents", 0)
+	if err != nil {
+		return Layer{}, err
+	}
+	if detuneCents < MinDetuneCents || detuneCents > MaxDetuneCents {
+		return Layer{}, fmt.Errorf("Layer %d detune_cents must be between %.0f and %.0f.", layerIndex, MinDetuneCents, MaxDetuneCents)
+	}
 	vibratoDepthCents, err := parseLayerNumber(rawLayer, layerIndex, "vibrato_depth_cents", 0)
 	if err != nil {
 		return Layer{}, err
@@ -150,6 +182,7 @@ func SanitiseLayer(rawLayer map[string]any, layerIndex int) (Layer, error) {
 		Volume:            volume,
 		FrequencyCurve:    curve,
 		MIDIChannels:      midiChannels,
+		DetuneCents:       detuneCents,
 		VibratoDepthCents: vibratoDepthCents,
 		VibratoRateHz:     vibratoRateHz,
 		OctaveShift:       octaveShift,
@@ -172,6 +205,7 @@ func NormaliseRuntimeLayers(layers []Layer) ([]Layer, error) {
 			"volume":              layer.Volume,
 			"frequency_curve":     curveAsRaw(layer.FrequencyCurve),
 			"midi_channels":       layer.MIDIChannels,
+			"detune_cents":        layer.DetuneCents,
 			"vibrato_depth_cents": layer.VibratoDepthCents,
 			"vibrato_rate_hz":     layer.VibratoRateHz,
 			"octave_shift":        layer.OctaveShift,
@@ -513,6 +547,10 @@ func canonicalLayersJSON(layers []Layer) string {
 			}
 			builder.WriteByte(']')
 		}
+		if layer.DetuneCents != 0 {
+			builder.WriteString(`,"detune_cents":`)
+			builder.WriteString(formatPythonFloat(layer.DetuneCents))
+		}
 		if layer.VibratoDepthCents > 0 {
 			builder.WriteString(`,"vibrato_depth_cents":`)
 			builder.WriteString(formatPythonFloat(layer.VibratoDepthCents))
@@ -532,6 +570,7 @@ func canonicalLayersJSON(layers []Layer) string {
 func layerRequiresOutputHash(layer Layer) bool {
 	return len(layer.FrequencyCurve) > 0 ||
 		len(layer.MIDIChannels) > 0 ||
+		layer.DetuneCents != 0 ||
 		layer.VibratoDepthCents > 0 ||
 		layer.OctaveShift != 0
 }

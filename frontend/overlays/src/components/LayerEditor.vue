@@ -26,6 +26,7 @@ const emit = defineEmits<{
   updateLayerDuty: [layerIndex: number, value: number];
   updateLayerVolume: [layerIndex: number, value: number];
   updateLayerMidiChannels: [layerIndex: number, value: number[]];
+  updateLayerDetune: [layerIndex: number, value: number];
   updateLayerVibratoDepth: [layerIndex: number, value: number];
   updateLayerVibratoRate: [layerIndex: number, value: number];
   updateLayerOctaveShift: [layerIndex: number, delta: number];
@@ -290,6 +291,38 @@ function proHint(): string {
                 >
                   {{ t('pro.octave_up') }}
                 </button>
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label class="fader-label" :for="`detune${layerIndex}`">
+                <span>{{ t('pro.detune') }}</span>
+                <input
+                  type="number"
+                  class="readout"
+                  :id="`detuneValue${layerIndex}`"
+                  min="-100"
+                  max="100"
+                  step="1"
+                  :value="layer.detuneCents.toFixed(0)"
+                  inputmode="numeric"
+                  :disabled="!canUseProControls"
+                  @change="emit('updateLayerDetune', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, -100, 100))"
+                />
+              </label>
+              <div class="fader-shell">
+                <input
+                  type="range"
+                  class="fader-input"
+                  :id="`detune${layerIndex}`"
+                  min="-100"
+                  max="100"
+                  step="1"
+                  :value="layer.detuneCents"
+                  :style="{ '--fill': faderFillPercent(layer.detuneCents, -100, 100) }"
+                  :disabled="!canUseProControls"
+                  @input="emit('updateLayerDetune', layerIndex, normaliseDecimalInput(($event.target as HTMLInputElement).value, -100, 100))"
+                />
               </div>
             </div>
 
