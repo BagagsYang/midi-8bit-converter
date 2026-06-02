@@ -43,3 +43,9 @@ OSS_REMOTE_URL=/Users/yangyi/Programming/octabit SYNC_DRY_RUN=1 SYNC_KEEP_WORKDI
 ## Sync Rule
 
 The public mirror is generated from an allowlist. New public files must be added to `scripts/pro/sync-oss.sh`; new private files must stay under private paths or be explicitly excluded.
+
+## Public Mirror Action
+
+`Sync OSS Mirror` runs after `CI` succeeds on `main`. It requires an `OSS_SYNC_TOKEN` repository secret in `bagags/octabit-pro` with access to push to `bagags/octabit`.
+
+The workflow validates that the secret is present and can read the mirror before running the Pro build. If the mirror commit changes files under `.github/workflows/`, the token must also be allowed to update workflow files.

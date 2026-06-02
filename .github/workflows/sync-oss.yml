@@ -15,6 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate mirror token
+        env:
+          OSS_SYNC_TOKEN: ${{ secrets.OSS_SYNC_TOKEN }}
+        run: |
+          if [ -z "$OSS_SYNC_TOKEN" ]; then
+            echo "::error title=Missing OSS_SYNC_TOKEN::Set the OSS_SYNC_TOKEN repository secret to a token that can push to bagags/octabit."
+            exit 1
+          fi
+
+          if ! git ls-remote "https://x-access-token:${OSS_SYNC_TOKEN}@github.com/bagags/octabit.git" HEAD >/dev/null 2>&1; then
+            echo "::error title=Invalid OSS_SYNC_TOKEN::OSS_SYNC_TOKEN cannot access bagags/octabit. Rotate the secret with a token that can push to the mirror."
+            exit 1
+          fi
       - uses: actions/setup-go@v5
         with:
           go-version-file: backend/go.mod
