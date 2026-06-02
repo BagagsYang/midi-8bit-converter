@@ -1,3 +1,27 @@
+<!-- MONOREPO-START -->
+## Monorepo Structure
+
+This is a **private monorepo** for developing both OctaBit OSS and OctaBit Pro.
+
+| Directory | Content | Public? |
+|-----------|---------|---------|
+| `backend/`, `frontend/` | OSS codebase | ✅ Synced to `bagags/octabit` |
+| `overlays/backend/`, `overlays/frontend/src/` | Pro replacement files | ❌ Private |
+| `scripts/pro/` | Pro build, dev, sync tooling | ❌ Private |
+| `deploy/pro/` | Pro deployment assets | ❌ Private |
+
+**Critical rule**: When editing files in `backend/` or `frontend/`, check whether a Pro overlay
+exists at the same relative path under `overlays/`. If it does, both versions may need updating.
+
+**Pro development**: See `AGENTS.pro.md` and `README.pro.md`. Run `scripts/pro/build.sh` to
+assemble and test the Pro build. The assemble step copies OSS code + overlays into a staging
+directory, then builds from there.
+
+**Public mirror**: `scripts/pro/sync-oss.sh` extracts the OSS subset and pushes to the public
+repository. The script uses an allowlist approach — only explicitly listed paths are synced;
+everything under `overlays/`, `scripts/pro/`, and `deploy/pro/` is excluded.
+<!-- MONOREPO-END -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.

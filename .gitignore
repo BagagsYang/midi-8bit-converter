@@ -13,6 +13,7 @@ Thumbs.db
 .cache/
 coverage/
 node_modules/
+frontend/.npm-cache
 dist/
 build/
 backend/octabit-server
