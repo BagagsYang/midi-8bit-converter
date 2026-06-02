@@ -1,52 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# --- paths (override via env) ---
-PUBLIC_REPO="${PUBLIC_REPO:-/home/deploy/octabit}"
-PRO_REPO="${PRO_REPO:-/home/deploy/octabit-pro}"
-BRANCH="${BRANCH:-feat/octabit-pro}"
+APP_ROOT="${APP_ROOT:-/home/deploy/octabit-pro}"
+BRANCH="${BRANCH:-main}"
 GO_SERVICE="${GO_SERVICE:-octabit-web}"
-OUTPUT_BIN="${OUTPUT_BIN:-$PUBLIC_REPO/backend/octabit-server}"
-OUTPUT_DIST="${OUTPUT_DIST:-$PUBLIC_REPO/frontend/dist}"
+OUTPUT_BIN="${OUTPUT_BIN:-$APP_ROOT/backend/octabit-server}"
+OUTPUT_DIST="${OUTPUT_DIST:-$APP_ROOT/frontend/dist}"
 CADDY_CONFIG="${CADDY_CONFIG:-/etc/caddy/Caddyfile}"
 RELOAD_CADDY="${RELOAD_CADDY:-1}"
 
-WORK_DIR="$(mktemp -d)"
-trap 'rm -rf "$WORK_DIR"' EXIT
-STAGED_APP="$WORK_DIR/octabit"
+echo "=== update private monorepo ($APP_ROOT) ==="
+git -C "$APP_ROOT" fetch --prune origin "$BRANCH"
+git -C "$APP_ROOT" checkout "$BRANCH"
+git -C "$APP_ROOT" reset --hard "origin/$BRANCH"
 
-echo "=== update public repo ($PUBLIC_REPO) ==="
-git -C "$PUBLIC_REPO" fetch --prune origin "$BRANCH"
-git -C "$PUBLIC_REPO" checkout "$BRANCH"
-git -C "$PUBLIC_REPO" reset --hard "origin/$BRANCH"
+echo "=== build pro artifacts ==="
+"$APP_ROOT/scripts/pro/build.sh"
 
-echo "=== update pro repo ($PRO_REPO) ==="
-git -C "$PRO_REPO" fetch --prune origin "$BRANCH"
-git -C "$PRO_REPO" checkout "$BRANCH"
-git -C "$PRO_REPO" reset --hard "origin/$BRANCH"
+echo "=== install backend binary ==="
+install -m 0755 "$APP_ROOT/dist/pro/octabit-server" "$OUTPUT_BIN"
 
-echo "=== assemble staged build ==="
-mkdir -p "$STAGED_APP"
-git -C "$PUBLIC_REPO" archive "$BRANCH" | tar -x -C "$STAGED_APP"
-mkdir -p "$STAGED_APP/backend/cmd/pro-server"
-cp "$PRO_REPO/backend/cmd/pro-server/main.go" "$STAGED_APP/backend/cmd/pro-server/main.go"
-if [ -d "$PRO_REPO/backend/overlays" ]; then
-	cp -R "$PRO_REPO/backend/overlays/"* "$STAGED_APP/backend/"
-fi
-cp -R "$PRO_REPO/frontend/overlays/src/"* "$STAGED_APP/frontend/src/"
-
-echo "=== build go backend ==="
-cd "$STAGED_APP/backend"
-go build -o "$WORK_DIR/octabit-server" ./cmd/pro-server
-install -m 0755 "$WORK_DIR/octabit-server" "$OUTPUT_BIN"
-
-echo "=== build frontend ==="
-cd "$STAGED_APP/frontend"
-npm ci
-npm run build
+echo "=== install frontend dist ==="
 rm -rf "$OUTPUT_DIST"
 mkdir -p "$(dirname "$OUTPUT_DIST")"
-cp -R dist "$OUTPUT_DIST"
+cp -R "$APP_ROOT/dist/pro/frontend-dist" "$OUTPUT_DIST"
 
 echo "=== restart backend ==="
 sudo systemctl restart "$GO_SERVICE"

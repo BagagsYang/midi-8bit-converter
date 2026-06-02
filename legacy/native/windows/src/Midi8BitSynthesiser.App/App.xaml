@@ -1,0 +1,12 @@
+<Application
+    x:Class="Midi8BitSynthesiser.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Midi8BitSynthesiser.App.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

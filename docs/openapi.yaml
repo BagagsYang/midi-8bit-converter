@@ -1,0 +1,860 @@
+openapi: 3.1.0
+info:
+  title: OctaBit Web API
+  version: 0.1.0
+  summary: Browser-facing OctaBit API contract
+  description: >
+    Contract for the Vue frontend and legacy synthesis compatibility routes.
+    During the Go backend migration, this file is the stable API shape that the
+    replacement backend must satisfy unless a documented correction says
+    otherwise.
+servers:
+  - url: /
+    description: Same-origin web server
+tags:
+  - name: health
+  - name: workspace
+  - name: synthesis
+  - name: previews
+  - name: legacy
+
+paths:
+  /api/health:
+    get:
+      tags: [health]
+      summary: Check backend health
+      operationId: getApiHealth
+      responses:
+        "200":
+          description: Backend is reachable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/workspace:
+    get:
+      tags: [workspace]
+      summary: Create or restore the anonymous workspace
+      operationId: getWorkspace
+      description: >
+        Missing, invalid, unknown, or expired workspace cookies create a fresh
+        empty workspace and set a new HttpOnly octabit_workspace cookie.
+      responses:
+        "200":
+          description: Workspace state.
+          headers:
+            Set-Cookie:
+              description: Present only when a new workspace token is issued.
+              schema:
+                type: string
+                examples:
+                  - octabit_workspace=token; Max-Age=86400; HttpOnly; Path=/; SameSite=Lax
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceStateResponse"
+
+  /api/workspace/uploads:
+    post:
+      tags: [workspace]
+      summary: Upload a MIDI file into the active workspace queue
+      operationId: createWorkspaceUpload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [midi_file]
+              properties:
+                midi_file:
+                  type: string
+                  format: binary
+                  description: One .mid or .midi file.
+      responses:
+        "201":
+          description: Queued upload.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceUploadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "409":
+          $ref: "#/components/responses/ConflictApiError"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLargeApiError"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaTypeApiError"
+        "500":
+          $ref: "#/components/responses/InternalApiError"
+
+  /api/workspace/uploads/{file_id}:
+    delete:
+      tags: [workspace]
+      summary: Delete an uploaded MIDI file from the active workspace
+      operationId: deleteWorkspaceUpload
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      responses:
+        "204":
+          description: Upload was deleted.
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "404":
+          $ref: "#/components/responses/NotFoundApiError"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+
+  /api/workspace/queue:
+    patch:
+      tags: [workspace]
+      summary: Replace the active workspace upload queue order
+      operationId: updateWorkspaceQueue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceQueueUpdateRequest"
+      responses:
+        "200":
+          description: Reordered upload queue.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceQueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+        "422":
+          $ref: "#/components/responses/UnprocessableApiError"
+
+  /api/workspace/config:
+    put:
+      tags: [workspace]
+      summary: Save the active workspace synthesis configuration
+      operationId: saveWorkspaceConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceConfigV1"
+      responses:
+        "200":
+          description: Saved configuration.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceConfigResponse"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+        "422":
+          $ref: "#/components/responses/UnprocessableApiError"
+
+  /api/synthesis-jobs:
+    post:
+      tags: [synthesis]
+      summary: Create a synthesis job
+      operationId: createSynthesisJob
+      description: >
+        JSON requests are the preferred Vue contract. Multipart form requests
+        are accepted for compatibility and create or reuse a workspace cookie.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSynthesisJobRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MultipartSynthesisJobRequest"
+      responses:
+        "202":
+          description: Job accepted.
+          headers:
+            Set-Cookie:
+              description: Present only when multipart compatibility mode creates a workspace.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SynthesisJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "404":
+          $ref: "#/components/responses/NotFoundApiError"
+        "409":
+          $ref: "#/components/responses/ConflictApiError"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+        "413":
+          $ref: "#/components/responses/PayloadTooLargeApiError"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaTypeApiError"
+        "422":
+          $ref: "#/components/responses/UnprocessableApiError"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsApiError"
+        "500":
+          $ref: "#/components/responses/InternalApiError"
+
+  /api/synthesis-jobs/{job_id}:
+    get:
+      tags: [synthesis]
+      summary: Get synthesis job status
+      operationId: getSynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: Job status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SynthesisJobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "404":
+          $ref: "#/components/responses/NotFoundApiError"
+        "410":
+          description: Workspace expired or the owned job expired.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ApiError"
+                  - $ref: "#/components/schemas/ExpiredJobResponse"
+    delete:
+      tags: [synthesis]
+      summary: Delete a synthesis job and output file
+      operationId: deleteSynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "204":
+          description: Job was deleted.
+        "400":
+          $ref: "#/components/responses/BadRequestApiError"
+        "404":
+          $ref: "#/components/responses/NotFoundApiError"
+        "410":
+          $ref: "#/components/responses/WorkspaceExpired"
+
+  /api/synthesis-jobs/{job_id}/download:
+    get:
+      tags: [synthesis]
+      summary: Download a ready synthesis job WAV
+      operationId: downloadSynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: WAV attachment.
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid job id or failed job payload.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ApiError"
+                  - $ref: "#/components/schemas/SynthesisJobResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundApiError"
+        "409":
+          description: Job exists but is not ready.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SynthesisJobResponse"
+        "410":
+          description: Workspace expired, job expired, or output file was removed.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ApiError"
+                  - $ref: "#/components/schemas/ExpiredJobResponse"
+
+  /static/previews/{filename}:
+    get:
+      tags: [previews]
+      summary: Serve shared preview audio assets
+      operationId: getPreviewAsset
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Preview audio file.
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Preview asset not found.
+
+  /synthesise:
+    post:
+      tags: [legacy]
+      summary: Legacy synchronous synthesis download
+      operationId: legacySynthesise
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MultipartSynthesisJobRequest"
+      responses:
+        "200":
+          description: WAV attachment.
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/LegacyBadRequest"
+        "413":
+          $ref: "#/components/responses/LegacyPayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/LegacyServerError"
+
+  /synthesise/jobs:
+    post:
+      tags: [legacy]
+      summary: Create a legacy asynchronous synthesis job
+      operationId: createLegacySynthesisJob
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/MultipartSynthesisJobRequest"
+      responses:
+        "202":
+          description: Legacy job accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacySynthesisJobResponse"
+        "400":
+          $ref: "#/components/responses/LegacyBadRequest"
+        "413":
+          $ref: "#/components/responses/LegacyPayloadTooLarge"
+        "429":
+          $ref: "#/components/responses/LegacyTooManyRequests"
+        "500":
+          $ref: "#/components/responses/LegacyServerError"
+
+  /synthesise/jobs/{job_id}:
+    get:
+      tags: [legacy]
+      summary: Get a legacy synthesis job
+      operationId: getLegacySynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: Legacy job status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacySynthesisJobResponse"
+        "410":
+          description: Legacy job expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpiredJobResponse"
+    delete:
+      tags: [legacy]
+      summary: Delete a legacy synthesis job
+      operationId: deleteLegacySynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "204":
+          description: Job deleted or already absent.
+
+  /synthesise/jobs/{job_id}/download:
+    get:
+      tags: [legacy]
+      summary: Download a ready legacy synthesis job WAV
+      operationId: downloadLegacySynthesisJob
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: WAV attachment.
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Legacy failed job payload.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacySynthesisJobResponse"
+        "409":
+          description: Legacy job exists but is not ready.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegacySynthesisJobResponse"
+        "410":
+          description: Legacy job expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpiredJobResponse"
+
+components:
+  parameters:
+    FileId:
+      name: file_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/OpaqueId"
+    JobId:
+      name: job_id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/OpaqueId"
+
+  responses:
+    BadRequestApiError:
+      description: Bad request with structured API error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ConflictApiError:
+      description: Resource state conflict or quota limit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    WorkspaceExpired:
+      description: Active workspace cookie is missing, unknown, or expired.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          examples:
+            workspaceExpired:
+              value:
+                error:
+                  code: workspace_expired
+                  message: The temporary workspace has expired. Refresh to start a new workspace.
+    PayloadTooLargeApiError:
+      description: Upload payload exceeded a configured limit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    UnsupportedMediaTypeApiError:
+      description: Uploaded file type is not supported.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    NotFoundApiError:
+      description: Resource not found in the active workspace.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    UnprocessableApiError:
+      description: Request JSON or synthesis options failed validation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    TooManyRequestsApiError:
+      description: Render queue is full.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          examples:
+            renderQueueFull:
+              value:
+                error:
+                  code: render_queue_full
+                  message: The render queue is full. Try again after current jobs finish.
+    InternalApiError:
+      description: Unexpected backend error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    LegacyBadRequest:
+      description: Legacy bad request error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LegacyError"
+    LegacyPayloadTooLarge:
+      description: Legacy upload too large error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LegacyError"
+    LegacyTooManyRequests:
+      description: Legacy render queue full error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LegacyError"
+    LegacyServerError:
+      description: Legacy unexpected backend error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LegacyError"
+
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status, service]
+      properties:
+        status:
+          const: ok
+        service:
+          const: octabit-web
+
+    ApiError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              examples:
+                - invalid_layers
+            message:
+              type: string
+
+    LegacyError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    OpaqueId:
+      type: string
+      pattern: "^[0-9a-f]{32}$"
+      examples:
+        - 0123456789abcdef0123456789abcdef
+
+    UnixTimestamp:
+      type: number
+      format: double
+      examples:
+        - 1770000000.0
+
+    WorkspaceConfigV1:
+      type: object
+      additionalProperties: false
+      required: [schema, sample_rate, layers]
+      properties:
+        schema:
+          const: octabit.workspace_config.v1
+        sample_rate:
+          type: integer
+          enum: [44100, 48000, 96000]
+        layers:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items:
+            $ref: "#/components/schemas/WorkspaceLayerConfig"
+
+    WorkspaceLayerConfig:
+      type: object
+      additionalProperties: false
+      required: [type, duty, volume, curve_enabled, frequency_curve]
+      properties:
+        type:
+          type: string
+          enum: [pulse, sine, sawtooth, triangle]
+        duty:
+          type: number
+          minimum: 0.01
+          maximum: 0.99
+        volume:
+          type: number
+          minimum: 0.0
+          maximum: 2.0
+        curve_enabled:
+          type: boolean
+        frequency_curve:
+          type: array
+          items:
+            $ref: "#/components/schemas/FrequencyCurvePoint"
+
+    FrequencyCurvePoint:
+      type: object
+      additionalProperties: false
+      required: [frequency_hz, gain_db]
+      properties:
+        frequency_hz:
+          type: number
+          minimum: 8.175798915643707
+          maximum: 12543.853951415975
+        gain_db:
+          type: number
+
+    WorkspaceInfo:
+      type: object
+      additionalProperties: false
+      required: [expires_at]
+      properties:
+        expires_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+
+    WorkspaceLimits:
+      type: object
+      additionalProperties: false
+      required: [max_queued_files, max_upload_bytes, max_converted_files]
+      properties:
+        max_queued_files:
+          type: integer
+          minimum: 1
+        max_upload_bytes:
+          type: integer
+          minimum: 0
+        max_converted_files:
+          type: integer
+          minimum: 1
+
+    WorkspaceUpload:
+      type: object
+      additionalProperties: false
+      required: [file_id, name, size, created_at, midi_profile]
+      properties:
+        file_id:
+          $ref: "#/components/schemas/OpaqueId"
+        name:
+          type: string
+        size:
+          type: integer
+          minimum: 0
+        created_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        midi_profile:
+          $ref: "#/components/schemas/MIDIProfile"
+
+    MIDIProfile:
+      type: object
+      additionalProperties: false
+      required: [channels, melodic_channels, multi_channel]
+      properties:
+        channels:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 16
+          uniqueItems: true
+        melodic_channels:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 16
+          uniqueItems: true
+        multi_channel:
+          type: boolean
+
+    ConvertedFile:
+      type: object
+      additionalProperties: false
+      required:
+        - job_id
+        - name
+        - source_name
+        - size
+        - download_url
+        - delete_url
+        - created_at
+        - updated_at
+        - expires_at
+      properties:
+        job_id:
+          $ref: "#/components/schemas/OpaqueId"
+        name:
+          type: string
+        source_name:
+          type: string
+        size:
+          type: integer
+          minimum: 0
+        download_url:
+          type: string
+        delete_url:
+          type: string
+        created_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        updated_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        expires_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+
+    WorkspaceStateResponse:
+      type: object
+      additionalProperties: false
+      required: [workspace, limits, config, uploads, converted_files]
+      properties:
+        workspace:
+          $ref: "#/components/schemas/WorkspaceInfo"
+        limits:
+          $ref: "#/components/schemas/WorkspaceLimits"
+        config:
+          $ref: "#/components/schemas/WorkspaceConfigV1"
+        uploads:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceUpload"
+        converted_files:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConvertedFile"
+
+    WorkspaceUploadResponse:
+      type: object
+      additionalProperties: false
+      required: [upload]
+      properties:
+        upload:
+          $ref: "#/components/schemas/WorkspaceUpload"
+
+    WorkspaceQueueUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [file_ids]
+      properties:
+        file_ids:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpaqueId"
+
+    WorkspaceQueueResponse:
+      type: object
+      additionalProperties: false
+      required: [uploads]
+      properties:
+        uploads:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceUpload"
+
+    WorkspaceConfigResponse:
+      type: object
+      additionalProperties: false
+      required: [config]
+      properties:
+        config:
+          $ref: "#/components/schemas/WorkspaceConfigV1"
+
+    CreateSynthesisJobRequest:
+      type: object
+      additionalProperties: false
+      required: [file_id, config]
+      properties:
+        file_id:
+          $ref: "#/components/schemas/OpaqueId"
+        config:
+          $ref: "#/components/schemas/WorkspaceConfigV1"
+
+    MultipartSynthesisJobRequest:
+      type: object
+      required: [midi_file]
+      properties:
+        midi_file:
+          type: string
+          format: binary
+          description: One .mid or .midi file.
+        rate:
+          type: integer
+          enum: [44100, 48000, 96000]
+          default: 48000
+        layers_json:
+          type: string
+          description: JSON array of renderer layer objects.
+
+    SynthesisJobStatus:
+      type: string
+      enum: [queued, rendering, ready, failed, expired]
+
+    SynthesisJobResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status, source_name, created_at, updated_at, expires_at]
+      properties:
+        job_id:
+          $ref: "#/components/schemas/OpaqueId"
+        status:
+          $ref: "#/components/schemas/SynthesisJobStatus"
+        source_name:
+          type: string
+        created_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        updated_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        expires_at:
+          $ref: "#/components/schemas/UnixTimestamp"
+        download_name:
+          type: string
+        size_bytes:
+          type: integer
+          minimum: 0
+        error:
+          type: string
+        download_url:
+          type: string
+        delete_url:
+          type: string
+
+    LegacySynthesisJobResponse:
+      allOf:
+        - $ref: "#/components/schemas/SynthesisJobResponse"
+      description: Same payload shape as SynthesisJobResponse, but ready links use /synthesise/jobs.
+
+    ExpiredJobResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status]
+      properties:
+        job_id:
+          $ref: "#/components/schemas/OpaqueId"
+        status:
+          const: expired

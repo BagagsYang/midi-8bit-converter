@@ -1,0 +1,246 @@
+{
+  "description": "Normalised Python Flask API happy-path transcript.",
+  "dynamic_values": "Opaque ids, workspace cookie values, and timestamps are replaced with placeholders.",
+  "records": [
+    {
+      "body": {
+        "config": {
+          "layers": [
+            {
+              "curve_enabled": false,
+              "duty": 0.5,
+              "frequency_curve": [
+                {
+                  "frequency_hz": 8.175798915643707,
+                  "gain_db": 0.0
+                },
+                {
+                  "frequency_hz": 12543.853951415975,
+                  "gain_db": 0.0
+                }
+              ],
+              "type": "pulse",
+              "volume": 1.0
+            }
+          ],
+          "sample_rate": 48000,
+          "schema": "octabit.workspace_config.v1"
+        },
+        "converted_files": [],
+        "limits": {
+          "max_converted_files": 20,
+          "max_queued_files": 20,
+          "max_upload_bytes": 104857600
+        },
+        "uploads": [],
+        "workspace": {
+          "expires_at": "<timestamp>"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json",
+        "Set-Cookie": "octabit_workspace=<workspace-token>; Expires=<timestamp>; Max-Age=86400; HttpOnly; Path=/; SameSite=Lax"
+      },
+      "label": "workspace_start",
+      "status": 200
+    },
+    {
+      "body": {
+        "upload": {
+          "created_at": "<timestamp>",
+          "file_id": "<file_id:1>",
+          "midi_profile": {
+            "channels": [
+              1
+            ],
+            "melodic_channels": [
+              1
+            ],
+            "multi_channel": false
+          },
+          "name": "first.mid",
+          "size": 64
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "upload_first",
+      "status": 201
+    },
+    {
+      "body": {
+        "upload": {
+          "created_at": "<timestamp>",
+          "file_id": "<file_id:2>",
+          "midi_profile": {
+            "channels": [
+              1
+            ],
+            "melodic_channels": [
+              1
+            ],
+            "multi_channel": false
+          },
+          "name": "second.mid",
+          "size": 76
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "upload_second",
+      "status": 201
+    },
+    {
+      "body": {
+        "uploads": [
+          {
+            "created_at": "<timestamp>",
+            "file_id": "<file_id:2>",
+            "midi_profile": {
+              "channels": [
+                1
+              ],
+              "melodic_channels": [
+                1
+              ],
+              "multi_channel": false
+            },
+            "name": "second.mid",
+            "size": 76
+          },
+          {
+            "created_at": "<timestamp>",
+            "file_id": "<file_id:1>",
+            "midi_profile": {
+              "channels": [
+                1
+              ],
+              "melodic_channels": [
+                1
+              ],
+              "multi_channel": false
+            },
+            "name": "first.mid",
+            "size": 64
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "reorder_queue",
+      "status": 200
+    },
+    {
+      "body": {
+        "config": {
+          "layers": [
+            {
+              "curve_enabled": true,
+              "duty": 0.25,
+              "frequency_curve": [
+                {
+                  "frequency_hz": 110.0,
+                  "gain_db": -6.0
+                },
+                {
+                  "frequency_hz": 440.0,
+                  "gain_db": 0.0
+                },
+                {
+                  "frequency_hz": 880.0,
+                  "gain_db": 3.0
+                }
+              ],
+              "type": "pulse",
+              "volume": 0.75
+            },
+            {
+              "curve_enabled": false,
+              "duty": 0.5,
+              "frequency_curve": [],
+              "type": "triangle",
+              "volume": 0.4
+            }
+          ],
+          "sample_rate": 44100,
+          "schema": "octabit.workspace_config.v1"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "save_config",
+      "status": 200
+    },
+    {
+      "body": {
+        "created_at": "<timestamp>",
+        "delete_url": "/api/synthesis-jobs/<job_id:3>",
+        "download_name": "second_mix_b863ae3e.wav",
+        "download_url": "/api/synthesis-jobs/<job_id:3>/download",
+        "expires_at": "<timestamp>",
+        "job_id": "<job_id:3>",
+        "size_bytes": 79424,
+        "source_name": "second.mid",
+        "status": "ready",
+        "updated_at": "<timestamp>"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "create_synthesis_job",
+      "status": 202
+    },
+    {
+      "body": {
+        "created_at": "<timestamp>",
+        "delete_url": "/api/synthesis-jobs/<job_id:3>",
+        "download_name": "second_mix_b863ae3e.wav",
+        "download_url": "/api/synthesis-jobs/<job_id:3>/download",
+        "expires_at": "<timestamp>",
+        "job_id": "<job_id:3>",
+        "size_bytes": 79424,
+        "source_name": "second.mid",
+        "status": "ready",
+        "updated_at": "<timestamp>"
+      },
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "label": "poll_synthesis_job",
+      "status": 200
+    },
+    {
+      "body": {
+        "prefix_hex": "524946463836010057415645",
+        "sha256": "aa713031dbafd225f507de33260ee7af83a96fea5cf59bc269d4325ab9c0760f",
+        "size": 79424
+      },
+      "headers": {
+        "Content-Disposition": "attachment; filename=second_mix_b863ae3e.wav",
+        "Content-Type": "audio/x-wav"
+      },
+      "label": "download_synthesis_job",
+      "status": 200
+    },
+    {
+      "body": null,
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8"
+      },
+      "label": "delete_synthesis_job",
+      "status": 204
+    },
+    {
+      "body": null,
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8"
+      },
+      "label": "delete_upload",
+      "status": 204
+    }
+  ]
+}

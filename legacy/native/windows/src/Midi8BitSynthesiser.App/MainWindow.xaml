@@ -1,0 +1,202 @@
+<Window
+    x:Class="Midi8BitSynthesiser.App.MainWindow"
+    x:Name="WindowRoot"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Midi8BitSynthesiser.App.Converters"
+    xmlns:viewModels="using:Midi8BitSynthesiser.App.ViewModels"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid
+        AllowDrop="True"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        DragOver="RootGrid_DragOver"
+        Drop="RootGrid_Drop">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="340" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border
+            Grid.Column="0"
+            Margin="16"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="20">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <StackPanel Spacing="8">
+                    <TextBlock x:Uid="QueueSectionTitle" FontSize="24" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="QueueSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                    <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.QueueSummary, Mode=OneWay}" />
+                </StackPanel>
+
+                <Grid Grid.Row="1" Margin="0,16,0,16">
+                    <Border
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        Padding="16"
+                        Visibility="{x:Bind ViewModel.HasQueue, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+                        <TextBlock Text="" />
+                    </Border>
+
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12"
+                        Visibility="{x:Bind ViewModel.ShowEmptyQueueState, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+                        <TextBlock x:Uid="EmptyQueueTitle" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="EmptyQueueDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+
+                    <ListView
+                        x:Name="QueueListView"
+                        AllowDrop="True"
+                        CanDragItems="True"
+                        CanReorderItems="True"
+                        ItemsSource="{x:Bind ViewModel.Queue, Mode=OneWay}"
+                        SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:ConversionJobViewModel">
+                                <Border Margin="0,0,0,8" Padding="12" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="14">
+                                    <StackPanel Spacing="10">
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold" Text="{x:Bind FileName, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind StateText, Mode=OneWay}" />
+                                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind StateDetail, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Button x:Uid="MoveJobUpButton" Click="MoveJobUpButton_Click" Tag="{x:Bind}" />
+                                            <Button x:Uid="MoveJobDownButton" Click="MoveJobDownButton_Click" Tag="{x:Bind}" />
+                                            <Button x:Uid="RemoveJobButton" Click="RemoveJobButton_Click" Tag="{x:Bind}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                    <Button x:Uid="ImportFilesButton" Click="ImportFilesButton_Click" />
+                    <Button x:Uid="ClearQueueButton" Click="ClearQueueButton_Click" IsEnabled="{x:Bind ViewModel.CanClearQueue, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Column="1" Margin="0,16,16,16">
+            <StackPanel Spacing="18">
+                <Border
+                    Padding="20"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="20">
+                    <StackPanel Spacing="16">
+                        <StackPanel>
+                            <TextBlock x:Uid="SoundDesignTitle" FontSize="30" FontWeight="SemiBold" />
+                            <TextBlock x:Uid="SoundDesignDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <TextBlock x:Uid="QueuedSummaryLabel" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.QueueSummary, Mode=OneWay}" />
+                            <TextBlock x:Uid="LayersSummaryLabel" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.LayerSummary, Mode=OneWay}" />
+                            <TextBlock x:Uid="AudibleSummaryLabel" FontWeight="SemiBold" />
+                            <TextBlock Text="{x:Bind ViewModel.AudibleLayerCount, Mode=OneWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="20">
+                    <StackPanel Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel>
+                                <TextBlock x:Uid="LayersSectionTitle" FontSize="20" FontWeight="SemiBold" />
+                                <TextBlock x:Uid="LayersSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                            <Button x:Uid="AddLayerButton" Click="AddLayerButton_Click" HorizontalAlignment="Right" />
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Layers, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:WaveLayerViewModel">
+                                    <Border Margin="0,0,0,12" Padding="16" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="16">
+                                        <StackPanel Spacing="12">
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="{x:Bind Title, Mode=OneWay}" />
+                                                <Button x:Uid="PreviewLayerButton" Click="PreviewLayerButton_Click" Tag="{x:Bind}" />
+                                                <Button x:Uid="RemoveLayerButton" Click="RemoveLayerButton_Click" IsEnabled="{x:Bind CanRemove, Mode=OneWay}" Tag="{x:Bind}" />
+                                            </StackPanel>
+
+                                            <ComboBox
+                                                DisplayMemberPath="Label"
+                                                ItemsSource="{x:Bind WaveTypeOptions, Mode=OneWay}"
+                                                SelectedValue="{Binding Type, Mode=TwoWay}"
+                                                SelectedValuePath="Value" />
+
+                                            <StackPanel Visibility="{x:Bind IsPulse, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+                                                <TextBlock Text="{x:Bind DutyLabel, Mode=OneWay}" />
+                                                <Slider Maximum="0.99" Minimum="0.01" StepFrequency="0.01" Value="{Binding Duty, Mode=TwoWay}" />
+                                            </StackPanel>
+
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Bind VolumeLabel, Mode=OneWay}" />
+                                                <Slider Maximum="2" Minimum="0" StepFrequency="0.1" Value="{Binding Volume, Mode=TwoWay}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="20">
+                    <StackPanel Spacing="16">
+                        <TextBlock x:Uid="OutputSectionTitle" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OutputSectionDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <ComboBox ItemsSource="{x:Bind ViewModel.SampleRates, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SampleRate, Mode=TwoWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.SampleRateTitle, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Padding="20"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="20">
+                    <StackPanel Spacing="12">
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsProcessing, Mode=OneWay}" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                        <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.LastErrorMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" Visibility="{x:Bind ViewModel.HasError, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.LastRunSummary, Mode=OneWay}" TextWrapping="WrapWholeWords" Visibility="{x:Bind ViewModel.HasSummary, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
+                        <Button Click="ExportButton_Click" Content="{x:Bind ViewModel.ExportButtonTitle, Mode=OneWay}" IsEnabled="{x:Bind ViewModel.CanStartConversion, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

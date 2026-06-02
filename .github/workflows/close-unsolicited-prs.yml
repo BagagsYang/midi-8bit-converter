@@ -1,0 +1,59 @@
+name: close-unsolicited-prs
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-external-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check author is collaborator
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          REPO="${{ github.repository }}"
+          OWNER="${{ github.event.repository.owner.login }}"
+          echo "PR author: $AUTHOR"
+          echo "Repo owner: $OWNER"
+
+          # Allow repo owner, Dependabot, and other trusted bots
+          case "$AUTHOR" in
+            "$OWNER"|"dependabot[bot]"|"renovate[bot]")
+              echo "Author ($AUTHOR) is trusted. Skipping."
+              echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          # Check if author is a repository collaborator
+          # gh api exits 0 on success (204 = is collaborator), non-zero on error (404 = not)
+          if gh api "repos/${REPO}/collaborators/${AUTHOR}" --silent 2>/dev/null; then
+            echo "Author is a collaborator. Skipping."
+            echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Author is not a collaborator."
+            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Close unsolicited PR
+        if: steps.check.outputs.is_collaborator == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+
+          gh pr comment "$PR" \
+            --repo "$REPO" \
+            --body "Hi @${AUTHOR} — thanks for your interest, but OctaBit is a publicly available single-author project and does not accept unsolicited pull requests. Please see [CONTRIBUTING.md](https://github.com/${REPO}/blob/main/CONTRIBUTING.md) for details."
+
+          gh pr close "$PR" \
+            --repo "$REPO" \
+            --delete-branch

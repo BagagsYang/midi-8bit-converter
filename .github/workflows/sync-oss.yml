@@ -1,0 +1,32 @@
+name: Sync OSS Mirror
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: scripts/pro/build.sh
+      - name: Sync public mirror
+        env:
+          OSS_REMOTE_URL: https://x-access-token:${{ secrets.OSS_SYNC_TOKEN }}@github.com/bagags/octabit.git
+          OSS_BRANCH: main
+        run: scripts/pro/sync-oss.sh

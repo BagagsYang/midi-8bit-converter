@@ -1,0 +1,107 @@
+{
+  "cases": [
+    {
+      "layers": [
+        {
+          "duty": 0.5,
+          "frequency_curve": [],
+          "type": "pulse",
+          "volume": 1.0
+        }
+      ],
+      "midi": "simple.mid",
+      "name": "simple_pulse_48000",
+      "note_specs": [
+        {
+          "end": 0.5,
+          "pitch": 69,
+          "start": 0.0,
+          "velocity": 100
+        }
+      ],
+      "output_name": "simple_pulse.wav",
+      "sample_rate": 48000,
+      "wav": {
+        "path": "renderer/simple_pulse_48000.wav",
+        "sha256": "58eab290d77e07bf62ca63f7f7573017d4c39c542014946883036a3d715a7155",
+        "size": 48044
+      }
+    },
+    {
+      "curve_gain_samples": {
+        "1760.0": 3.0,
+        "220.0": -2.9999999999999982,
+        "440.0": 0.0,
+        "55.0": -6.0,
+        "660.0": 1.7548875021634691
+      },
+      "curve_hash": "b863ae3e",
+      "layers": [
+        {
+          "duty": 0.25,
+          "frequency_curve": [
+            {
+              "frequency_hz": 110.0,
+              "gain_db": -6.0
+            },
+            {
+              "frequency_hz": 440.0,
+              "gain_db": 0.0
+            },
+            {
+              "frequency_hz": 880.0,
+              "gain_db": 3.0
+            }
+          ],
+          "type": "pulse",
+          "volume": 0.75
+        },
+        {
+          "duty": 0.5,
+          "frequency_curve": [],
+          "type": "triangle",
+          "volume": 0.4
+        }
+      ],
+      "midi": "melody.mid",
+      "name": "curve_mix_44100",
+      "note_specs": [
+        {
+          "end": 0.25,
+          "pitch": 60,
+          "start": 0.0,
+          "velocity": 96
+        },
+        {
+          "end": 0.5499999999999999,
+          "pitch": 64,
+          "start": 0.3,
+          "velocity": 104
+        },
+        {
+          "end": 0.8999999999999999,
+          "pitch": 67,
+          "start": 0.6,
+          "velocity": 112
+        }
+      ],
+      "output_name": "melody_mix_b863ae3e.wav",
+      "sample_rate": 44100,
+      "wav": {
+        "path": "renderer/curve_mix_44100.wav",
+        "sha256": "aa713031dbafd225f507de33260ee7af83a96fea5cf59bc269d4325ab9c0760f",
+        "size": 79424
+      }
+    }
+  ],
+  "invalid_layer_errors": {
+    "duplicate_curve_frequency": "Layer 1 frequency_curve frequencies must be strictly increasing.",
+    "too_many_layers": "Synthesis supports at most 4 sound layers."
+  },
+  "limits": {
+    "max_midi_notes": 20000,
+    "max_render_layers": 4,
+    "max_render_seconds": 1800,
+    "normalised_peak": 0.89
+  }
+}

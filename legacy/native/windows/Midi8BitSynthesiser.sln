@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midi8BitSynthesiser.Core", "src\Midi8BitSynthesiser.Core\Midi8BitSynthesiser.Core.csproj", "{47A0D9F2-244C-41E1-B900-8A19C5138E33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midi8BitSynthesiser.App", "src\Midi8BitSynthesiser.App\Midi8BitSynthesiser.App.csproj", "{31956853-450C-410B-8A9B-0EEC4BA78250}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midi8BitSynthesiser.Tests", "tests\Midi8BitSynthesiser.Tests\Midi8BitSynthesiser.Tests.csproj", "{F63AD4CF-C4FF-45F8-B1FA-9C31AA90AF6E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47A0D9F2-244C-41E1-B900-8A19C5138E33}.Debug|x64.ActiveCfg = Debug|x64
+		{47A0D9F2-244C-41E1-B900-8A19C5138E33}.Debug|x64.Build.0 = Debug|x64
+		{47A0D9F2-244C-41E1-B900-8A19C5138E33}.Release|x64.ActiveCfg = Release|x64
+		{47A0D9F2-244C-41E1-B900-8A19C5138E33}.Release|x64.Build.0 = Release|x64
+		{31956853-450C-410B-8A9B-0EEC4BA78250}.Debug|x64.ActiveCfg = Debug|x64
+		{31956853-450C-410B-8A9B-0EEC4BA78250}.Debug|x64.Build.0 = Debug|x64
+		{31956853-450C-410B-8A9B-0EEC4BA78250}.Release|x64.ActiveCfg = Release|x64
+		{31956853-450C-410B-8A9B-0EEC4BA78250}.Release|x64.Build.0 = Release|x64
+		{F63AD4CF-C4FF-45F8-B1FA-9C31AA90AF6E}.Debug|x64.ActiveCfg = Debug|x64
+		{F63AD4CF-C4FF-45F8-B1FA-9C31AA90AF6E}.Debug|x64.Build.0 = Debug|x64
+		{F63AD4CF-C4FF-45F8-B1FA-9C31AA90AF6E}.Release|x64.ActiveCfg = Release|x64
+		{F63AD4CF-C4FF-45F8-B1FA-9C31AA90AF6E}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

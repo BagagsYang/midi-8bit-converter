@@ -1,0 +1,85 @@
+name: check-cla
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  check-cla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check CLA status
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          REPO="${{ github.repository }}"
+          OWNER="${{ github.event.repository.owner.login }}"
+
+          echo "PR author: $AUTHOR"
+          echo "Repo owner: $OWNER"
+
+          if [ "$AUTHOR" = "$OWNER" ]; then
+            echo "Author is the repo owner. CLA assumed."
+            echo "cla_signed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          HTTP_CODE=$(gh api "repos/${REPO}/collaborators/${AUTHOR}" \
+            --silent \
+            -w '%{http_code}' \
+            -o /dev/null 2>&1 || echo "404")
+
+          if [ "$HTTP_CODE" != "204" ]; then
+            echo "Author is not a collaborator. Deferring to close-unsolicited-prs workflow."
+            echo "cla_signed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -f "CLA-signatures/${AUTHOR}.json" ]; then
+            echo "CLA signature found for @${AUTHOR}."
+            echo "cla_signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No CLA signature found for @${AUTHOR}."
+            echo "cla_signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Add CLA label
+        if: steps.check.outputs.cla_signed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          gh pr edit "$PR" --repo "$REPO" --add-label "needs-cla" || true
+
+      - name: Request CLA signature
+        if: steps.check.outputs.cla_signed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+
+          gh pr comment "$PR" --repo "$REPO" --body "$(cat <<'MSG'
+          Hi @${AUTHOR} — thanks for the pull request!
+
+          Before this can be merged, you need to sign the Contributor License
+          Agreement. Please:
+
+          1. Read [CLA.md](https://github.com/${REPO}/blob/main/CLA.md)
+          2. Create `CLA-signatures/${AUTHOR}.json` with your info
+          3. Open a pull request with this file — the PR itself is your signature
+
+          Once your signed CLA is recorded, this label will be removed and the
+          PR can proceed.
+          MSG
+          )"

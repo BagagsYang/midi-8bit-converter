@@ -1,0 +1,42 @@
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI success and enable auto-merge
+        run: |
+          sleep 10  # give CI time to queue
+          INTERVAL=30
+          DEADLINE=$((SECONDS + 1800))  # 30 min timeout
+          while [ $SECONDS -lt $DEADLINE ]; do
+            OUTPUT=$(gh pr checks "$PR_NUMBER" --json state 2>/dev/null || echo '')
+            PENDING=$(echo "$OUTPUT" | grep -c '"state":"PENDING"\|"state":"IN_PROGRESS"\|"state":"QUEUED"' || true)
+            FAILURE=$(echo "$OUTPUT" | grep -c '"state":"FAILURE"' || true)
+            if [ "$PENDING" -eq 0 ] && [ -n "$OUTPUT" ]; then
+              if [ "$FAILURE" -eq 0 ]; then
+                echo "CI passed. Enabling auto-merge."
+                gh pr merge --auto --squash "$PR_URL"
+                exit 0
+              else
+                echo "CI failed. Skipping auto-merge."
+                exit 1
+              fi
+            fi
+            echo "Waiting for CI checks..."
+            sleep $INTERVAL
+          done
+          echo "Timed out waiting for CI. Skipping auto-merge."
+          exit 1
+        timeout-minutes: 33
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
