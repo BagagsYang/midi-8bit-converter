@@ -21,7 +21,6 @@ directory, then builds from there.
 repository. The script uses an allowlist approach — only explicitly listed paths are synced;
 everything under `overlays/`, `scripts/pro/`, and `deploy/pro/` is excluded.
 <!-- MONOREPO-END -->
-
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -31,6 +30,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 OctaBit is a browser-based MIDI-to-8-bit-WAV converter (live at octabit.cc). AGPL-3.0-or-later.
 
 The production stack is a Vue 3 frontend (`frontend/`) talking to a Go backend (`backend/`) over a stable `/api/*` contract. The legacy Flask backend and Python renderer under `legacy/` are retained only for parity fixture regeneration and fallback reference — new feature work targets the Go backend.
+
+`bagags/octabit` is the public OSS mirror generated from a private upstream monorepo. The public mirror is for reading, auditing, running, and self-hosting the AGPL-licensed OSS code; it is not an open contribution target and does not accept unsolicited pull requests.
 
 ## Essential Commands
 

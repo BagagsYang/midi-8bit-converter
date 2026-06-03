@@ -69,6 +69,6 @@ git push origin pro-v1.0.0
 
 ## Public Mirror Action
 
-`Sync OSS Mirror` runs after `CI` succeeds on `main`. It requires an `OSS_SYNC_TOKEN` repository secret in `bagags/octabit-pro` with access to push to `bagags/octabit`.
+`Sync OSS Mirror` runs after `CI` succeeds on `main`. It requires an `OSS_SYNC_TOKEN` repository secret in the private upstream repository with access to push to `bagags/octabit`.
 
 The workflow validates that the secret is present and can read the mirror before running the Pro build. If the mirror commit changes files under `.github/workflows/`, the token must also be allowed to update workflow files.
