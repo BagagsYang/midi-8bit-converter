@@ -52,7 +52,7 @@ jobs:
 
           gh pr comment "$PR" \
             --repo "$REPO" \
-            --body "Hi @${AUTHOR} — thanks for your interest, but OctaBit is a publicly available single-author project and does not accept unsolicited pull requests. Please see [CONTRIBUTING.md](https://github.com/${REPO}/blob/main/CONTRIBUTING.md) for details."
+            --body "Hi @${AUTHOR} — thanks for your interest, but bagags/octabit is a public OSS mirror of a private upstream monorepo and does not accept unsolicited pull requests. Please see [CONTRIBUTING.md](https://github.com/${REPO}/blob/main/CONTRIBUTING.md) for details."
 
           gh pr close "$PR" \
             --repo "$REPO" \

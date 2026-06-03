@@ -4,6 +4,8 @@ Language/语言: [English](./README.md) | 简体中文
 
 OctaBit 是一个基于浏览器的工具，用于将 MIDI 文件转换为 8-bit 风格 WAV 音频。公开服务地址是 <https://octabit.cc>。
 
+OctaBit 的公开 OSS 代码库由私有上游 monorepo 镜像到 `bagags/octabit`。公开镜像用于让任何人阅读、审计、运行和自行部署 AGPL 授权的 OSS 代码，但它不是开放贡献目标，也不接受未经邀请的 pull request。提交 issue 或事先约定贡献工作前，请先阅读 [CONTRIBUTING.zh-Hans.md](./CONTRIBUTING.zh-Hans.md)。
+
 生产 Web 前端是 `frontend/` 中的 Vue 3 应用。主后端是 `backend/` 中的 Go 服务，它实现稳定的 `/api/*` 合约、旧 `/synthesise*` 兼容路由、工作区存储、合成任务和 Go MIDI-to-WAV 渲染器。旧 Flask 后端和 Python 渲染器保留在 `legacy/` 下，用于 fixture 重新生成和回退参考。原生 macOS 和 Windows 应用已暂停/弃用，仅保留作为参考或未来可能恢复。
 
 ## 当前活跃内容

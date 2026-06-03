@@ -54,7 +54,7 @@ Name Python tests `test_*.py`. For web API or localization changes, add render-l
 
 Recent history uses short imperative messages and lightweight prefixes such as `feat:`, `fix:`, and `docs:`. Keep commits focused, for example `fix: prevent duplicate waveform layers`.
 
-Pull requests should include a clear summary, touched areas, user-facing or deployment impact, screenshots for visible UI changes, linked issues when relevant, and the exact checks run. Note source and license details for new dependencies, vendored assets, or generated media.
+The public `bagags/octabit` repository is an OSS mirror of a private upstream monorepo, not an open contribution target. Pull requests are only for prior-arranged work and should include a clear summary, touched areas, user-facing or deployment impact, screenshots for visible UI changes, linked issues when relevant, and the exact checks run. Note source and license details for new dependencies, vendored assets, or generated media.
 
 ## Agent-Specific Instructions
 

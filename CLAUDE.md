@@ -8,6 +8,8 @@ OctaBit is a browser-based MIDI-to-8-bit-WAV converter (live at octabit.cc). AGP
 
 The production stack is a Vue 3 frontend (`frontend/`) talking to a Go backend (`backend/`) over a stable `/api/*` contract. The legacy Flask backend and Python renderer under `legacy/` are retained only for parity fixture regeneration and fallback reference — new feature work targets the Go backend.
 
+`bagags/octabit` is the public OSS mirror generated from a private upstream monorepo. The public mirror is for reading, auditing, running, and self-hosting the AGPL-licensed OSS code; it is not an open contribution target and does not accept unsolicited pull requests.
+
 ## Essential Commands
 
 ```bash
