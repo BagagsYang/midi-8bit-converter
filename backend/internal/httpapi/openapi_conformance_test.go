@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"octabit/backend/internal/jobs"
 	"octabit/backend/internal/storage"
 	"octabit/backend/internal/workspace"
 )
@@ -37,12 +36,7 @@ func TestOpenAPIDocumentedRoutesAreRegistered(t *testing.T) {
 			"00000000000000000000000000000003",
 		),
 	})
-	legacyJobs := jobs.NewLegacyService(jobRoot, jobs.Config{
-		RunInline: true,
-		Now:       func() time.Time { return time.Unix(1000, 0) },
-		NewID:     sequenceGenerator("00000000000000000000000000000004"),
-	})
-	router := NewRouterWithOptions(cfg, Options{WorkspaceService: service, LegacyJobs: legacyJobs})
+router := NewRouterWithOptions(cfg, Options{WorkspaceService: service})
 
 	for _, route := range openAPIRoutes(t) {
 		t.Run(route.method+" "+route.path, func(t *testing.T) {

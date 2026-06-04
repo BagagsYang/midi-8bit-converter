@@ -6,9 +6,7 @@ Language/语言: English | [简体中文](./README.zh-Hans.md)
 
 ## Usage
 
-- `legacy/web-flask/` serves these files through a dedicated Flask route.
-- The retained `legacy/native/macos/` code copies these files into the app bundle at build time.
-- The retained `legacy/native/windows/` code links these files into the WinUI project at build and publish time.
+- The backend serves these files through a dedicated route.
 
 ## Preview asset provenance
 

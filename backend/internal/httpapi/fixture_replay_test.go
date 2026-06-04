@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"octabit/backend/internal/config"
-	"octabit/backend/internal/jobs"
 	"octabit/backend/internal/storage"
 	"octabit/backend/internal/workspace"
 )
@@ -128,44 +127,6 @@ func TestWorkspaceFlowReplaysPythonBaseline(t *testing.T) {
 				Body:    responseBodyForReplay(t, response.Body.Bytes(), expected.Label),
 			}
 			normaliseWorkspaceReplayBody(actual.Body, fileIDs, jobIDs)
-			expectedBody := cloneBody(expected.Body)
-			normaliseBinaryExpectation(expected.Label, expectedBody)
-			if !reflect.DeepEqual(actual.Body, expectedBody) || actual.Status != expected.Status || !reflect.DeepEqual(actual.Headers, expected.Headers) {
-				t.Fatalf("replay mismatch\nactual:   %#v\nexpected: %#v", actual, apiRecord{
-					Label:   expected.Label,
-					Status:  expected.Status,
-					Headers: expected.Headers,
-					Body:    expectedBody,
-				})
-			}
-		})
-	}
-}
-
-func TestLegacyJobsReplayPythonBaseline(t *testing.T) {
-	legacyJobs := jobs.NewLegacyService(t.TempDir(), jobs.Config{
-		DownloadTTLSeconds: 1800,
-		RunInline:          true,
-		Now:                func() time.Time { return time.Unix(1000, 0) },
-		NewID:              sequenceGenerator("00000000000000000000000000000001"),
-	})
-	router := NewRouterWithOptions(replayConfig(t.TempDir()), Options{LegacyJobs: legacyJobs})
-	transcript := loadAPITranscript(t, filepath.Join("..", "..", "testdata", "python-baseline", "api", "legacy_jobs.json"))
-	simpleMIDI := readFixture(t, filepath.Join("..", "..", "testdata", "python-baseline", "midi", "simple.mid"))
-	jobIDs := map[string]string{}
-
-	for _, expected := range transcript.Records {
-		t.Run(expected.Label, func(t *testing.T) {
-			request := legacyReplayRequest(t, expected.Label, jobIDs, simpleMIDI)
-			response := httptest.NewRecorder()
-			router.ServeHTTP(response, request)
-			actual := apiRecord{
-				Label:   expected.Label,
-				Status:  response.Code,
-				Headers: selectedHeaders(response.Result()),
-				Body:    responseBodyForReplay(t, response.Body.Bytes(), expected.Label),
-			}
-			normaliseLegacyReplayBody(actual.Body, jobIDs)
 			expectedBody := cloneBody(expected.Body)
 			normaliseBinaryExpectation(expected.Label, expectedBody)
 			if !reflect.DeepEqual(actual.Body, expectedBody) || actual.Status != expected.Status || !reflect.DeepEqual(actual.Headers, expected.Headers) {
@@ -409,7 +370,6 @@ func replayConfig(jobRoot string) config.Config {
 		WorkspaceMaxUploadBytes:    104857600,
 		WorkspaceMaxConvertedFiles: 20,
 		MaxUploadBytes:             1024 * 1024,
-		DownloadTTLSeconds:         1800,
 		RenderWorkers:              1,
 		RenderQueueSize:            0,
 	}
@@ -445,26 +405,6 @@ func workspaceReplayRequest(t *testing.T, label string, fileIDs map[string]strin
 		return httptest.NewRequest(http.MethodDelete, "/api/workspace/uploads/"+fileIDs["<file_id:1>"], nil)
 	default:
 		t.Fatalf("no workspace replay request for %q", label)
-		return nil
-	}
-}
-
-func legacyReplayRequest(t *testing.T, label string, jobIDs map[string]string, simpleMIDI []byte) *http.Request {
-	t.Helper()
-	switch label {
-	case "create_legacy_job":
-		return multipartRequest(t, "/synthesise/jobs", "legacy.mid", simpleMIDI, map[string]string{
-			"rate":        "44100",
-			"layers_json": `[{"type":"pulse","duty":0.5,"volume":1.0,"frequency_curve":[]}]`,
-		})
-	case "poll_legacy_job":
-		return httptest.NewRequest(http.MethodGet, "/synthesise/jobs/"+jobIDs["<job_id:1>"], nil)
-	case "download_legacy_job":
-		return httptest.NewRequest(http.MethodGet, "/synthesise/jobs/"+jobIDs["<job_id:1>"]+"/download", nil)
-	case "delete_legacy_job":
-		return httptest.NewRequest(http.MethodDelete, "/synthesise/jobs/"+jobIDs["<job_id:1>"], nil)
-	default:
-		t.Fatalf("no legacy replay request for %q", label)
 		return nil
 	}
 }
@@ -573,20 +513,6 @@ func normaliseWorkspaceReplayBody(body map[string]any, fileIDs map[string]string
 	default:
 		normaliseTimestamps(body)
 	}
-}
-
-func normaliseLegacyReplayBody(body map[string]any, jobIDs map[string]string) {
-	if body == nil {
-		return
-	}
-	if body["job_id"] != nil {
-		jobID := body["job_id"].(string)
-		if _, ok := jobIDs["<job_id:1>"]; !ok {
-			jobIDs["<job_id:1>"] = jobID
-		}
-		replaceJobID(body, jobIDs["<job_id:1>"], "<job_id:1>")
-	}
-	normaliseTimestamps(body)
 }
 
 func replaceJobID(body map[string]any, actual, placeholder string) {

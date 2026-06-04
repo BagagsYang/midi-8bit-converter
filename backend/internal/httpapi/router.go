@@ -26,7 +26,6 @@ type healthResponse struct {
 
 type Options struct {
 	WorkspaceService *workspace.Service
-	LegacyJobs       *jobs.LegacyService
 }
 
 func NewRouter(cfg config.Config) http.Handler {
@@ -36,14 +35,6 @@ func NewRouter(cfg config.Config) http.Handler {
 func NewRouterWithOptions(cfg config.Config, options Options) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", health)
-	legacyJobs := options.LegacyJobs
-	if legacyJobs == nil && cfg.JobRoot != "" {
-		legacyJobs = jobs.NewLegacyService(cfg.JobRoot, jobs.Config{
-			DownloadTTLSeconds: cfg.DownloadTTLSeconds,
-			MaxWorkers:         cfg.RenderWorkers,
-			MaxQueueSize:       cfg.RenderQueueSize,
-		})
-	}
 	if options.WorkspaceService != nil {
 		mux.HandleFunc("GET /api/workspace", getWorkspace(options.WorkspaceService))
 		mux.HandleFunc("POST /api/workspace/uploads", createWorkspaceUpload(cfg, options.WorkspaceService))
@@ -54,13 +45,6 @@ func NewRouterWithOptions(cfg config.Config, options Options) http.Handler {
 		mux.HandleFunc("GET /api/synthesis-jobs/{job_id}", getSynthesisJob(options.WorkspaceService))
 		mux.HandleFunc("DELETE /api/synthesis-jobs/{job_id}", deleteSynthesisJob(options.WorkspaceService))
 		mux.HandleFunc("GET /api/synthesis-jobs/{job_id}/download", downloadSynthesisJob(options.WorkspaceService))
-	}
-	mux.HandleFunc("POST /synthesise", synthesise(cfg))
-	if legacyJobs != nil {
-		mux.HandleFunc("POST /synthesise/jobs", createLegacySynthesisJob(cfg, legacyJobs))
-		mux.HandleFunc("GET /synthesise/jobs/{job_id}", getLegacySynthesisJob(legacyJobs))
-		mux.HandleFunc("DELETE /synthesise/jobs/{job_id}", deleteLegacySynthesisJob(legacyJobs))
-		mux.HandleFunc("GET /synthesise/jobs/{job_id}/download", downloadLegacySynthesisJob(legacyJobs))
 	}
 	mux.HandleFunc("GET /static/previews/", previewAsset(cfg.PreviewAssetsDir))
 	return mux
@@ -86,10 +70,6 @@ func writeAPIError(w http.ResponseWriter, status int, code, message string) {
 			"message": message,
 		},
 	})
-}
-
-func writeLegacyError(w http.ResponseWriter, status int, message string) {
-	writeJSON(w, status, map[string]string{"error": message})
 }
 
 func getWorkspace(service *workspace.Service) http.HandlerFunc {
@@ -451,179 +431,6 @@ func downloadSynthesisJob(service *workspace.Service) http.HandlerFunc {
 		outputPath := service.JobOutputPath(workspaceContext, jobID)
 		if _, err := os.Stat(outputPath); err != nil {
 			_, _ = service.DeleteJob(r.Context(), workspaceContext, jobID)
-			writeJSON(w, http.StatusGone, map[string]string{"job_id": jobID, "status": "expired"})
-			return
-		}
-		downloadName := payload.DownloadName
-		if downloadName == "" {
-			downloadName = "output.wav"
-		}
-		w.Header().Set("Content-Type", "audio/x-wav")
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", downloadName))
-		http.ServeFile(w, r, outputPath)
-	}
-}
-
-func createLegacySynthesisJob(cfg config.Config, legacyJobs *jobs.LegacyService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if cfg.MaxUploadBytes > 0 {
-			r.Body = http.MaxBytesReader(w, r.Body, int64(cfg.MaxUploadBytes))
-		}
-		if err := r.ParseMultipartForm(int64(cfg.MaxUploadBytes)); err != nil {
-			writeLegacyError(w, http.StatusRequestEntityTooLarge, "Uploaded file is too large.")
-			return
-		}
-		files := r.MultipartForm.File["midi_file"]
-		if len(files) == 0 {
-			writeLegacyError(w, http.StatusBadRequest, "No MIDI file uploaded")
-			return
-		}
-		fileHeader := files[0]
-		if fileHeader.Filename == "" {
-			writeLegacyError(w, http.StatusBadRequest, "No selected file")
-			return
-		}
-		if !isSupportedMIDIFile(fileHeader.Filename) {
-			writeLegacyError(w, http.StatusBadRequest, "Unsupported file type. Upload a .mid or .midi file.")
-			return
-		}
-		workspaceConfig, err := workspace.ConfigFromFormValues(r.FormValue("rate"), r.FormValue("layers_json"))
-		if err != nil {
-			writeLegacyError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		tempPath, err := saveMultipartFileToTemp(fileHeader)
-		if err != nil {
-			writeLegacyError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		defer cleanupTempPath(tempPath)
-		info, err := os.Stat(tempPath)
-		if err != nil {
-			writeLegacyError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		if info.Size() == 0 {
-			writeLegacyError(w, http.StatusBadRequest, "Uploaded MIDI file is empty or incomplete.")
-			return
-		}
-
-		job, err := legacyJobs.CreateFromTemp(tempPath, fileHeader.Filename, workspaceConfig.SampleRate, workspace.RuntimeLayers(workspaceConfig))
-		if err != nil {
-			if errors.Is(err, jobs.ErrRenderQueueFull) {
-				writeLegacyError(w, http.StatusTooManyRequests, err.Error())
-				return
-			}
-			writeLegacyError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusAccepted, legacyJobs.Payload(*job))
-	}
-}
-
-func synthesise(cfg config.Config) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if cfg.MaxUploadBytes > 0 {
-			r.Body = http.MaxBytesReader(w, r.Body, int64(cfg.MaxUploadBytes))
-		}
-		if err := r.ParseMultipartForm(int64(cfg.MaxUploadBytes)); err != nil {
-			writeLegacyError(w, http.StatusRequestEntityTooLarge, "Uploaded file is too large.")
-			return
-		}
-		files := r.MultipartForm.File["midi_file"]
-		if len(files) == 0 {
-			writeLegacyError(w, http.StatusBadRequest, "No MIDI file uploaded")
-			return
-		}
-		fileHeader := files[0]
-		if fileHeader.Filename == "" {
-			writeLegacyError(w, http.StatusBadRequest, "No selected file")
-			return
-		}
-		if !isSupportedMIDIFile(fileHeader.Filename) {
-			writeLegacyError(w, http.StatusBadRequest, "Unsupported file type. Upload a .mid or .midi file.")
-			return
-		}
-		workspaceConfig, err := workspace.ConfigFromFormValues(r.FormValue("rate"), r.FormValue("layers_json"))
-		if err != nil {
-			writeLegacyError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		tempPath, err := saveMultipartFileToTemp(fileHeader)
-		if err != nil {
-			writeLegacyError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		defer cleanupTempPath(tempPath)
-		info, err := os.Stat(tempPath)
-		if err != nil {
-			writeLegacyError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		if info.Size() == 0 {
-			writeLegacyError(w, http.StatusBadRequest, "Uploaded MIDI file is empty or incomplete.")
-			return
-		}
-
-		downloadName, wavData, err := jobs.RenderWAVBytes(tempPath, fileHeader.Filename, workspaceConfig.SampleRate, workspace.RuntimeLayers(workspaceConfig))
-		if err != nil {
-			writeLegacyError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		w.Header().Set("Content-Type", "audio/x-wav")
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", downloadName))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(wavData)
-	}
-}
-
-func getLegacySynthesisJob(legacyJobs *jobs.LegacyService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		jobID := r.PathValue("job_id")
-		job, expired, ok := legacyJobs.Get(jobID)
-		if expired || !ok {
-			writeJSON(w, http.StatusGone, map[string]string{"job_id": jobID, "status": "expired"})
-			return
-		}
-		payload := legacyJobs.Payload(*job)
-		if payload.Status == jobs.StatusExpired {
-			writeJSON(w, http.StatusGone, payload)
-			return
-		}
-		writeJSON(w, http.StatusOK, payload)
-	}
-}
-
-func deleteLegacySynthesisJob(legacyJobs *jobs.LegacyService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		legacyJobs.Delete(r.PathValue("job_id"))
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusNoContent)
-	}
-}
-
-func downloadLegacySynthesisJob(legacyJobs *jobs.LegacyService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		jobID := r.PathValue("job_id")
-		job, expired, ok := legacyJobs.Get(jobID)
-		if expired || !ok {
-			writeJSON(w, http.StatusGone, map[string]string{"job_id": jobID, "status": "expired"})
-			return
-		}
-		payload := legacyJobs.Payload(*job)
-		if job.Status == jobs.StatusFailed {
-			writeJSON(w, http.StatusBadRequest, payload)
-			return
-		}
-		if job.Status != jobs.StatusReady {
-			writeJSON(w, http.StatusConflict, payload)
-			return
-		}
-		outputPath := legacyJobs.OutputPath(jobID)
-		if _, err := os.Stat(outputPath); err != nil {
-			legacyJobs.Delete(jobID)
 			writeJSON(w, http.StatusGone, map[string]string{"job_id": jobID, "status": "expired"})
 			return
 		}

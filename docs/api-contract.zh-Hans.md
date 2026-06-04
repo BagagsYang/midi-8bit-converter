@@ -4,15 +4,14 @@ Language/语言: [English](./api-contract.md) | 简体中文
 
 本文档描述 Go OctaBit 后端面向浏览器的 API 边界。生产 Web 前端是
 `frontend/` 中的 Vue 应用，由 Caddy 从 Vite `dist` 构建产物提供服务。Go 服务是私有后端
-API、工作区/合成服务、预览提供方、兼容路由提供方和运行时渲染器。机器可读契约位于
+API、工作区/合成服务、预览提供方和运行时渲染器。机器可读契约位于
 [`openapi.yaml`](./openapi.yaml)。
 
 ## 范围
 
 - 生产前端代码应使用 `/api/*` 路由。
-- 生产环境中，Caddy 应将 `/api/*`、`/static/previews/*` 和 `/synthesise*`
+- 生产环境中，Caddy 应将 `/api/*` 和 `/static/previews/*`
   反向代理到 `127.0.0.1:8000` 上的 Go 后端。
-- 旧的 `/synthesise*` 路由保留用于兼容。
 - 匿名临时工作区使用名为 `octabit_workspace` 的随机 HttpOnly cookie。
 - SQLite 存储工作区元数据。MIDI 和 WAV 二进制文件仍存储在文件系统中。
 - 浏览器可见的 `file_id` 和 `job_id` 是随机、不透明的 UUID 十六进制标识。
@@ -27,7 +26,6 @@ API、工作区/合成服务、预览提供方、兼容路由提供方和运行�
 - `WEB_WORKSPACE_MAX_QUEUED_FILES`：每个工作区的 MIDI 队列文件数量上限。默认值为 `20`。
 - `WEB_WORKSPACE_MAX_UPLOAD_BYTES`：每个工作区活跃 MIDI 上传总字节上限。默认值为 `104857600`。
 - `WEB_WORKSPACE_MAX_CONVERTED_FILES`：每个工作区活跃已转换任务数量上限。默认值为 `20`。
-- `WEB_DOWNLOAD_TTL_SECONDS`：旧任务 ready 或 failed 状态的保留时间。默认值为 `1800`。
 - `WEB_MAX_UPLOAD_BYTES`：单请求上传大小上限。默认值为 `20971520`。
 - 支持的上传扩展名：`.mid`、`.midi`。
 - 支持的采样率：`44100`、`48000`、`96000`。
@@ -389,15 +387,3 @@ journal mode，并设置 `PRAGMA busy_timeout=5000` 以减少多 worker 下的�
 - `404`，代码 `not_found`
 - `410`，代码 `workspace_expired`
 
-## 旧路由兼容
-
-旧路由仍可使用：
-
-- `POST /synthesise`
-- `POST /synthesise/jobs`
-- `GET /synthesise/jobs/<job_id>`
-- `GET /synthesise/jobs/<job_id>/download`
-- `DELETE /synthesise/jobs/<job_id>`
-
-旧 JSON 错误通常使用 `{"error": "message"}`，ready 的旧任务载荷会返回
-`/synthesise/jobs/...` 链接。生产前端代码应使用 `/api/*` 路由。

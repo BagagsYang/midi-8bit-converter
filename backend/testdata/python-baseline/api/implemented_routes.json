@@ -1,5 +1,5 @@
 {
-  "description": "Normalised Python Flask transcript for routes currently implemented by the Go backend.",
+  "description": "Transcript for routes currently implemented by the Go backend.",
   "dynamic_values": "Binary bodies are recorded by hash, size, and prefix.",
   "records": [
     {

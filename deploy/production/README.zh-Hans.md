@@ -3,12 +3,9 @@
 这是 `octabit.cc` 预期使用的非 Docker 生产路径。
 
 - Caddy 从 `frontend/dist` 提供构建后的 Vue 3 前端。
-- Caddy 将 `/api/*`、`/static/previews/*` 和 `/synthesise*` 反向代理到
-  `127.0.0.1:8000` 上的 Go 后端。
-- Go 后端保持私有，负责工作区、上传、合成、下载、预览资源和旧路由兼容。
-- 旧 Flask 栈保留在仓库中，用于回退参考和 fixture 重新生成，不作为常规生产路径。
-
-`deploy/web-flask/` 中的 Docker 文件是旧 Flask 回退的另一条路径。除非生产计划改变，不要把 Docker 引入当前生产切换流程。
+- Caddy 将 `/api/*` 和 `/static/previews/*` 反向代理到 `127.0.0.1:8000` 上的
+  Go 后端。
+- Go 后端保持私有，负责工作区、上传、合成、下载和预览资源。
 
 ## 一次性服务器形态
 
@@ -47,10 +44,6 @@ octabit.cc {
 		reverse_proxy 127.0.0.1:8000
 	}
 
-	handle /synthesise* {
-		reverse_proxy 127.0.0.1:8000
-	}
-
 	handle {
 		root * /home/deploy/octabit/frontend/dist
 		try_files {path} /index.html
@@ -59,8 +52,8 @@ octabit.cc {
 }
 ```
 
-这会让 Vue 应用成为公开前端，同时保留 API、预览音频路由和旧合成路由。`try_files`
-回退用于 Vue/Vite 浏览器路由；由于 API 路由先被处理，它不会截获 API 请求。
+这会让 Vue 应用成为公开前端，同时保留 API 和预览音频路由。`try_files` 回退用于
+Vue/Vite 浏览器路由；由于 API 路由先被处理，它不会截获 API 请求。
 
 ## 部署流程
 

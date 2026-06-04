@@ -8,29 +8,17 @@ OctaBit is a browser-based tool for converting MIDI files into 8-bit style WAV a
 
 OctaBit's public OSS codebase is mirrored from a private upstream monorepo to `bagags/octabit`. The mirror is published so people can read, audit, run, and self-host the AGPL-licensed OSS code, but it is not an open contribution target and does not accept unsolicited pull requests. See [CONTRIBUTING.md](./CONTRIBUTING.md) before opening issues or arranging contribution work.
 
-The production web frontend is the Vue 3 app in `frontend/`. The primary backend is the Go service in `backend/`, which implements the stable `/api/*` contract, legacy `/synthesise*` compatibility routes, workspace storage, synthesis jobs, and the Go MIDI-to-WAV renderer. The older Flask backend and Python renderer are retained under `legacy/` for fixture regeneration and fallback reference. The native macOS and Windows apps are deprecated/paused and retained only for reference or possible future revival.
+The production web frontend is the Vue 3 app in `frontend/`. The primary backend is the Go service in `backend/`, which implements the stable `/api/*` contract, workspace storage, synthesis jobs, and the Go MIDI-to-WAV renderer.
 
 ## What Is Active
 
 | Path | Role |
 | --- | --- |
 | `frontend/` | Production Vue 3 frontend served from the Vite `dist` build |
-| `backend/` | Primary Go backend API, workspace/synthesis service, compatibility routes, Go renderer, and frozen Python parity fixtures |
-| `legacy/web-flask/` | Legacy Flask backend/API and Flask-rendered frontend fallback retained for parity reference |
-| `legacy/python-renderer/` | Canonical Python MIDI-to-WAV parity reference |
+| `backend/` | Primary Go backend API, workspace/synthesis service, Go renderer, and frozen Python parity fixtures |
 | `assets/previews/` | Shared waveform preview WAV files served through the backend |
 | `deploy/production/` | Non-Docker production deployment notes, helper script, and Caddy examples for Vue production |
-| `deploy/web-flask/` | Legacy Docker image definition and notes for the Flask backend fallback path |
-| `compose.web.yml` | Minimal Docker Compose entrypoint for the legacy Flask fallback path |
 | `docs/api-contract.md`, `docs/openapi.yaml` | Web API request and response contract |
-| `scripts/generate_python_parity_fixtures.py` | Opt-in regeneration script for Python baseline fixtures |
-
-Retained native app folders:
-
-| Path | Status |
-| --- | --- |
-| `legacy/native/macos/` | Deprecated/paused native SwiftUI macOS app |
-| `legacy/native/windows/` | Deprecated/paused native WinUI 3 Windows app |
 
 ## Run The Web App
 
@@ -51,31 +39,16 @@ npm run dev
 
 Open `http://127.0.0.1:5173/`. Vite proxies `/api/*` and `/static/previews/*` to the Go backend on `127.0.0.1:8000`.
 
-The legacy Flask-rendered frontend can still be opened directly for fallback or fixture-regeneration testing:
-
-```bash
-python3 -m venv .venv
-./.venv/bin/python3 -m pip install -r legacy/web-flask/requirements.txt
-./.venv/bin/python3 legacy/web-flask/app.py
-```
-
-Run the routine post-migration checks:
+Run the routine checks:
 
 ```bash
 cd backend && go test ./...
 cd frontend && npm run build
 ```
 
-Run legacy Python checks only when changing fallback or parity-reference code:
-
-```bash
-./.venv/bin/python3 -m unittest discover -s legacy/web-flask/tests
-./.venv/bin/python3 -m unittest discover -s legacy/python-renderer/tests
-```
-
 ## User Limits
 
-These are the current default limits for the web app and renderer. Deployment operators can change web-service limits through environment variables, and renderer safety limits are enforced in the Go renderer with the same parity targets as `legacy/python-renderer/midi_to_wave.py`.
+These are the current default limits for the web app and renderer. Deployment operators can change web-service limits through environment variables, and renderer safety limits are enforced in the Go renderer.
 
 | Limit | Default | Source |
 | --- | ---: | --- |
@@ -84,7 +57,6 @@ These are the current default limits for the web app and renderer. Deployment op
 | Queued MIDI files per workspace | 20 files | `WEB_WORKSPACE_MAX_QUEUED_FILES` |
 | Total queued upload storage per workspace | 100 MiB | `WEB_WORKSPACE_MAX_UPLOAD_BYTES` |
 | Converted WAV files per workspace | 20 files | `WEB_WORKSPACE_MAX_CONVERTED_FILES` |
-| Compatibility job download lifetime | 1800 seconds | `WEB_DOWNLOAD_TTL_SECONDS` |
 | Active render workers per container | 2 workers | `WEB_RENDER_WORKERS` |
 | Waiting render queue per container | 8 jobs | `WEB_RENDER_QUEUE_SIZE` |
 | MIDI duration | 1800 seconds | renderer limit |
@@ -118,15 +90,7 @@ Primary routes:
 - `GET /api/synthesis-jobs/<job_id>/download`
 - `DELETE /api/synthesis-jobs/<job_id>`
 
-Compatibility routes remain for older clients:
-
-- `POST /synthesise`
-- `POST /synthesise/jobs`
-- `GET /synthesise/jobs/<job_id>`
-- `GET /synthesise/jobs/<job_id>/download`
-- `DELETE /synthesise/jobs/<job_id>`
-
-API errors use `{"error":{"code":"...","message":"..."}}`. Compatibility routes keep the older `{"error":"..."}` shape.
+API errors use `{"error":{"code":"...","message":"..."}}`.
 
 ## Sound Configuration
 
@@ -142,9 +106,9 @@ The hash is derived from the sanitised layer payload, so different curve setting
 
 ## Localisation
 
-The production Vue UI keeps JSON catalog files under `frontend/src/i18n/` for English, Spanish, French, Japanese, Simplified Chinese (`zh-Hans`), and Traditional Chinese (`zh-Hant`). The legacy Flask-rendered UI keeps its catalogs under `legacy/web-flask/i18n/`. Keep `en.json`, `es.json`, `fr.json`, `ja.json`, `zh-Hans.json`, and `zh-Hant.json` key sets aligned in the production frontend catalogs. English is the fallback locale. Repository documentation remains English and Simplified Chinese. Follow the standard process in [docs/localisation.md](./docs/localisation.md).
+The production Vue UI keeps JSON catalog files under `frontend/src/i18n/` for English, Spanish, French, Japanese, Simplified Chinese (`zh-Hans`), and Traditional Chinese (`zh-Hant`). Keep `en.json`, `es.json`, `fr.json`, `ja.json`, `zh-Hans.json`, and `zh-Hant.json` key sets aligned in the production frontend catalogs. English is the fallback locale. Repository documentation remains English and Simplified Chinese. Follow the standard process in [docs/localisation.md](./docs/localisation.md).
 
-User-facing web strings should go through the catalog rather than being hardcoded in templates or JavaScript. Native macOS and Windows localisation work is out of scope while those apps remain paused.
+User-facing web strings should go through the catalog rather than being hardcoded in templates or JavaScript.
 
 ## Deployment
 
@@ -156,9 +120,7 @@ PORT=8000 WEB_SYNTHESISE_JOB_ROOT=/var/lib/octabit ./octabit-server
 cd frontend && npm ci && npm run build
 ```
 
-For public deployment, keep the Go backend private on `127.0.0.1:8000`. Caddy serves `frontend/dist` as the public frontend and reverse proxies `/api/*`, `/static/previews/*`, and `/synthesise*` to Go. Production deployment notes, Caddy examples, smoke checks, and rollback steps are in `deploy/production/README.md`.
-
-The Docker image in `deploy/web-flask/` remains available for a Flask-backend or legacy Flask-rendered fallback path. It pins its Python base image by digest and installs from hash-locked requirement files.
+For public deployment, keep the Go backend private on `127.0.0.1:8000`. Caddy serves `frontend/dist` as the public frontend and reverse proxies `/api/*` and `/static/previews/*` to Go. Production deployment notes, Caddy examples, smoke checks, and rollback steps are in `deploy/production/README.md`.
 
 ## License
 

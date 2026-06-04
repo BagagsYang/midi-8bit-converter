@@ -5,16 +5,14 @@ Language/语言: English | [简体中文](./api-contract.zh-Hans.md)
 This document describes the browser-facing API boundary for the Go OctaBit
 backend. The production web frontend is the Vue app in `frontend/`, served by
 Caddy from its Vite `dist` build. The Go service is the private backend API,
-workspace/synthesis service, preview provider, compatibility-route provider,
-and runtime renderer. The machine-readable contract lives in
-[`openapi.yaml`](./openapi.yaml).
+workspace/synthesis service, preview provider, and runtime renderer. The
+machine-readable contract lives in [`openapi.yaml`](./openapi.yaml).
 
 ## Scope
 
 - Production frontend code should use the `/api/*` routes.
-- In production, Caddy should reverse proxy `/api/*`, `/static/previews/*`, and
-  `/synthesise*` to the Go backend on `127.0.0.1:8000`.
-- Legacy `/synthesise*` routes remain for compatibility.
+- In production, Caddy should reverse proxy `/api/*` and `/static/previews/*`
+  to the Go backend on `127.0.0.1:8000`.
 - Anonymous temporary workspaces use a random HttpOnly cookie named
   `octabit_workspace`.
 - SQLite stores workspace metadata. MIDI and WAV blobs stay on the filesystem.
@@ -35,8 +33,6 @@ and runtime renderer. The machine-readable contract lives in
   workspace. Default: `104857600`.
 - `WEB_WORKSPACE_MAX_CONVERTED_FILES`: active converted job cap per workspace.
   Default: `20`.
-- `WEB_DOWNLOAD_TTL_SECONDS`: legacy ready or failed job retention. Default:
-  `1800`.
 - `WEB_MAX_UPLOAD_BYTES`: per-request upload cap. Default: `20971520`.
 - Supported upload extensions: `.mid`, `.midi`.
 - Supported sample rates: `44100`, `48000`, `96000`.
@@ -400,16 +396,3 @@ Errors:
 - `404` with code `not_found`
 - `410` with code `workspace_expired`
 
-## Legacy compatibility
-
-The legacy routes remain available:
-
-- `POST /synthesise`
-- `POST /synthesise/jobs`
-- `GET /synthesise/jobs/<job_id>`
-- `GET /synthesise/jobs/<job_id>/download`
-- `DELETE /synthesise/jobs/<job_id>`
-
-Legacy JSON errors generally use `{"error": "message"}` and ready legacy job
-payloads return `/synthesise/jobs/...` links. Production frontend code should
-use the `/api/*` routes.
