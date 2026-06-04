@@ -3,7 +3,6 @@
     "README.md": "4852a85f6d81964ef3f3d41e77061bffcb9769d9e6a07ec13a99b8b360831302",
     "api/error_responses.json": "a367cff69c103fee545d1f2d30ee09e89d8d691411601c6502deb16725f4fe9e",
     "api/implemented_routes.json": "764c02d1f532b0a1d31b82e496ba7117c6cc98e1c3d63c1a1b0fe2de87335c58",
-    "api/legacy_jobs.json": "56921ab1f48ef0de699f0ddb45731b1c7136afc58f5590914ac05f6197fe6289",
     "api/workspace_flow.json": "a8ee7927658d746f1531070e9afdc52999d2ddea6750e6a7692fdaeb0669550f",
     "config/workspace_config_normalisation.json": "b47058ef842a5c529899ebc7dda8a63f716df67d0af187499fe6c3e64fdd1977",
     "renderer/curve_mix_44100.wav": "aa713031dbafd225f507de33260ee7af83a96fea5cf59bc269d4325ab9c0760f",
@@ -50,10 +49,8 @@
       "size": 64
     }
   },
-  "python_runtime_only": true,
-  "regenerate_command": "./.venv/bin/python3 scripts/generate_python_parity_fixtures.py",
   "schema": "octabit.python_baseline_fixtures.v1",
-  "source": "Generated from the current Flask backend and Python renderer.",
+  "source": "Frozen snapshot from the Go renderer for parity regression testing.",
   "summary": {
     "api_error_records": 8,
     "api_flow_records": 10,
@@ -64,7 +61,6 @@
       "config_from_form"
     ],
     "implemented_route_records": 2,
-    "legacy_api_records": 4,
     "renderer_cases": [
       "simple_pulse_48000",
       "curve_mix_44100"

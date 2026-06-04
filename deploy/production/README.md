@@ -3,16 +3,10 @@
 This is the intended non-Docker production path for `octabit.cc`.
 
 - Caddy serves the built Vue 3 frontend from `frontend/dist`.
-- Caddy reverse proxies `/api/*`, `/static/previews/*`, and `/synthesise*` to
-  the Go backend on `127.0.0.1:8000`.
+- Caddy reverse proxies `/api/*` and `/static/previews/*` to the Go backend on
+  `127.0.0.1:8000`.
 - The Go backend remains private and owns workspace, upload, synthesis,
-  download, preview asset, and legacy compatibility routes.
-- The legacy Flask stack remains in the repository for fallback reference and
-  fixture regeneration, not as the normal production path.
-
-The Docker files in `deploy/web-flask/` are an alternate legacy Flask fallback
-path. Do not introduce Docker into the current production cutover unless the
-production plan changes.
+  download, and preview asset routes.
 
 ## One-Time Server Shape
 
@@ -52,10 +46,6 @@ octabit.cc {
 		reverse_proxy 127.0.0.1:8000
 	}
 
-	handle /synthesise* {
-		reverse_proxy 127.0.0.1:8000
-	}
-
 	handle {
 		root * /home/deploy/octabit/frontend/dist
 		try_files {path} /index.html
@@ -64,10 +54,9 @@ octabit.cc {
 }
 ```
 
-This keeps the Vue app as the public frontend while preserving the API,
-preview audio route, and legacy synthesis routes. The `try_files` fallback is
-for Vue/Vite browser routes and should not catch API requests because those are
-handled first.
+This keeps the Vue app as the public frontend while preserving the API and
+preview audio route. The `try_files` fallback is for Vue/Vite browser routes
+and should not catch API requests because those are handled first.
 
 ## Deployment Flow
 

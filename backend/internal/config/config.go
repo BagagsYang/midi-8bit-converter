@@ -10,7 +10,6 @@ import (
 const (
 	DefaultHost                       = "127.0.0.1"
 	DefaultPort                       = 5002
-	DefaultDownloadTTLSeconds         = 30 * 60
 	DefaultWorkspaceTTLSeconds        = 24 * 60 * 60
 	DefaultWorkspaceMaxQueuedFiles    = 20
 	DefaultWorkspaceMaxUploadBytes    = 100 * 1024 * 1024
@@ -25,7 +24,6 @@ type Config struct {
 	Port                       int
 	JobRoot                    string
 	PreviewAssetsDir           string
-	DownloadTTLSeconds         int
 	WorkspaceTTLSeconds        int
 	WorkspaceMaxQueuedFiles    int
 	WorkspaceMaxUploadBytes    int
@@ -41,7 +39,6 @@ func FromEnv() Config {
 		Port:                       positiveIntFromEnv("PORT", DefaultPort),
 		JobRoot:                    stringFromEnv("WEB_SYNTHESISE_JOB_ROOT", defaultJobRoot()),
 		PreviewAssetsDir:           defaultPreviewAssetsDir(),
-		DownloadTTLSeconds:         positiveIntFromEnv("WEB_DOWNLOAD_TTL_SECONDS", DefaultDownloadTTLSeconds),
 		WorkspaceTTLSeconds:        positiveIntFromEnv("WEB_WORKSPACE_TTL_SECONDS", DefaultWorkspaceTTLSeconds),
 		WorkspaceMaxQueuedFiles:    positiveIntFromEnv("WEB_WORKSPACE_MAX_QUEUED_FILES", DefaultWorkspaceMaxQueuedFiles),
 		WorkspaceMaxUploadBytes:    positiveIntFromEnv("WEB_WORKSPACE_MAX_UPLOAD_BYTES", DefaultWorkspaceMaxUploadBytes),

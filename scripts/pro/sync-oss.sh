@@ -51,7 +51,6 @@ copy_path "$ROOT/CONTRIBUTING.zh-Hans.md" "$MIRROR_DIR/CONTRIBUTING.zh-Hans.md"
 copy_path "$ROOT/LICENSE.md" "$MIRROR_DIR/LICENSE.md"
 copy_path "$ROOT/README.md" "$MIRROR_DIR/README.md"
 copy_path "$ROOT/README.zh-Hans.md" "$MIRROR_DIR/README.zh-Hans.md"
-copy_path "$ROOT/compose.web.yml" "$MIRROR_DIR/compose.web.yml"
 copy_path "$ROOT/global.json" "$MIRROR_DIR/global.json"
 
 copy_dir_contents "$ROOT/CLA-signatures" "$MIRROR_DIR/CLA-signatures"

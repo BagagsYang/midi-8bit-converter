@@ -10,7 +10,6 @@ OSS code stays at the repository root:
 - `frontend/`
 - `assets/`
 - `docs/`
-- `legacy/`
 - public deployment and contributor files
 
 Pro-only code lives outside OSS package roots:

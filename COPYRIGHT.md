@@ -21,10 +21,7 @@ backend/
 frontend/
 assets/
 docs/
-legacy/
 deploy/production/
-deploy/web-flask/
-scripts/generate_python_parity_fixtures.py
 CLA-signatures/
 CONTRIBUTING.md
 CONTRIBUTING.zh-Hans.md

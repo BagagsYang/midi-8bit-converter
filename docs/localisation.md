@@ -11,10 +11,6 @@ agent. It is intentionally maintained in English only.
 - Repository product documentation is maintained in English and Simplified
   Chinese. Simplified Chinese markdown variants use the `.zh-Hans.md` suffix,
   but agent instruction docs such as this file are English-only.
-- Legacy Flask UI catalogues live in `legacy/web-flask/i18n/` and should only
-  change when a task explicitly targets the legacy fallback.
-- Paused native macOS and Windows app localisation is out of scope unless those
-  apps are explicitly revived or targeted.
 
 ## Agent checklist for a production frontend locale
 
@@ -53,8 +49,6 @@ Simplified Chinese docs that list frontend catalog coverage. At minimum check:
 - `docs/repository-layout.zh-Hans.md`
 - `AGENTS.md`
 - `CLAUDE.md`
-- `legacy/web-flask/i18n/README.md`
-- `legacy/web-flask/i18n/README.zh-Hans.md`
 
 Keep documentation language coverage separate from UI language coverage. The
 repository docs remain English and Simplified Chinese even when the production

@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   summary: Browser-facing OctaBit API contract
   description: >
-    Contract for the Vue frontend and legacy synthesis compatibility routes.
+    Contract for the Vue frontend.
     During the Go backend migration, this file is the stable API shape that the
     replacement backend must satisfy unless a documented correction says
     otherwise.
@@ -16,7 +16,6 @@ tags:
   - name: workspace
   - name: synthesis
   - name: previews
-  - name: legacy
 
 paths:
   /api/health:
@@ -309,123 +308,6 @@ paths:
         "404":
           description: Preview asset not found.
 
-  /synthesise:
-    post:
-      tags: [legacy]
-      summary: Legacy synchronous synthesis download
-      operationId: legacySynthesise
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/MultipartSynthesisJobRequest"
-      responses:
-        "200":
-          description: WAV attachment.
-          content:
-            audio/wav:
-              schema:
-                type: string
-                format: binary
-        "400":
-          $ref: "#/components/responses/LegacyBadRequest"
-        "413":
-          $ref: "#/components/responses/LegacyPayloadTooLarge"
-        "500":
-          $ref: "#/components/responses/LegacyServerError"
-
-  /synthesise/jobs:
-    post:
-      tags: [legacy]
-      summary: Create a legacy asynchronous synthesis job
-      operationId: createLegacySynthesisJob
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/MultipartSynthesisJobRequest"
-      responses:
-        "202":
-          description: Legacy job accepted.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacySynthesisJobResponse"
-        "400":
-          $ref: "#/components/responses/LegacyBadRequest"
-        "413":
-          $ref: "#/components/responses/LegacyPayloadTooLarge"
-        "429":
-          $ref: "#/components/responses/LegacyTooManyRequests"
-        "500":
-          $ref: "#/components/responses/LegacyServerError"
-
-  /synthesise/jobs/{job_id}:
-    get:
-      tags: [legacy]
-      summary: Get a legacy synthesis job
-      operationId: getLegacySynthesisJob
-      parameters:
-        - $ref: "#/components/parameters/JobId"
-      responses:
-        "200":
-          description: Legacy job status.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacySynthesisJobResponse"
-        "410":
-          description: Legacy job expired.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ExpiredJobResponse"
-    delete:
-      tags: [legacy]
-      summary: Delete a legacy synthesis job
-      operationId: deleteLegacySynthesisJob
-      parameters:
-        - $ref: "#/components/parameters/JobId"
-      responses:
-        "204":
-          description: Job deleted or already absent.
-
-  /synthesise/jobs/{job_id}/download:
-    get:
-      tags: [legacy]
-      summary: Download a ready legacy synthesis job WAV
-      operationId: downloadLegacySynthesisJob
-      parameters:
-        - $ref: "#/components/parameters/JobId"
-      responses:
-        "200":
-          description: WAV attachment.
-          content:
-            audio/wav:
-              schema:
-                type: string
-                format: binary
-        "400":
-          description: Legacy failed job payload.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacySynthesisJobResponse"
-        "409":
-          description: Legacy job exists but is not ready.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LegacySynthesisJobResponse"
-        "410":
-          description: Legacy job expired.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ExpiredJobResponse"
-
 components:
   parameters:
     FileId:
@@ -508,31 +390,6 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
-    LegacyBadRequest:
-      description: Legacy bad request error.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LegacyError"
-    LegacyPayloadTooLarge:
-      description: Legacy upload too large error.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LegacyError"
-    LegacyTooManyRequests:
-      description: Legacy render queue full error.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LegacyError"
-    LegacyServerError:
-      description: Legacy unexpected backend error.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LegacyError"
-
   schemas:
     HealthResponse:
       type: object
@@ -560,14 +417,6 @@ components:
                 - invalid_layers
             message:
               type: string
-
-    LegacyError:
-      type: object
-      additionalProperties: false
-      required: [error]
-      properties:
-        error:
-          type: string
 
     OpaqueId:
       type: string
@@ -843,11 +692,6 @@ components:
           type: string
         delete_url:
           type: string
-
-    LegacySynthesisJobResponse:
-      allOf:
-        - $ref: "#/components/schemas/SynthesisJobResponse"
-      description: Same payload shape as SynthesisJobResponse, but ready links use /synthesise/jobs.
 
     ExpiredJobResponse:
       type: object

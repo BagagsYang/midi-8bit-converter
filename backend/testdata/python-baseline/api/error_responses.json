@@ -1,5 +1,5 @@
 {
-  "description": "Normalised Python Flask API error response transcript.",
+  "description": "Frozen API error response transcript.",
   "dynamic_values": "Opaque ids, workspace cookie values, and timestamps are replaced with placeholders.",
   "records": [
     {
