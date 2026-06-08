@@ -4,7 +4,7 @@ go 1.25.10
 
 require (
 	gitlab.com/gomidi/midi/v2 v2.3.23
-	modernc.org/sqlite v1.50.1
+	modernc.org/sqlite v1.52.0
 )
 
 require (
