@@ -1,6 +1,6 @@
 module octabit/backend
 
-go 1.25.10
+go 1.25.11
 
 require (
 	gitlab.com/gomidi/midi/v2 v2.3.23
