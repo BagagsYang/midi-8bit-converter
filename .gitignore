@@ -13,7 +13,7 @@ Thumbs.db
 .cache/
 coverage/
 node_modules/
-frontend/.npm-cache
+.npm-cache/
 dist/
 build/
 backend/octabit-server
@@ -23,6 +23,8 @@ windows-review-bundle/
 windows-review-bundle.zip
 **/.xcodebuild/
 **/xcuserdata/
+.claude/
 .codex/
 .agents/
+.serena/
 .playwright-mcp/
