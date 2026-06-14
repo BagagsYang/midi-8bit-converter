@@ -26,6 +26,12 @@ cd frontend && npm test             # vitest run
 cd frontend && npm run test:watch   # vitest watch mode
 ```
 
+## Go Workspace
+
+A root `go.work` is checked in for editor and Go tooling support. It includes `./backend`;
+continue to run backend commands from `backend/`, or use root package patterns such as
+`go test ./backend/...`.
+
 ## Architecture
 
 ### Go Backend (`backend/`)
