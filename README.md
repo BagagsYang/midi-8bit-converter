@@ -8,6 +8,21 @@ OctaBit is a browser-based tool for converting MIDI files into 8-bit style WAV a
 
 OctaBit's public OSS codebase is mirrored from a private upstream monorepo to `bagags/octabit`. The mirror is published so people can read, audit, run, and self-host the AGPL-licensed OSS code, but it is not an open contribution target and does not accept unsolicited pull requests. See [CONTRIBUTING.md](./CONTRIBUTING.md) before opening issues or arranging contribution work.
 
+## Archive Notice
+
+This public repository is being archived as the historical OSS mirror for
+OctaBit. It is no longer the main development repository.
+
+Future development of OctaBit and OctaBit Pro continues privately in the
+proprietary `bagags/octabit-pro` codebase. Historical public releases and source
+snapshots that were published under GNU AGPL-3.0-or-later remain available under
+the AGPL terms that accompanied those releases. This archive notice does not
+revoke rights previously granted for those historical public versions.
+
+Third-party dependencies, icons, fonts, assets, and fixtures remain governed by
+their own license terms. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
+for the current notice inventory.
+
 The production web frontend is the Vue 3 app in `frontend/`. The primary backend is the Go service in `backend/`, which implements the stable `/api/*` contract, workspace storage, synthesis jobs, and the Go MIDI-to-WAV renderer.
 
 ## What Is Active
@@ -124,4 +139,8 @@ For public deployment, keep the Go backend private on `127.0.0.1:8000`. Caddy se
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`). See [LICENSE.md](./LICENSE.md) for details.
+Historical public releases of this project are licensed under the GNU Affero
+General Public License v3.0 or later (`AGPL-3.0-or-later`). See
+[LICENSE.md](./LICENSE.md) for details. Future private development may use a
+separate proprietary license for repository-owned code, while third-party
+components remain under their own license terms.

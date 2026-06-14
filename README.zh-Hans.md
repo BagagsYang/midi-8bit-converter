@@ -6,6 +6,17 @@ OctaBit 是一个基于浏览器的工具，用于将 MIDI 文件转换为 8-bit
 
 OctaBit 的公开 OSS 代码库由私有上游 monorepo 镜像到 `bagags/octabit`。公开镜像用于让任何人阅读、审计、运行和自行部署 AGPL 授权的 OSS 代码，但它不是开放贡献目标，也不接受未经邀请的 pull request。提交 issue 或事先约定贡献工作前，请先阅读 [CONTRIBUTING.zh-Hans.md](./CONTRIBUTING.zh-Hans.md)。
 
+## 归档说明
+
+此公开仓库将作为 OctaBit 的历史 OSS 镜像归档，不再是主要开发仓库。
+
+OctaBit 和 OctaBit Pro 的后续开发将在私有的专有 `bagags/octabit-pro`
+代码库中继续。已经以 GNU AGPL-3.0-or-later 发布的历史公开版本和源码快照，
+仍按发布时附带的 AGPL 条款提供。此归档说明不会撤销历史公开版本已经授予的权利。
+
+第三方依赖、图标、字体、资源和 fixtures 仍受其各自许可证条款约束。当前通知清单见
+[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+
 生产 Web 前端是 `frontend/` 中的 Vue 3 应用。主后端是 `backend/` 中的 Go 服务，它实现稳定的 `/api/*` 合约、工作区存储、合成任务和 Go MIDI-to-WAV 渲染器。
 
 ## 当前活跃内容
@@ -123,4 +134,5 @@ cd frontend && npm ci && npm run build
 
 ## 许可证
 
-本项目采用 GNU Affero General Public License v3.0 或更新版本（`AGPL-3.0-or-later`）授权。详情见 [LICENSE.md](./LICENSE.md)。
+本项目的历史公开版本采用 GNU Affero General Public License v3.0 或更新版本（`AGPL-3.0-or-later`）授权。详情见
+[LICENSE.md](./LICENSE.md)。未来私有开发可能对项目自有代码采用单独的专有许可证；第三方组件仍按其各自许可证条款授权。
