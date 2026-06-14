@@ -1,16 +1,15 @@
 # About OctaBit Contributions
 
-`bagags/octabit` is the public OSS mirror of a private upstream monorepo.
-OctaBit is a publicly available single-author project licensed under AGPL-3.0.
+`bagags/octabit` is an archived public mirror of OctaBit.
 
-The source code is published so that anyone may read, audit, run, and host their
-own instance under the terms of the license. The public mirror is not a
-community open-source contribution target — unsolicited pull requests are not
-accepted and may be closed without review.
+This repository is preserved for historical reference and for continued access to the source code that was previously published under AGPL-3.0-or-later. Historical public releases remain governed by the license terms that accompanied those releases.
 
-If you have been invited to contribute, you must sign the
-[Contributor License Agreement](CLA.md) before any pull request can be merged.
-See the CLA for terms.
+Future development of OctaBit continues in a private proprietary codebase.
 
-If you find a bug or have a feature request, you are welcome to open an issue.
-Please do not submit unsolicited pull requests.
+## Contributions
+
+This archived mirror is not an active contribution target. Pull requests are not accepted and may be closed without review.
+
+Issues may remain available for historical discussion, but bug reports and feature requests are not guaranteed to receive a response.
+
+If you have been specifically invited to contribute to future private development, contribution terms will be handled separately outside this archived public mirror.
